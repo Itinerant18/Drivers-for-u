@@ -74,8 +74,8 @@ export function TubelightNavbar({ items, className }: TubelightNavbarProps) {
                     {item.badge > 9 ? "9+" : item.badge}
                   </span>
                 ) : null}
-                <Icon active={isActive} size={22} strokeWidth={isActive ? 2.5 : 2} />
-                <span className="text-[10.5px] tracking-wide">{item.name}</span>
+                <Icon active={isActive} />
+                <span className="text-[10.5px] tracking-wide mt-1">{item.name}</span>
               </div>
               {isActive && (
                 <motion.div

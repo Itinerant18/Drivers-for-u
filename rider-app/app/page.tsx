@@ -6,7 +6,9 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { ordersApi } from '@/lib/api/orders';
 import Link from 'next/link';
 import WebGLShaderBackground from '@/components/ui/WebGLShaderBackground';
-import { ShieldIcon, BoltIcon, WalletIcon, HeadsetIcon, ForwardIcon } from '@/components/ds/Icon';
+import Image from 'next/image';
+
+import { ForwardIcon } from '@/components/ds/Icon';
 
 // Statuses for which an in-progress trip should send the rider straight to the
 // live screen instead of the home tab.
@@ -96,8 +98,8 @@ export default function IndexPage() {
       {/* TopNavBar */}
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled
-          ? 'bg-white/95 shadow-md border-b border-slate-200/50'
-          : 'bg-white/80 backdrop-blur-xl border-b border-slate-200/20 md:bg-transparent md:border-none md:backdrop-blur-none'
+          ? 'bg-background-primary/95 shadow-md border-b border-border-opaque/50'
+          : 'bg-background-primary/80 backdrop-blur-xl border-b border-border-opaque/20 md:bg-transparent md:border-none md:backdrop-blur-none'
           }`}
         id="mainNav"
       >
@@ -107,7 +109,7 @@ export default function IndexPage() {
             <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg group-hover:scale-95 transition-transform">
               V
             </div>
-            <span className="font-extrabold text-black text-xl tracking-tight">Vahnly</span>
+            <span className="font-extrabold text-content-primary text-xl tracking-tight">Vahnly</span>
           </Link>
 
           {/* Desktop Nav Links */}
@@ -128,7 +130,7 @@ export default function IndexPage() {
 
           {/* Trailing Action */}
           <div className="flex items-center gap-4">
-            <Link href="/login/" className="text-sm font-semibold text-slate-700 hover:text-secondary transition-colors">
+            <Link href="/login/" className="text-sm font-semibold text-content-primary hover:text-secondary transition-colors">
               Log In
             </Link>
           </div>
@@ -146,7 +148,7 @@ export default function IndexPage() {
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-content-primary mb-6 tracking-tight leading-tight">
             Hire a Professional <br className="hidden md:block" />
-            <span className="text-black">Driver</span> <br className="hidden md:block" />
+            <span className="text-content-primary">Driver</span> <br className="hidden md:block" />
             <span className="bg-gradient-to-r from-secondary via-secondary-2 to-secondary-3 bg-clip-text text-transparent">For Your Own Car</span>
           </h1>
           <p className="text-base md:text-lg text-content-secondary mb-10 max-w-2xl mx-auto leading-relaxed">
@@ -157,7 +159,7 @@ export default function IndexPage() {
               Get Started Now
               <ForwardIcon size={16} />
             </Link>
-            <a href="#features" className="w-full sm:w-auto bg-white border border-secondary/30 text-secondary px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-secondary/5 active:scale-95 transition-all flex items-center justify-center">
+            <a href="#features" className="w-full sm:w-auto bg-background-primary border border-secondary/30 text-secondary px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-secondary/5 active:scale-95 transition-all flex items-center justify-center">
               Learn More
             </a>
           </div>
@@ -169,8 +171,8 @@ export default function IndexPage() {
 
             {/* Feature 1: Large Span */}
             <div className="glass-card rounded-2xl p-6 flex flex-col gap-4 animate-fade-in-up hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-default group md:col-span-2 lg:col-span-2">
-              <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <ShieldIcon size={24} className="text-secondary" />
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 group-hover:rotate-6 transition-all drop-shadow-md">
+                <Image src="https://img.icons8.com/3d-fluency/94/security-checked.png" alt="Verified" width={56} height={56} unoptimized />
               </div>
               <div>
                 <h3 className="font-bold text-content-primary text-lg mb-2">Verified Drivers</h3>
@@ -182,8 +184,8 @@ export default function IndexPage() {
 
             {/* Feature 2 */}
             <div className="glass-card rounded-2xl p-6 flex flex-col gap-4 animate-fade-in-up delay-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-default group">
-              <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <BoltIcon size={24} className="text-secondary" />
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 group-hover:rotate-6 transition-all drop-shadow-md">
+                <Image src="https://img.icons8.com/3d-fluency/94/lightning-bolt.png" alt="Instant" width={56} height={56} unoptimized />
               </div>
               <div>
                 <h3 className="font-bold text-content-primary text-lg mb-2">Instant Dispatch</h3>
@@ -195,8 +197,8 @@ export default function IndexPage() {
 
             {/* Feature 3 */}
             <div className="glass-card rounded-2xl p-6 flex flex-col gap-4 animate-fade-in-up delay-200 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-default group">
-              <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <WalletIcon size={24} className="text-secondary" />
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-2 group-hover:scale-110 group-hover:-rotate-6 transition-all drop-shadow-md">
+                <Image src="https://img.icons8.com/3d-fluency/94/wallet.png" alt="Pricing" width={56} height={56} unoptimized />
               </div>
               <div>
                 <h3 className="font-bold text-content-primary text-lg mb-2">Transparent Pricing</h3>
@@ -208,8 +210,8 @@ export default function IndexPage() {
 
             {/* Feature 4: Wide layout */}
             <div className="glass-card rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center gap-6 animate-fade-in-up delay-300 md:col-span-2 lg:col-span-2 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-default group">
-              <div className="w-14 h-14 shrink-0 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
-                <HeadsetIcon size={28} className="text-secondary" />
+              <div className="w-16 h-16 shrink-0 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all drop-shadow-md">
+                <Image src="https://img.icons8.com/3d-fluency/94/headset.png" alt="Support" width={64} height={64} unoptimized />
               </div>
               <div>
                 <h3 className="font-bold text-content-primary text-lg mb-2">24/7 Premium Support</h3>

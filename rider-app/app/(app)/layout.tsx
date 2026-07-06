@@ -9,48 +9,22 @@ import { useAuthStore } from "@/lib/store/authStore";
 
 import { TubelightNavbar } from "@/components/ui/tubelight-navbar";
 
-function HomeIcon({ active }: { active: boolean }) {
-  const c = active ? "var(--interactive-primary)" : "var(--content-secondary)";
+import Image from "next/image";
+
+function ImageIcon({ active, src }: { active: boolean; src: string }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1v-9.5z" stroke={c} strokeWidth="1.5" fill={active ? "var(--surface-accent)" : "none"} />
-      <path d="M9 21v-7h6v7" stroke={c} strokeWidth="1.5" />
-    </svg>
+    <div className={`relative transition-all duration-300 ${active ? "scale-110 drop-shadow-md" : "grayscale opacity-70 hover:grayscale-0 hover:opacity-100"}`}>
+      <Image src={src} alt="icon" width={28} height={28} className="object-contain" unoptimized />
+    </div>
   );
 }
 
-function TripsIcon({ active }: { active: boolean }) {
-  const c = active ? "var(--interactive-primary)" : "var(--content-secondary)";
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="5" cy="17" r="2" stroke={c} strokeWidth="1.5" fill={active ? "var(--surface-accent)" : "none"} />
-      <circle cx="19" cy="17" r="2" stroke={c} strokeWidth="1.5" fill={active ? "var(--surface-accent)" : "none"} />
-      <path d="M5 17H3V7a1 1 0 011-1h11l4 5v6h-2" stroke={c} strokeWidth="1.5" />
-      <path d="M7 17h8" stroke={c} strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function WalletIcon({ active }: { active: boolean }) {
-  const c = active ? "var(--interactive-primary)" : "var(--content-secondary)";
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="6" width="20" height="14" rx="2" stroke={c} strokeWidth="1.5" fill={active ? "var(--surface-accent)" : "none"} />
-      <path d="M2 10h20" stroke={c} strokeWidth="1.5" />
-      <circle cx="17" cy="15" r="1.5" fill={c} />
-    </svg>
-  );
-}
-
-function AccountIcon({ active }: { active: boolean }) {
-  const c = active ? "var(--interactive-primary)" : "var(--content-secondary)";
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="4" stroke={c} strokeWidth="1.5" fill={active ? "var(--surface-accent)" : "none"} />
-      <path d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6" stroke={c} strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
+const ICONS = {
+  Home: "https://img.icons8.com/3d-fluency/94/home.png",
+  Trips: "https://img.icons8.com/3d-fluency/94/map-pin.png",
+  Wallet: "https://img.icons8.com/3d-fluency/94/wallet.png",
+  Account: "https://img.icons8.com/3d-fluency/94/user-male-circle.png",
+};
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -72,10 +46,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   if (!authChecked) return null;
 
   const navItems = [
-    { name: "Home", url: "/home", icon: HomeIcon },
-    { name: "Trips", url: "/account/bookings", icon: TripsIcon },
-    { name: "Wallet", url: "/account/wallet", icon: WalletIcon },
-    { name: "Account", url: "/account", icon: AccountIcon, badge: unreadCount },
+    { name: "Home", url: "/home", icon: ({ active }: { active: boolean }) => <ImageIcon active={active} src={ICONS.Home} /> },
+    { name: "Trips", url: "/account/bookings", icon: ({ active }: { active: boolean }) => <ImageIcon active={active} src={ICONS.Trips} /> },
+    { name: "Wallet", url: "/account/wallet", icon: ({ active }: { active: boolean }) => <ImageIcon active={active} src={ICONS.Wallet} /> },
+    { name: "Account", url: "/account", icon: ({ active }: { active: boolean }) => <ImageIcon active={active} src={ICONS.Account} />, badge: unreadCount },
   ];
 
   return (

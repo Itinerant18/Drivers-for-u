@@ -229,3 +229,6 @@ playground/
 # Local reference screenshots + personal tool config
 SCREEEN/
 opencode.json
+
+# Personal home-laptop setup transcript (contains local dev config, not for repo)
+HOME_SETUP.md

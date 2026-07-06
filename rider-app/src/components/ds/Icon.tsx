@@ -1,85 +1,98 @@
 /**
  * Icon.tsx — Vahnly Driver App Icon System
- * Static: @tabler/icons-react (stroke-based, currentColor, strokeWidth 1.8)
+ * Static: Icons8 3D Fluency (PNGs)
  * Animated: @lordicon/react (Lottie JSON, colorful, hover/loop triggers)
  */
 
 import React, { useRef } from 'react';
 import { Player } from '@lordicon/react';
-
-// ─── TABLER STATIC ICONS (re-exported with Vahnly names) ───────────────────
-export { IconPhone as PhoneIcon }           from '@tabler/icons-react';
-export { IconMessageCircle as ChatIcon }    from '@tabler/icons-react';
-export { IconNavigation as NavigateIcon }   from '@tabler/icons-react';
-export { IconCash as CashIcon }             from '@tabler/icons-react';
-export { IconCreditCard as CardIcon }       from '@tabler/icons-react';
-export { IconShield as ShieldIcon }         from '@tabler/icons-react';
-export { IconCar as CarIcon }               from '@tabler/icons-react';
-export { IconAlertTriangle as AlertIcon }   from '@tabler/icons-react';
-export { IconCheck as CheckIcon }           from '@tabler/icons-react';
-export { IconBell as BellIcon }             from '@tabler/icons-react';
-export { IconPlus as PlusIcon }             from '@tabler/icons-react';
-export { IconParking as ParkingIcon }       from '@tabler/icons-react';
-export { IconAlertOctagon as SirenIcon }    from '@tabler/icons-react';
-export { IconCamera as CameraIcon }         from '@tabler/icons-react';
-export { IconX as CrossIcon }               from '@tabler/icons-react';
-export { IconRefresh as RefreshIcon }       from '@tabler/icons-react';
-export { IconMenu2 as MenuIcon }            from '@tabler/icons-react';
-export { IconWifi as SignalIcon }           from '@tabler/icons-react';
-export { IconAlertOctagon as OctagonAlertIcon } from '@tabler/icons-react';
-export { IconFlame as FlameIcon }           from '@tabler/icons-react';
-export { IconPlayerPause as PauseIcon }     from '@tabler/icons-react';
-export { IconTool as WrenchIcon }           from '@tabler/icons-react';
-export { IconClock as ClockIcon }           from '@tabler/icons-react';
-export { IconRoute as RouteIcon }           from '@tabler/icons-react';
-export { IconHome as HomeIcon }             from '@tabler/icons-react';
-export { IconWallet as PaymentIcon }        from '@tabler/icons-react';
-export { IconMapPin as PinIcon }            from '@tabler/icons-react';
-export { IconUser as UserIcon }             from '@tabler/icons-react';
-export { IconSearch as SearchIcon }         from '@tabler/icons-react';
-export { IconArrowLeft as BackIcon }        from '@tabler/icons-react';
-export { IconArrowRight as ForwardIcon }    from '@tabler/icons-react';
-
-// ─── NEW ICONS (emoji replacements) ────────────────────────────────────────
-export { IconStar as StarIcon }             from '@tabler/icons-react';
-export { IconWallet as WalletIcon }         from '@tabler/icons-react';
-export { IconReceipt as BookingIcon }       from '@tabler/icons-react';
-export { IconGift as GiftIcon }             from '@tabler/icons-react';
-export { IconTrophy as TrophyIcon }         from '@tabler/icons-react';
-export { IconMapPin as LocationIcon }       from '@tabler/icons-react';
-export { IconHelp as SupportIcon }          from '@tabler/icons-react';
-export { IconFile as DocumentIcon }         from '@tabler/icons-react';
-export { IconBell as NotificationIcon }     from '@tabler/icons-react';
-export { IconSettings as SettingsIcon }     from '@tabler/icons-react';
-export { IconShare as ShareIcon }           from '@tabler/icons-react';
-export { IconCamera as CameraOutlineIcon }  from '@tabler/icons-react';
-export { IconInfoCircle as InfoIcon }       from '@tabler/icons-react';
-export { IconLogout as LogoutIcon }         from '@tabler/icons-react';
-export { IconAlertTriangle as WarningIcon } from '@tabler/icons-react';
-export { IconCircleCheck as SuccessIcon }   from '@tabler/icons-react';
-export { IconCircleX as ErrorIcon }         from '@tabler/icons-react';
-export { IconBuildingSkyscraper as WorkIcon } from '@tabler/icons-react';
-export { IconHome2 as HomeAddressIcon }     from '@tabler/icons-react';
-export { IconDoor as LogoutDoorIcon }       from '@tabler/icons-react';
-export { IconChevronRight as ChevronIcon }  from '@tabler/icons-react';
-export { IconBus as VehicleIcon }           from '@tabler/icons-react';
-export { IconLock as LockIcon }             from '@tabler/icons-react';
-export { IconFlag as FlagIcon }             from '@tabler/icons-react';
-export { IconEdit as EditIcon }             from '@tabler/icons-react';
-export { IconDownload as DownloadIcon }     from '@tabler/icons-react';
-export { IconExternalLink as LinkIcon }     from '@tabler/icons-react';
-export { IconPhoto as PhotoIcon }           from '@tabler/icons-react';
-export { IconBriefcase as WorkBriefcaseIcon } from '@tabler/icons-react';
-export { IconBolt as BoltIcon }             from '@tabler/icons-react';
-export { IconHeadset as HeadsetIcon }       from '@tabler/icons-react';
+import Image from 'next/image';
 
 // ─── ICON PROPS TYPE ────────────────────────────────────────────────────────
 export interface IconProps {
   size?: number;
-  color?: string;
-  stroke?: number;
+  color?: string; // Kept for compatibility, but ignored by 3D PNGs
+  stroke?: number; // Kept for compatibility, but ignored by 3D PNGs
   className?: string;
 }
+
+// ─── 3D FLUENCY BASE COMPONENT ──────────────────────────────────────────────
+const FluencyIcon = ({ name, size = 24, className = '' }: { name: string } & IconProps) => (
+  <Image 
+    src={`https://img.icons8.com/3d-fluency/94/${name}.png`} 
+    alt={`${name} icon`} 
+    width={size} 
+    height={size} 
+    className={className} 
+    unoptimized 
+  />
+);
+
+// ─── STATIC ICONS (Icons8 3D Fluency) ───────────────────────────────────────
+export const PhoneIcon = (props: IconProps) => <FluencyIcon name="phone" {...props} />;
+export const ChatIcon = (props: IconProps) => <FluencyIcon name="chat" {...props} />;
+export const NavigateIcon = (props: IconProps) => <FluencyIcon name="navigation" {...props} />;
+export const CashIcon = (props: IconProps) => <FluencyIcon name="money" {...props} />;
+export const CardIcon = (props: IconProps) => <FluencyIcon name="bank-card" {...props} />;
+export const ShieldIcon = (props: IconProps) => <FluencyIcon name="security-checked" {...props} />;
+export const CarIcon = (props: IconProps) => <FluencyIcon name="car" {...props} />;
+export const AlertIcon = (props: IconProps) => <FluencyIcon name="warning-shield" {...props} />;
+export const CheckIcon = (props: IconProps) => <FluencyIcon name="checkmark" {...props} />;
+export const BellIcon = (props: IconProps) => <FluencyIcon name="bell" {...props} />;
+export const PlusIcon = (props: IconProps) => <FluencyIcon name="plus" {...props} />;
+export const ParkingIcon = (props: IconProps) => <FluencyIcon name="parking" {...props} />;
+export const SirenIcon = (props: IconProps) => <FluencyIcon name="siren" {...props} />;
+export const CameraIcon = (props: IconProps) => <FluencyIcon name="camera" {...props} />;
+export const CrossIcon = (props: IconProps) => <FluencyIcon name="multiply" {...props} />;
+export const RefreshIcon = (props: IconProps) => <FluencyIcon name="refresh" {...props} />;
+export const MenuIcon = (props: IconProps) => <FluencyIcon name="menu" {...props} />;
+export const SignalIcon = (props: IconProps) => <FluencyIcon name="wifi" {...props} />;
+export const OctagonAlertIcon = (props: IconProps) => <FluencyIcon name="siren" {...props} />;
+export const FlameIcon = (props: IconProps) => <FluencyIcon name="fire-element" {...props} />;
+export const PauseIcon = (props: IconProps) => <FluencyIcon name="pause" {...props} />;
+export const WrenchIcon = (props: IconProps) => <FluencyIcon name="wrench" {...props} />;
+export const ClockIcon = (props: IconProps) => <FluencyIcon name="clock" {...props} />;
+export const RouteIcon = (props: IconProps) => <FluencyIcon name="route" {...props} />;
+export const HomeIcon = (props: IconProps) => <FluencyIcon name="home" {...props} />;
+export const PaymentIcon = (props: IconProps) => <FluencyIcon name="wallet" {...props} />;
+export const PinIcon = (props: IconProps) => <FluencyIcon name="map-pin" {...props} />;
+export const UserIcon = (props: IconProps) => <FluencyIcon name="gender-neutral-user" {...props} />;
+export const SearchIcon = (props: IconProps) => <FluencyIcon name="search" {...props} />;
+export const BackIcon = (props: IconProps) => <FluencyIcon name="arrow-left" {...props} />;
+export const ForwardIcon = (props: IconProps) => <FluencyIcon name="arrow-right" {...props} />;
+
+// ─── NEW ICONS (emoji replacements) ────────────────────────────────────────
+export const StarIcon = (props: IconProps) => <FluencyIcon name="star" {...props} />;
+export const WalletIcon = (props: IconProps) => <FluencyIcon name="wallet" {...props} />;
+export const BookingIcon = (props: IconProps) => <FluencyIcon name="receipt" {...props} />;
+export const GiftIcon = (props: IconProps) => <FluencyIcon name="gift" {...props} />;
+export const TrophyIcon = (props: IconProps) => <FluencyIcon name="trophy" {...props} />;
+export const LocationIcon = (props: IconProps) => <FluencyIcon name="marker" {...props} />;
+export const SupportIcon = (props: IconProps) => <FluencyIcon name="headset" {...props} />;
+export const DocumentIcon = (props: IconProps) => <FluencyIcon name="document" {...props} />;
+export const NotificationIcon = (props: IconProps) => <FluencyIcon name="bell" {...props} />;
+export const SettingsIcon = (props: IconProps) => <FluencyIcon name="settings" {...props} />;
+export const ShareIcon = (props: IconProps) => <FluencyIcon name="share" {...props} />;
+export const CameraOutlineIcon = (props: IconProps) => <FluencyIcon name="camera" {...props} />;
+export const InfoIcon = (props: IconProps) => <FluencyIcon name="info" {...props} />;
+export const LogoutIcon = (props: IconProps) => <FluencyIcon name="exit" {...props} />;
+export const WarningIcon = (props: IconProps) => <FluencyIcon name="warning-shield" {...props} />;
+export const SuccessIcon = (props: IconProps) => <FluencyIcon name="ok" {...props} />;
+export const ErrorIcon = (props: IconProps) => <FluencyIcon name="cancel" {...props} />;
+export const WorkIcon = (props: IconProps) => <FluencyIcon name="briefcase" {...props} />;
+export const HomeAddressIcon = (props: IconProps) => <FluencyIcon name="home" {...props} />;
+export const LogoutDoorIcon = (props: IconProps) => <FluencyIcon name="exit" {...props} />;
+export const ChevronIcon = (props: IconProps) => <FluencyIcon name="chevron-right" {...props} />;
+export const VehicleIcon = (props: IconProps) => <FluencyIcon name="bus" {...props} />;
+export const LockIcon = (props: IconProps) => <FluencyIcon name="lock" {...props} />;
+export const FlagIcon = (props: IconProps) => <FluencyIcon name="flag" {...props} />;
+export const EditIcon = (props: IconProps) => <FluencyIcon name="edit" {...props} />;
+export const DownloadIcon = (props: IconProps) => <FluencyIcon name="download" {...props} />;
+export const LinkIcon = (props: IconProps) => <FluencyIcon name="external-link" {...props} />;
+export const PhotoIcon = (props: IconProps) => <FluencyIcon name="image" {...props} />;
+export const WorkBriefcaseIcon = (props: IconProps) => <FluencyIcon name="briefcase" {...props} />;
+export const BoltIcon = (props: IconProps) => <FluencyIcon name="lightning-bolt" {...props} />;
+export const HeadsetIcon = (props: IconProps) => <FluencyIcon name="headset" {...props} />;
 
 // ─── ANIMATED ICON COMPONENT (Lordicon) ────────────────────────────────────
 interface AnimatedIconProps {

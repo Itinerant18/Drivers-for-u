@@ -40,7 +40,7 @@ function RadarAnimation() {
   return (
     <div className="relative flex h-48 w-48 items-center justify-center">
       <Ripple mainCircleSize={90} mainCircleOpacity={0.2} numCircles={5} />
-      <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-surface-accent ring-2 ring-border-accent glow-accent">
+      <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-surface-accent ring-2 ring-border-accent">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" stroke="var(--accent-400)" strokeWidth="1.5" />
           <path d="M12 7v5l3 3" stroke="var(--accent-400)" strokeWidth="1.5" strokeLinecap="round" />

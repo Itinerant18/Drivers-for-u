@@ -79,9 +79,6 @@ export default function HomePage() {
 
   return (
     <BlurFade duration={0.5} className="relative h-[100dvh] w-full overflow-y-auto overscroll-contain bg-background-secondary" style={{ paddingBottom: 'env(safe-area-inset-bottom)' } as React.CSSProperties}>
-      {/* Ambient light shapes — far behind everything, fixed so scroll never repaints */}
-      <div className="ambient-glows" aria-hidden="true" />
-
       {/* Map hero — upper third, rounded into the booking sheet below */}
       <section className="relative h-[42dvh] min-h-[280px] overflow-hidden rounded-b-[2rem] shadow-elevation-2">
         <div className="absolute inset-0 z-0">

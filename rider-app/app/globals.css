@@ -128,17 +128,11 @@
   --glass-border: rgba(255, 255, 255, 0.5);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 
-  /* ── Glow ── */
-  --glow-accent: 0 0 16px rgba(74, 111, 165, 0.15);
-  --glow-positive: 0 0 16px rgba(58, 157, 104, 0.15);
-  --glow-negative: 0 0 16px rgba(201, 64, 48, 0.15);
-
   /* ── Brand gradient (formalized) — sourced from tokens.css, never redeclared ── */
   --color-secondary: var(--brand-secondary);
   --color-secondary-hover: var(--brand-secondary-hover);
   --color-secondary-2: var(--brand-secondary-2);  /* hero brand gradient — mid */
   --color-secondary-3: var(--brand-secondary-3);  /* hero brand gradient — end (indigo) */
-  --shadow-brand-glow: var(--brand-glow-shadow);  /* primary CTA glow */
 }
 
 /* ─────────────────────────────────────────────
@@ -147,6 +141,15 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* No visible scrollbars anywhere — native mobile apps don't show scrollbar chrome. */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
 }
 
 html,
@@ -407,18 +410,6 @@ body {
   border-bottom: 1px solid var(--border-opaque);
 }
 
-.glow-accent {
-  box-shadow: var(--glow-accent);
-}
-
-.glow-positive {
-  box-shadow: var(--glow-positive);
-}
-
-.glow-negative {
-  box-shadow: var(--glow-negative);
-}
-
 /* ── Spring entrance for modals/sheets ── */
 @keyframes springUp {
   from { transform: translateY(100%); opacity: 0; }
@@ -495,43 +486,9 @@ body {
 }
 
 /* Muted/tertiary text (placeholders, secondary captions) loses too much contrast
-   sitting on frosted glass over the ambient glows — darken it a step on glass surfaces only. */
+   sitting on frosted glass — darken it a step on glass surfaces only. */
 .glass-tile, .glass-panel, .glass-sheet {
   --content-tertiary: var(--gray-600);
-}
-
-/* Ambient light shapes — sit far behind the sheet content. Fixed +
-   pointer-events-none so they never repaint on scroll. */
-.ambient-glows {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-.ambient-glows::before,
-.ambient-glows::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.5;
-  animation: auraDrift 24s ease-in-out infinite alternate;
-}
-.ambient-glows::before {
-  width: 60vw; height: 60vw;
-  left: -20vw; top: 18%;
-  background: radial-gradient(circle, rgba(79, 70, 229, 0.16), transparent 70%);
-}
-.ambient-glows::after {
-  width: 55vw; height: 55vw;
-  right: -18vw; bottom: 6%;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.12), transparent 70%);
-  animation-delay: -12s;
-}
-@keyframes auraDrift {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(4vw, -3vh, 0) scale(1.12); }
 }
 
 /* Hero CTA sheen — a slow gloss sweep at long intervals. */
@@ -568,8 +525,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ambient-glows::before, .ambient-glows::after,
-  .cta-sheen::after, .badge-shimmer, .pin-pulse::before {
+  .cta-sheen::after, .pin-pulse::before {
     animation: none;
   }
 }

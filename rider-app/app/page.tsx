@@ -153,7 +153,7 @@ export default function IndexPage() {
             Vahnly provides a premium, safe, and dynamic ride matching ecosystem. Connect instantly with verified, highly trained independent drivers to navigate your car, whether for daily commutes, road trips, or late-night events.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login/" className="w-full sm:w-auto bg-secondary text-white px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-secondary-hover shadow-brand-glow active:scale-95 transition-all flex items-center justify-center gap-2">
+            <Link href="/login/" className="w-full sm:w-auto bg-secondary text-white px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-secondary-hover active:scale-95 transition-all flex items-center justify-center gap-2">
               Get Started Now
               <ForwardIcon size={16} />
             </Link>

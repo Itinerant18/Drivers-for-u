@@ -80,21 +80,12 @@ export function TubelightNavbar({ items, className }: TubelightNavbarProps) {
               {isActive && (
                 <motion.div
                   layoutId="lamp-v1"
-                  className="absolute inset-0 w-full bg-secondary/10 rounded-full -z-10"
+                  className="absolute inset-x-0 top-0 -z-10"
                   initial={false}
-                  transition={{
-                    type: "spring",
-                    stiffness: 350,
-                    damping: 28,
-                  }}
+                  transition={{ type: "spring", stiffness: 350, damping: 28 }}
                 >
-                  {/* Neon top emitter border — brand blue, not charcoal (charcoal blurred reads as a smudge, not a glow) */}
-                  <div className="absolute -top-[1.5px] left-1/2 -translate-x-1/2 w-10 h-[2px] bg-secondary rounded-t-full shadow-[0_0_12px_var(--color-secondary)]">
-                    {/* Multi-layered light beam glows */}
-                    <div className="absolute w-16 h-8 bg-secondary/30 rounded-full blur-md -top-3 -left-3 pointer-events-none" />
-                    <div className="absolute w-10 h-6 bg-secondary/40 rounded-full blur-md -top-2 -left-0 pointer-events-none" />
-                    <div className="absolute w-6 h-4 bg-secondary/50 rounded-full blur-sm -top-1 left-2 pointer-events-none" />
-                  </div>
+                  {/* Active-tab indicator — a plain solid bar on the top edge, no glow/blur */}
+                  <div className="absolute left-1/2 top-0 h-[3px] w-11 -translate-x-1/2 rounded-full bg-secondary" />
                 </motion.div>
               )}
             </Link>

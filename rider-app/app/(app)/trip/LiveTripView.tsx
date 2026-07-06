@@ -50,7 +50,7 @@ function FAB({
           "active:scale-90",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
           danger
-            ? "bg-negative-400 text-white shadow-elevation-2 glow-negative"
+            ? "bg-negative-400 text-white shadow-elevation-2"
             : "bg-background-primary/90 border border-border-opaque backdrop-blur-sm",
         ].join(" ")}
       >

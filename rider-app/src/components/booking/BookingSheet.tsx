@@ -157,7 +157,7 @@ function Chip({
         "active:scale-95",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
         active
-          ? "bg-secondary text-content-inverse shadow-brand-glow"
+          ? "bg-secondary text-content-inverse"
           : "glass-tile text-content-secondary hover:text-content-primary",
       ].join(" ")}
     >
@@ -545,7 +545,7 @@ export function BookingSheet() {
       <div className="relative pb-[calc(8rem+env(safe-area-inset-bottom,0px))]">
         {/* Handle — hints the sheet layering over the map */}
         <div className="flex justify-center pb-1 pt-3">
-          <div className="h-1 w-10 rounded-pill bg-secondary/25 shadow-brand-glow" />
+          <div className="h-1 w-10 rounded-pill bg-secondary/25" />
         </div>
 
         {/* Quick tiles */}
@@ -579,7 +579,7 @@ export function BookingSheet() {
                         <motion.span
                           layoutId="trip-aura"
                           transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                          className="absolute inset-0 rounded-pill bg-gradient-to-r from-secondary to-secondary-3 shadow-brand-glow"
+                          className="absolute inset-0 rounded-pill bg-gradient-to-r from-secondary to-secondary-3"
                           aria-hidden="true"
                         />
                       )}
@@ -775,7 +775,7 @@ export function BookingSheet() {
                       <motion.span
                         layoutId="trans-thumb"
                         transition={{ type: "spring", stiffness: 360, damping: 32 }}
-                        className="absolute inset-0 rounded-pill bg-gradient-to-r from-secondary to-secondary-2 shadow-brand-glow"
+                        className="absolute inset-0 rounded-pill bg-gradient-to-r from-secondary to-secondary-2"
                         aria-hidden="true"
                       />
                     )}
@@ -805,7 +805,7 @@ export function BookingSheet() {
                       "transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.97]",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
                       active
-                        ? "bg-white/85 border-2 border-secondary shadow-brand-glow -translate-y-0.5"
+                        ? "bg-white/85 border-2 border-secondary -translate-y-0.5"
                         : "glass-tile border border-white/65 opacity-85 hover:opacity-100",
                     ].join(" ")}
                     aria-pressed={active}
@@ -968,7 +968,7 @@ export function BookingSheet() {
                       "transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
                       active
-                        ? "bg-white/85 border-2 border-secondary shadow-brand-glow"
+                        ? "bg-white/85 border-2 border-secondary"
                         : "glass-tile border border-white/65",
                     ].join(" ")}
                   >
@@ -1026,7 +1026,7 @@ export function BookingSheet() {
                     <div
                       className={[
                         "col-span-3 rounded-2xl p-3 transition-all duration-300",
-                        d4mCare ? "bg-positive-50/70 shadow-[0_0_20px_rgba(58,157,104,0.14)]" : "",
+                        d4mCare ? "bg-positive-50/70" : "",
                       ].join(" ")}
                     >
                       <div className="flex h-full flex-col">
@@ -1149,9 +1149,8 @@ export function BookingSheet() {
               aria-live="polite"
               className="cta-sheen h-16 w-full rounded-pill text-label-large font-semibold text-content-inverse cursor-pointer
                 bg-gradient-to-r from-secondary via-secondary-2 to-secondary-3
-                shadow-brand-glow
                 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98]
-                disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+                disabled:opacity-50 disabled:cursor-not-allowed
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"
             >
               {bookingState === "loading" ? (
@@ -1214,7 +1213,7 @@ export function BookingSheet() {
               onClick={confirmBooking}
               disabled={bookingState === "loading"}
               className="mt-4 h-14 w-full rounded-pill bg-gradient-to-r from-secondary to-secondary-3 text-content-inverse text-label-large font-semibold
-                cursor-pointer transition-transform active:scale-[0.99] shadow-brand-glow
+                cursor-pointer transition-transform active:scale-[0.99]
                 disabled:opacity-50 disabled:cursor-not-allowed
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"
             >

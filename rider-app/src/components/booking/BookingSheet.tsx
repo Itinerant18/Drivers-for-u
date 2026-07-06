@@ -11,7 +11,7 @@ import { cityConfigApi, type TripTypeInfo } from "@/lib/api/cityConfig";
 import { searchPlaces, type GeocodeResult } from "@/lib/utils/geocode";
 import { QuickTiles } from "./QuickTiles";
 import { FareDisplay } from "@/components/ds/FareDisplay";
-import { CrossIcon, PinIcon, CarIcon, FlameIcon, CheckIcon } from "@/components/ds/Icon";
+import { CrossIcon, PinIcon, CarIcon, FlameIcon, CheckIcon, ChevronIcon } from "@/components/ds/Icon";
 import { BorderBeam } from "@/components/ui/border-beam";
 import type { CarType, GarageCar, LocationPoint, PaymentMethod, Transmission, TripType } from "@/lib/api/types";
 
@@ -392,6 +392,8 @@ export function BookingSheet() {
   const [showD4mInfo, setShowD4mInfo] = useState(false);
   const [promoInput, setPromoInput] = useState("");
   const [promoStatus, setPromoStatus] = useState<"idle" | "ok" | "err">("idle");
+  const [showPromo, setShowPromo] = useState(false);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [bookingState, setBookingState] = useState<"idle" | "loading">("idle");
   const [bookingError, setBookingError] = useState<string | null>(null);
 
@@ -584,7 +586,7 @@ export function BookingSheet() {
                       <span className="relative">{t.label}</span>
                     </button>
                     {disabled && (
-                      <span className="badge-shimmer absolute -right-1 -top-1 rounded-full bg-surface-warning px-1.5 py-0.5 text-[9px] font-semibold text-content-warning leading-none">
+                      <span className="absolute -right-1 -top-1 rounded-full bg-surface-warning px-2 py-1 text-label-small font-semibold text-content-warning leading-none">
                         Soon
                       </span>
                     )}
@@ -644,7 +646,7 @@ export function BookingSheet() {
                           type="button"
                           onClick={swapEnds}
                           aria-label="Swap pickup and drop"
-                          className="glass-tile absolute right-2 top-[38px] z-10 flex h-9 w-9 items-center justify-center rounded-full
+                          className="glass-tile absolute right-2 top-[38px] z-10 flex h-11 w-11 items-center justify-center rounded-full
                             text-content-secondary transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]
                             active:scale-90 active:rotate-180 cursor-pointer
                             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
@@ -840,11 +842,12 @@ export function BookingSheet() {
             ) : fareEstimate ? (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={{ opacity: isSearching ? 0.5 : 1, y: 0 }}
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="relative space-y-2 overflow-hidden rounded-xl"
+                aria-busy={isSearching}
+                className="relative space-y-2 overflow-hidden rounded-xl transition-opacity"
               >
-                <BorderBeam size={60} duration={8} colorFrom="#1a5cff" colorTo="rgba(26,92,255,0.05)" borderWidth={1} delay={0.5} />
+                <BorderBeam size={60} duration={8} colorFrom="var(--color-secondary)" colorTo="rgba(0,64,224,0.05)" borderWidth={1} delay={0.5} transition={{ repeat: 2 }} />
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
@@ -885,12 +888,26 @@ export function BookingSheet() {
               </p>
             )}
 
-            {/* Promo code */}
+            {/* Promo code — collapsed by default; rare-use field shouldn't share weight with the fare itself */}
+            {!showPromo && !promoInput && promoStatus === "idle" ? (
+              <button
+                type="button"
+                onClick={() => setShowPromo(true)}
+                className="mt-4 flex items-center gap-1.5 border-t border-white/60 pt-3 text-label-small text-content-accent
+                  cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-sm"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
+                  <path d="M7 7h.01M17 17h.01M3 12l9-9 9 9-9 9-9-9z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                Have a promo code?
+              </button>
+            ) : (
             <div className="mt-4 flex items-center gap-2 border-t border-white/60 pt-3">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
                 <path d="M7 7h.01M17 17h.01M3 12l9-9 9 9-9 9-9-9z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-content-tertiary" />
               </svg>
               <input
+                autoFocus={showPromo}
                 className="flex-1 bg-transparent text-paragraph-medium text-content-primary
                   outline-none placeholder:text-content-tertiary"
                 placeholder="Enter promo code"
@@ -923,6 +940,7 @@ export function BookingSheet() {
                 Apply
               </button>
             </div>
+            )}
             {promoStatus === "ok" && fareEstimate?.fare_breakdown.promo_discount_paise ? (
               <p className="mt-1.5 text-label-small text-content-positive">
                 <FareDisplay amount={fareEstimate.fare_breakdown.promo_discount_paise} size="sm" /> saved
@@ -933,80 +951,10 @@ export function BookingSheet() {
             )}
           </GlassSection>
 
-          {/* [5a] D4M Care — square bento tile */}
-          <GlassSection
-            index={4}
-            span="col-span-3"
-            className={d4mCare ? "bg-positive-50/70 shadow-[0_0_20px_rgba(58,157,104,0.14)] transition-all duration-300" : "transition-all duration-300"}
-          >
-            <div className="flex h-full flex-col">
-              <div className="flex items-start justify-between">
-                <motion.span
-                  animate={d4mCare ? { scale: [1, 1.15, 1] } : { scale: 1 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  className={["flex h-7 w-7 items-center justify-center", d4mCare ? "text-content-positive" : "text-content-accent"].join(" ")}
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M12 3l7 3v5c0 4.4-3 7.4-7 8.5-4-1.1-7-4.1-7-8.5V6l7-3z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                    <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </motion.span>
-                <button
-                  type="button"
-                  onClick={() => setShowD4mInfo(true)}
-                  className="text-content-tertiary hover:text-content-secondary min-w-[24px] min-h-[24px] flex items-center justify-center
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-pill"
-                  aria-label="D4M Care info"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
-              </div>
-              <span className="mt-2 text-label-medium font-semibold text-content-primary">D4M Care</span>
-              <p className="text-label-small text-content-secondary">₹49 — Insurance + support</p>
-              <div className="mt-auto pt-3">
-                <Toggle on={d4mCare} onToggle={() => setD4mCare(!d4mCare)} />
-              </div>
-            </div>
-          </GlassSection>
-
-          {/* [5b] Owner not in car — square bento tile, warmer cue */}
-          <GlassSection
-            index={4}
-            span="col-span-3"
-            className={ownerNotInCar ? "bg-warning-50/70 transition-all duration-300" : "transition-all duration-300"}
-          >
-            <div className="flex h-full flex-col">
-              <span className="flex h-7 w-7 items-center justify-center text-content-secondary">
-                <CarIcon size={22} />
-              </span>
-              <span className="mt-2 text-label-medium font-semibold text-content-primary">I won&apos;t be in the car</span>
-              <p className="text-label-small text-content-secondary">Driver takes the car without me</p>
-              <AnimatePresence>
-                {ownerNotInCar && (
-                  <motion.p
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className="mt-1 overflow-hidden text-label-small text-content-warning"
-                  >
-                    Verified driver · GPS-tracked end to end.
-                  </motion.p>
-                )}
-              </AnimatePresence>
-              <div className="mt-auto pt-3">
-                <Toggle on={ownerNotInCar} onToggle={() => setOwnerNotInCar(!ownerNotInCar)} tone="warm" />
-              </div>
-            </div>
-          </GlassSection>
-
-          {/* [6a] Payment — 2×2 method grid */}
-          <GlassSection index={5} span="col-span-4">
+          {/* [5] Payment — required every booking, stays visible. 2×2 method grid, full width now that Persons moved into the disclosure below. */}
+          <GlassSection index={4} span="col-span-6">
             <TileHeader label="Payment" />
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {PAYMENT_METHODS.map((pm) => {
                 const active = paymentMethod === pm.value;
                 return (
@@ -1039,42 +987,152 @@ export function BookingSheet() {
             </div>
           </GlassSection>
 
-          {/* [6b] Persons — compact bento tile */}
-          <GlassSection index={5} span="col-span-2">
-            <div className="flex h-full flex-col items-center">
-              <span className="text-label-medium font-semibold text-content-primary">Persons</span>
-              <span className="my-auto font-mono text-heading-medium text-content-primary tabular-nums">
-                {personsCount}
+          {/* [6] More options — Persons / D4M Care / Owner. Collapsed by default: rare-per-booking
+              controls shouldn't share visual weight with route/car/payment. A dot signals an active
+              choice even while collapsed, and the review sheet re-surfaces everything before commit. */}
+          <GlassSection index={5} span="col-span-6">
+            <button
+              type="button"
+              onClick={() => setShowMoreOptions((v) => !v)}
+              aria-expanded={showMoreOptions}
+              className="flex w-full items-center justify-between cursor-pointer
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-sm"
+            >
+              <span className="flex items-center gap-2 text-label-medium font-semibold text-content-primary">
+                More options
+                {(d4mCare || ownerNotInCar) && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-secondary" aria-hidden="true" />
+                )}
               </span>
-              <div className="flex gap-1.5 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setPersonsCount(personsCount - 1)}
-                  disabled={personsCount <= 1}
-                  aria-label="Decrease persons"
-                  className="glass-tile flex h-10 w-10 items-center justify-center rounded-xl
-                    text-label-large text-content-primary
-                    disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed
-                    transition-transform duration-200 active:scale-90
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
+              <span className="flex items-center gap-1.5 text-label-small text-content-secondary">
+                {personsCount} {personsCount === 1 ? "person" : "persons"}
+                <ChevronIcon
+                  size={14}
+                  className={`transition-transform duration-200 ${showMoreOptions ? "rotate-90" : ""}`}
+                />
+              </span>
+            </button>
+            <AnimatePresence initial={false}>
+              {showMoreOptions && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
                 >
-                  −
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPersonsCount(personsCount + 1)}
-                  disabled={personsCount >= 8}
-                  aria-label="Increase persons"
-                  className="glass-tile flex h-10 w-10 items-center justify-center rounded-xl
-                    text-label-large text-content-primary
-                    disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed
-                    transition-transform duration-200 active:scale-90
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
-                >
-                  +
-                </button>
-              </div>
-            </div>
+                  <div className="mt-3 grid grid-cols-6 gap-3 border-t border-white/60 pt-3">
+                    {/* D4M Care */}
+                    <div
+                      className={[
+                        "col-span-3 rounded-2xl p-3 transition-all duration-300",
+                        d4mCare ? "bg-positive-50/70 shadow-[0_0_20px_rgba(58,157,104,0.14)]" : "",
+                      ].join(" ")}
+                    >
+                      <div className="flex h-full flex-col">
+                        <div className="flex items-start justify-between">
+                          <motion.span
+                            animate={d4mCare ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+                            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                            className={["flex h-7 w-7 items-center justify-center", d4mCare ? "text-content-positive" : "text-content-accent"].join(" ")}
+                          >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                              <path d="M12 3l7 3v5c0 4.4-3 7.4-7 8.5-4-1.1-7-4.1-7-8.5V6l7-3z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                              <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </motion.span>
+                          <button
+                            type="button"
+                            onClick={() => setShowD4mInfo(true)}
+                            className="touch-target text-content-tertiary hover:text-content-secondary min-w-[24px] min-h-[24px] flex items-center justify-center
+                              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-pill"
+                            aria-label="D4M Care info"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+                              <path d="M12 16v-4M12 8h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                            </svg>
+                          </button>
+                        </div>
+                        <span className="mt-2 text-label-medium font-semibold text-content-primary">D4M Care</span>
+                        <p className="text-label-small text-content-secondary">₹49 — Insurance + support</p>
+                        <div className="mt-auto pt-3">
+                          <Toggle on={d4mCare} onToggle={() => setD4mCare(!d4mCare)} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Owner not in car */}
+                    <div
+                      className={[
+                        "col-span-3 rounded-2xl p-3 transition-all duration-300",
+                        ownerNotInCar ? "bg-warning-50/70" : "",
+                      ].join(" ")}
+                    >
+                      <div className="flex h-full flex-col">
+                        <span className="flex h-7 w-7 items-center justify-center text-content-secondary">
+                          <CarIcon size={22} />
+                        </span>
+                        <span className="mt-2 text-label-medium font-semibold text-content-primary">I won&apos;t be in the car</span>
+                        <p className="text-label-small text-content-secondary">Driver takes the car without me</p>
+                        <AnimatePresence>
+                          {ownerNotInCar && (
+                            <motion.p
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                              className="mt-1 overflow-hidden text-label-small text-content-warning"
+                            >
+                              Verified driver · GPS-tracked end to end.
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
+                        <div className="mt-auto pt-3">
+                          <Toggle on={ownerNotInCar} onToggle={() => setOwnerNotInCar(!ownerNotInCar)} tone="warm" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Persons */}
+                    <div className="col-span-6 flex items-center justify-between rounded-2xl bg-white/40 p-3">
+                      <span className="text-label-medium font-semibold text-content-primary">Persons</span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setPersonsCount(personsCount - 1)}
+                          disabled={personsCount <= 1}
+                          aria-label="Decrease persons"
+                          className="glass-tile flex h-11 w-11 items-center justify-center rounded-xl
+                            text-label-large text-content-primary
+                            disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed
+                            transition-transform duration-200 active:scale-90
+                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
+                        >
+                          −
+                        </button>
+                        <span className="w-6 text-center font-mono text-heading-medium text-content-primary tabular-nums">
+                          {personsCount}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setPersonsCount(personsCount + 1)}
+                          disabled={personsCount >= 8}
+                          aria-label="Increase persons"
+                          className="glass-tile flex h-11 w-11 items-center justify-center rounded-xl
+                            text-label-large text-content-primary
+                            disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed
+                            transition-transform duration-200 active:scale-90
+                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </GlassSection>
 
           {/* [7] Hero confirm CTA */}

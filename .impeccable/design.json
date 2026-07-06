@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-06T00:00:00Z",
+  "title": "Design System: Vahnly Rider",
+  "extensions": {
+    "colorMeta": {
+      "ink-charcoal": { "role": "primary", "displayName": "Charcoal Ink", "canonical": "#1A1A1A", "tonalRamp": ["#1A1A1A", "#222221", "#30302E", "#454541", "#60605B", "#7E7E77", "#ADADA5", "#EAEAE5"] },
+      "canvas": { "role": "neutral", "displayName": "Canvas", "canonical": "#FAFAFA", "tonalRamp": ["#1A1A1A", "#30302E", "#60605B", "#ADADA5", "#C9C9C2", "#E0E0DA", "#F4F4F1", "#FAFAFA"] },
+      "brand-blue": { "role": "secondary", "displayName": "Brand Blue", "canonical": "#0040E0", "tonalRamp": ["#001233", "#00206B", "#0035BE", "#0040E0", "#2563EB", "#4F46E5", "#8FA8F5", "#D3E4FE"] },
+      "accent-steel-blue": { "role": "tertiary", "displayName": "Steel-Blue Accent", "canonical": "#4A6FA5", "tonalRamp": ["#2D4566", "#3B5A84", "#4A6FA5", "#9FB3C8", "#BCCCDC", "#D9E2EC", "#F0F4F8"] },
+      "success": { "role": "status-positive", "displayName": "Success Green", "canonical": "#3A9D68", "tonalRamp": ["#205F3E", "#2D7F53", "#3A9D68", "#6FC38B", "#9CD6AF", "#C7E8D2", "#EAF6EC"] },
+      "warning": { "role": "status-warning", "displayName": "Warning Amber", "canonical": "#F0B840", "tonalRamp": ["#986F1B", "#C6942C", "#F0B840", "#FCD068", "#FDE096", "#FEEDC4", "#FFF8E7"] },
+      "danger": { "role": "status-negative", "displayName": "Danger Red", "canonical": "#C94030", "tonalRamp": ["#7A2017", "#A13023", "#C94030", "#E6685F", "#EE958F", "#F5C2BE", "#FBECEB"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Rare — onboarding and empty-state headlines only." },
+      "headline": { "displayName": "Headline", "purpose": "Screen titles, modal headers." },
+      "title": { "displayName": "Title", "purpose": "Tile headers, card titles inside the booking cockpit." },
+      "body": { "displayName": "Body", "purpose": "Default prose, addresses, descriptions." },
+      "label": { "displayName": "Label", "purpose": "Buttons, chips, badges, captions." },
+      "mono": { "displayName": "Mono", "purpose": "Fares, ETAs, distances, IDs — nowhere else." }
+    },
+    "shadows": [
+      { "name": "elevation-1", "value": "0 1px 2px rgba(0,0,0,0.04)", "purpose": "Flat cards at rest, outside the cockpit." },
+      { "name": "elevation-2", "value": "0 4px 12px rgba(0,0,0,0.06)", "purpose": "Flat cards on hover/lift." },
+      { "name": "elevation-3", "value": "0 -2px 16px rgba(0,0,0,0.08)", "purpose": "Bottom sheets rising from the edge, outside the cockpit." },
+      { "name": "glass-shadow", "value": "0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)", "purpose": "Frosted tile interior highlight + drop, cockpit only." },
+      { "name": "brand-glow", "value": "0 4px 24px rgba(0,64,224,0.3)", "purpose": "Reserved for the active brand-gradient element itself (CTA, selected chip)." }
+    ],
+    "motion": [
+      { "name": "ease-quint", "value": "cubic-bezier(0.83, 0, 0.17, 1)", "purpose": "Default state transitions app-wide." },
+      { "name": "ease-out-quint", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Enter transitions, reveals." },
+      { "name": "ease-in-quint", "value": "cubic-bezier(0.64, 0, 0.78, 0)", "purpose": "Exit transitions." },
+      { "name": "ease-spring", "value": "cubic-bezier(0.34, 1.56, 0.64, 1)", "purpose": "Press/lift feedback and sheet entrance inside the booking cockpit — the one place overshoot is intentional." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary CTA (cockpit)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Full-width gradient booking CTA — the single highest-stakes button in the app.",
+      "html": "<button class=\"ds-btn-cta\">Confirm Booking</button>",
+      "css": ".ds-btn-cta { display:flex; align-items:center; justify-content:center; width:100%; height:64px; border-radius:999px; background:linear-gradient(90deg,#0040E0,#2563EB,#4F46E5); color:#FAFAFA; font-weight:600; font-size:14px; border:none; box-shadow:0 4px 24px rgba(0,64,224,0.3); transition:transform 200ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-cta:active { transform:scale(0.98); } .ds-btn-cta:focus-visible { outline:2px solid #4A6FA5; outline-offset:2px; } .ds-btn-cta:disabled { opacity:0.5; box-shadow:none; }"
+    },
+    {
+      "name": "Secondary Button (flat, app-wide)",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Default button outside the booking cockpit — no gradient, no glow.",
+      "html": "<button class=\"ds-btn-secondary\">Continue</button>",
+      "css": ".ds-btn-secondary { display:flex; align-items:center; justify-content:center; width:100%; height:56px; border-radius:8px; background:#1A1A1A; color:#FAFAFA; font-weight:600; font-size:16px; border:none; transition:opacity 100ms, transform 100ms; } .ds-btn-secondary:active { opacity:0.85; transform:scale(0.98); } .ds-btn-secondary:disabled { opacity:0.4; }"
+    },
+    {
+      "name": "Glass Tile",
+      "kind": "card",
+      "refersTo": "glass-tile",
+      "description": "Frosted-glass tile — booking cockpit only, never used outside the booking flow.",
+      "html": "<div class=\"ds-glass-tile\">Estimated fare<br><strong>₹324.00</strong></div>",
+      "css": ".ds-glass-tile { background:rgba(255,255,255,0.62); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,0.65); border-radius:12px; padding:16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 2px 12px rgba(15,30,80,0.05); color:#1A1A1A; }"
+    },
+    {
+      "name": "Flat Card (app-wide default)",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Default card outside the booking cockpit — flat with a hairline border.",
+      "html": "<div class=\"ds-card\">Trip to Salt Lake<br><span>3 Jul, 6:40 PM</span></div>",
+      "css": ".ds-card { background:#FAFAFA; border:1px solid #E0E0DA; border-radius:12px; padding:16px; box-shadow:0 1px 2px rgba(0,0,0,0.04); color:#1A1A1A; }"
+    },
+    {
+      "name": "Selectable Chip (trip type / car class / payment)",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Unselected = neutral glass/flat; selected = brand-gradient fill with inverse text and glow, driven by a shared spring-animated indicator.",
+      "html": "<button class=\"ds-chip ds-chip-active\">One-Way</button>",
+      "css": ".ds-chip { border-radius:999px; padding:8px 16px; font-size:12px; font-weight:600; border:none; cursor:pointer; color:#60605B; background:rgba(255,255,255,0.62); transition:all 200ms cubic-bezier(0.22,1,0.36,1); } .ds-chip:hover { color:#1A1A1A; } .ds-chip-active { color:#FAFAFA; background:linear-gradient(90deg,#0040E0,#4F46E5); box-shadow:0 4px 24px rgba(0,64,224,0.3); }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard text input — flat canvas variant. Cockpit variant swaps background for glass.",
+      "html": "<input class=\"ds-input\" placeholder=\"Pickup location\" />",
+      "css": ".ds-input { width:100%; height:48px; border-radius:8px; border:1px solid #E0E0DA; background:#F4F4F1; color:#1A1A1A; font-size:16px; padding:0 16px; outline:none; transition:border-color 100ms; } .ds-input:focus { border-color:#4A6FA5; box-shadow:0 0 0 2px rgba(74,111,165,0.3); } .ds-input::placeholder { color:#60605B; }"
+    },
+    {
+      "name": "Bottom Tab Bar (tubelight nav)",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Floating frosted pill nav; active tab gets a brand-blue glow indicator (never charcoal — a charcoal blur reads as a smudge, not a glow).",
+      "html": "<nav class=\"ds-navbar\"><a class=\"ds-navbar-tab ds-navbar-tab-active\">Home</a><a class=\"ds-navbar-tab\">Trips</a><a class=\"ds-navbar-tab\">Wallet</a><a class=\"ds-navbar-tab\">Account</a></nav>",
+      "css": ".ds-navbar { display:flex; align-items:center; justify-content:space-between; background:rgba(250,250,250,0.9); border:1px solid rgba(224,224,218,0.7); backdrop-filter:blur(24px); border-radius:999px; padding:8px 12px; box-shadow:0 12px 40px rgba(0,0,0,0.15); } .ds-navbar-tab { flex:1; text-align:center; padding:10px 0; border-radius:999px; color:#60605B; font-size:10.5px; font-weight:500; text-decoration:none; } .ds-navbar-tab-active { color:#1A1A1A; font-weight:600; box-shadow: inset 0 12px 12px -8px rgba(0,64,224,0.3); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Frosted Cockpit",
+    "overview": "Vahnly's booking surface is a premium car-owner control panel floating over the map — the road stays visible beneath a layer of frosted glass, and the one action that matters (book the driver) is the only element that fully commits to color: a deep blue-to-indigo gradient (#0040E0 → #2563EB → #4F46E5) that reads instantly against the restrained warm-neutral canvas underneath. Everywhere else — trip history, account, settings — the shell stays flat, charcoal-inked, and quiet. The glass and the gradient are earned real estate, reserved for the moment the rider is actively commanding a trip; they are not a default skin applied to the whole product. This system explicitly rejects glassmorphism as ambient decoration scattered across every screen, gradient text, all-caps display type, and any brand color beyond the three defined roles.",
+    "keyCharacteristics": [
+      "Warm off-white canvas (#FAFAFA) and charcoal ink (#1A1A1A) as the base, everywhere.",
+      "Frosted glass (tile, panel, sheet) exclusively on the booking cockpit over the map.",
+      "One brand gradient, reserved for the primary CTA and active-state indicators only.",
+      "Steel-blue as the separate, calmer accent for links, focus rings, and informational borders.",
+      "Mono type (JetBrains Mono) exclusively for fares, ETAs, distances, and IDs."
+    ],
+    "rules": [
+      { "name": "The Inverse-Text Rule", "body": "Any element painted with the brand gradient MUST set its text color via the content-inverse token (#FAFAFA), verified against 4.5:1.", "section": "colors" },
+      { "name": "The Rare Gradient Rule", "body": "The brand gradient appears in exactly two places: the primary CTA and the active-state indicator for a selectable chip/tile/tab.", "section": "colors" },
+      { "name": "The Numbers-Are-Mono Rule", "body": "Any figure the rider is trusting financially or temporally renders in --font-mono; prose about the number stays in Inter.", "section": "typography" },
+      { "name": "The Cockpit-Only Glass Rule", "body": ".glass-tile / .glass-panel / .glass-sheet render only inside the booking flow. A settings row or trip-history card reaching for glass is reaching for the wrong material.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do reserve the brand gradient for exactly two roles: the primary CTA and active-state indicators.",
+      "Do map every inverse-text use through --color-content-inverse and verify 4.5:1 before shipping.",
+      "Do keep frosted glass scoped to the booking cockpit only; flat + hairline everywhere else.",
+      "Do render fares, ETAs, distances, and IDs in --font-mono; everything else in Inter.",
+      "Do collapse rare-use controls behind progressive disclosure instead of permanent equal weight.",
+      "Do keep every interactive control ≥44×44px."
+    ],
+    "donts": [
+      "Don't use gradient text (background-clip: text).",
+      "Don't apply glassmorphism outside the booking cockpit.",
+      "Don't hardcode brand-gradient hex values in component JSX — always reference the CSS variable.",
+      "Don't ship a gradient-backed element with unmapped or assumed-inverse text.",
+      "Don't run more than one infinite decorative motion loop competing for attention on a single screen.",
+      "Don't use all-caps display headlines, or introduce a brand color outside the three defined roles."
+    ]
+  }
+}

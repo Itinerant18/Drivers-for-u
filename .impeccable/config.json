@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "bounce-easing",
+        "value": "springup",
+        "reason": "User confirmed springUp/--ease-spring is an intentional systematic motion token, part of the formalized bento brand direction (critique 2026-07-06)",
+        "createdAt": "2026-07-06T06:18:42.049Z"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "reason": "Confirmed --ease-spring token value, intentional per formalized bento brand direction (critique 2026-07-06)",
+        "createdAt": "2026-07-06T06:18:42.127Z"
+      }
+    ]
+  }
+}

@@ -102,7 +102,7 @@ export default function HomePage() {
         {/* Geolocation-denied banner */}
         {geoError && (
           <div className="absolute left-1/2 top-[68px] z-10 -translate-x-1/2">
-            <div className="rounded-full bg-surface-negative/90 px-4 py-1.5 text-xs font-medium text-content-negative backdrop-blur-sm">
+            <div className="rounded-full bg-surface-negative/90 px-4 py-1.5 text-xs font-medium text-negative-600 backdrop-blur-sm">
               Location unavailable — showing default area
             </div>
           </div>

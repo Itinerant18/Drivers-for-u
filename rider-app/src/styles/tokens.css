@@ -32,7 +32,7 @@
   --gray-900:  #222221;
   --gray-1000: #1A1A1A;
 
-  /* Accent (muted steel-blue) ramp */
+  /* Accent (muted steel-blue) ramp — informational accents, borders, focus rings */
   --accent-50:  #F0F4F8;
   --accent-100: #D9E2EC;
   --accent-200: #BCCCDC;
@@ -40,6 +40,14 @@
   --accent-400: #4A6FA5;
   --accent-500: #3B5A84;
   --accent-600: #2D4566;
+
+  /* Brand gradient (formalized 2026-07) — primary CTA + active-state indicator.
+     Canonical here; globals.css @theme only references these, never redeclares. */
+  --brand-secondary:       #0040E0;
+  --brand-secondary-hover: #0035BE;
+  --brand-secondary-2:     #2563EB;
+  --brand-secondary-3:     #4F46E5;
+  --brand-glow-shadow:     0 4px 24px rgba(0, 64, 224, 0.3);
 
   /* Positive (green) ramp */
   --positive-50:  #EAF6EC;
@@ -133,7 +141,7 @@
   --content-secondary: var(--gray-600);   /* #60605B */
   --content-tertiary:  var(--gray-500);   /* #7E7E77 */
   --content-accent:    var(--accent-400); /* #4A6FA5 */
-  --content-positive:  var(--positive-400);
+  --content-positive:  var(--positive-600); /* positive-400 read ~3.4:1 on canvas — 600 clears 4.5:1 */
   --content-warning:   var(--warning-600);
   --content-negative:  var(--negative-400);
 

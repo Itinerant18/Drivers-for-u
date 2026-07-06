@@ -34,6 +34,7 @@
   --color-content-positive:  var(--content-positive);
   --color-content-warning:   var(--content-warning);
   --color-content-negative:  var(--content-negative);
+  --color-content-inverse:   var(--content-inverse);
 
   /* ── Semantic Border Colors ── */
   --color-border-opaque:   var(--border-opaque);
@@ -132,17 +133,12 @@
   --glow-positive: 0 0 16px rgba(58, 157, 104, 0.15);
   --glow-negative: 0 0 16px rgba(201, 64, 48, 0.15);
 
-  /* ── Custom Bento Colors ── */
-  --color-secondary: #0040e0;
-  --color-secondary-hover: #0035be;
-  --color-secondary-2: #2563eb;  /* hero brand gradient — mid */
-  --color-secondary-3: #4f46e5;  /* hero brand gradient — end (indigo) */
-  --shadow-brand-glow: 0 4px 24px rgba(0, 64, 224, 0.3);  /* primary CTA glow */
-  --color-surface-dim: #cbdbf5;
-  --color-surface-container-highest: #d3e4fe;
-  --color-surface-container-high: #dce9ff;
-  --color-surface-container-low: #eff4ff;
-  --color-surface-bright: #ffffff;
+  /* ── Brand gradient (formalized) — sourced from tokens.css, never redeclared ── */
+  --color-secondary: var(--brand-secondary);
+  --color-secondary-hover: var(--brand-secondary-hover);
+  --color-secondary-2: var(--brand-secondary-2);  /* hero brand gradient — mid */
+  --color-secondary-3: var(--brand-secondary-3);  /* hero brand gradient — end (indigo) */
+  --shadow-brand-glow: var(--brand-glow-shadow);  /* primary CTA glow */
 }
 
 /* ─────────────────────────────────────────────
@@ -452,12 +448,6 @@ body {
    LUMINOUS BENTO GRID & LANDING UTILITIES
    ───────────────────────────────────────────── */
 
-.dark .glass-card {
-  background: rgba(11, 28, 48, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
 @keyframes fadeInUp {
   0% { opacity: 0; transform: translateY(30px); }
   100% { opacity: 1; transform: translateY(0); }
@@ -504,6 +494,12 @@ body {
   box-shadow: 0 -12px 48px rgba(15, 30, 80, 0.1);
 }
 
+/* Muted/tertiary text (placeholders, secondary captions) loses too much contrast
+   sitting on frosted glass over the ambient glows — darken it a step on glass surfaces only. */
+.glass-tile, .glass-panel, .glass-sheet {
+  --content-tertiary: var(--gray-600);
+}
+
 /* Ambient light shapes — sit far behind the sheet content. Fixed +
    pointer-events-none so they never repaint on scroll. */
 .ambient-glows {
@@ -546,24 +542,13 @@ body {
   top: 0; bottom: 0; width: 40%;
   left: -60%;
   background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  animation: ctaSheen 6s var(--ease-out-quint) infinite;
+  animation: ctaSheen 6s var(--ease-out-quint) 3;
   pointer-events: none;
 }
 @keyframes ctaSheen {
   0%, 72% { left: -60%; }
   88%     { left: 120%; }
   100%    { left: 120%; }
-}
-
-/* Occasional shimmer for the Monthly "Soon" badge. */
-.badge-shimmer {
-  background-image: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.75) 50%, transparent 70%);
-  background-size: 250% 100%;
-  animation: badgeShimmer 5s ease-in-out infinite;
-}
-@keyframes badgeShimmer {
-  0%, 70% { background-position: 120% 0; }
-  100%    { background-position: -60% 0; }
 }
 
 /* Soft pulsing map marker (service-readiness pin). */
@@ -742,7 +727,7 @@ body {
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: #0040e0;
+  --secondary: var(--brand-secondary);
   --secondary-foreground: #ffffff;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -766,45 +751,6 @@ body {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --color-1: oklch(66.2% 0.225 25.9);
-  --color-2: oklch(60.4% 0.26 302);
-  --color-3: oklch(69.6% 0.165 251);
-  --color-4: oklch(80.2% 0.134 225);
-  --color-5: oklch(90.7% 0.231 133);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
   --color-1: oklch(66.2% 0.225 25.9);
   --color-2: oklch(60.4% 0.26 302);
   --color-3: oklch(69.6% 0.165 251);

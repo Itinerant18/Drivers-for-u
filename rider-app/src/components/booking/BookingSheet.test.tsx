@@ -147,6 +147,7 @@ describe('BookingSheet', () => {
   it('shows an error when promo validation rejects', async () => {
     validatePromo.mockRejectedValueOnce(new Error('invalid'));
     render(<BookingSheet />);
+    await userEvent.click(screen.getByRole('button', { name: 'Have a promo code?' }));
     await userEvent.type(screen.getByPlaceholderText('Enter promo code'), 'NOPE');
     await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
     expect(await screen.findByText('Invalid or expired code')).toBeInTheDocument();
@@ -154,6 +155,7 @@ describe('BookingSheet', () => {
 
   it('shows a success tick when promo validation resolves', async () => {
     render(<BookingSheet />);
+    await userEvent.click(screen.getByRole('button', { name: 'Have a promo code?' }));
     await userEvent.type(screen.getByPlaceholderText('Enter promo code'), 'TESTCODE');
     await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
     expect(await screen.findByLabelText('Promo applied')).toBeInTheDocument();

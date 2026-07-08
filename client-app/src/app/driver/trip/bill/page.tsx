@@ -3,7 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { FinalBill, reportCarIssue, CarIssueType } from '@/api/client';
+import { FinalBill, reportCarIssue, CarIssueType, driverConfirmPayment } from '@/api/client';
+import { useToastStore } from '@/store/useToastStore';
+import { friendlyError } from '@/lib/ui/errorMessage';
 import { FareDisplay, ClockIcon, WrenchIcon, CheckIcon, PhoneIcon, CashIcon } from '@/components/ds';
 
 const CAR_ISSUE_TYPES: { value: CarIssueType; label: string }[] = [
@@ -21,6 +23,7 @@ export default function FinalBillPage() {
   const { token } = useAuthStore();
 
   const [bill, setBill] = useState<FinalBill | null>(null);
+  const [missing, setMissing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'CASH' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,34 +67,34 @@ export default function FinalBillPage() {
     } catch (e) {
       console.warn('Failed reading bill from session storage:', e);
     }
-    
-    // Fallback Mock values if not found (in offline/sandbox mode)
-    if (orderID) {
-      setBill({
-        order_id: orderID,
-        base_fare_paise: 35000,
-        distance_km: 18.2,
-        distance_charge_paise: 5760,
-        wait_minutes: 8,
-        wait_charge_paise: 600,
-        overtime_minutes: 25,
-        overtime_charge_paise: 1250,
-        tolls_paise: 5000,
-        parking_charges_paise: 3000,
-        night_surge_paise: 5000,
-        care_surcharge_paise: 1500,
-        total_fare_paise: 62110,
-        driver_payout_paise: 49688,
-      });
-    }
+    // No mock fallback: a missing bill means the trip was never really ended
+    // on the backend — never show invented numbers the driver could collect.
+    setMissing(true);
   }, [orderID]);
 
   if (!bill) {
     return (
       <div className="min-h-screen bg-black text-white p-6 font-mono flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <span className="flex justify-center animate-spin text-content-tertiary"><ClockIcon size={24} /></span>
-          <p className="text-xs text-content-tertiary">HYDRATING TRANSIT RECEIPT...</p>
+        <div className="text-center space-y-3 max-w-xs">
+          {missing ? (
+            <>
+              <p className="text-xs text-content-negative font-bold uppercase">Receipt unavailable</p>
+              <p className="text-[10px] text-content-tertiary">
+                This trip has no finalized bill on this device. Return to the terminal and end the trip again.
+              </p>
+              <button
+                onClick={() => router.push('/driver')}
+                className="w-full bg-white text-black font-bold py-3 rounded-xl text-[10px] uppercase tracking-wider cursor-pointer"
+              >
+                Back to terminal
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="flex justify-center animate-spin text-content-tertiary"><ClockIcon size={24} /></span>
+              <p className="text-xs text-content-tertiary">HYDRATING TRANSIT RECEIPT...</p>
+            </>
+          )}
         </div>
       </div>
     );
@@ -108,15 +111,25 @@ export default function FinalBillPage() {
   const d4mCareFee = bill.care_surcharge_paise / 100;
   const totalAmount = bill.total_fare_paise / 100;
 
-  const handleMarkPaid = () => {
-    if (!paymentMethod) return;
+  // Settles the payment on the backend (ledger splits + payment intent) before
+  // moving to the rating screen. The rating itself goes via rate-rider later.
+  const handleMarkPaid = async () => {
+    if (!paymentMethod || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      sessionStorage.setItem(`payment_method_${orderID}`, paymentMethod);
+      if (token && orderID) {
+        await driverConfirmPayment(token, orderID, {
+          payment_method: paymentMethod,
+          rider_rating: 0,
+          tags: [],
+        });
+      }
+      try {
+        sessionStorage.setItem(`payment_method_${orderID}`, paymentMethod);
+      } catch {}
       router.push(`/driver/trip/rate?order_id=${orderID}`);
-    } catch (e) {
-      console.warn('Storage failed:', e);
-    } finally {
+    } catch (err) {
+      useToastStore.getState().show(friendlyError(err), 'error');
       setIsSubmitting(false);
     }
   };

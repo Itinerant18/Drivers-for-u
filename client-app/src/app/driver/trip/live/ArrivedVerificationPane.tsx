@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { DutyState } from '@/store/useDriverDutyStore';
-import { verifyTripOTP, addOrderEvent, ApiClientError } from '@/api/client';
+import { verifyTripOTP, addOrderEvent, uploadTripPhoto, ApiClientError } from '@/api/client';
 import { useToastStore } from '@/store/useToastStore';
 import { FareDisplay, CheckIcon, SirenIcon, ClockIcon, CrossIcon, CameraIcon } from '@/components/ds';
 
@@ -148,7 +148,26 @@ export const ArrivedVerificationPane: React.FC<ArrivedVerificationPaneProps> = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [noShowSubmitting, setNoShowSubmitting] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const showToast = useToastStore((s) => s.show);
+
+  const handlePhotoSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file || !token) return;
+    setPhotoUploading(true);
+    try {
+      const url = await uploadTripPhoto(token, file, 'ODOMETER_START');
+      setStartOdoPhoto(url);
+      logAudit('ODOMETER_PHOTO_UPLOADED', { stage: 'START', url });
+    } catch (err) {
+      showToast('Photo upload failed — you can retry or continue without it.', 'error');
+      console.warn('Odometer photo upload failed:', err);
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
 
   const orderId = activeTrip?.order_id;
   // Garage cars always carry make/model (and a plate on file to verify against);
@@ -360,19 +379,30 @@ export const ArrivedVerificationPane: React.FC<ArrivedVerificationPaneProps> = (
             <FuelSlider value={startFuel} onChange={setStartFuel} />
           </div>
 
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handlePhotoSelected}
+            className="hidden"
+            aria-label="Dashboard photo"
+          />
           <button
             type="button"
-            onClick={() => {
-              setStartOdoPhoto(`s3://odometer-captures/start-${Date.now()}.png`);
-              logAudit('ODOMETER_PHOTO_UPLOADED', { stage: 'START' });
-            }}
+            disabled={photoUploading}
+            onClick={() => photoInputRef.current?.click()}
             className="w-full h-11 rounded-sm border border-border-opaque bg-background-secondary
               text-label-medium text-content-secondary
-              cursor-pointer hover:bg-background-tertiary transition-base
+              cursor-pointer hover:bg-background-tertiary transition-base disabled:opacity-60
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
           >
             <span className="inline-flex items-center justify-center gap-1.5">
-              {startOdoPhoto ? <><CheckIcon size={16} /> Photo captured</> : <><CameraIcon size={16} /> Take dashboard photo</>}
+              {photoUploading
+                ? <><ClockIcon size={16} /> Uploading…</>
+                : startOdoPhoto
+                  ? <><CheckIcon size={16} /> Photo captured — retake</>
+                  : <><CameraIcon size={16} /> Take dashboard photo</>}
             </span>
           </button>
         </div>

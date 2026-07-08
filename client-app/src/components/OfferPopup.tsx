@@ -144,6 +144,32 @@ export function OfferPopup() {
     }
   }, [currentOffer?.orderId, status, token, reconcilePendingOffer]);
 
+  // Audible + haptic alert on each new offer — drivers keep the phone mounted
+  // and can't watch the screen; the 15s window is missed without a hard signal.
+  useEffect(() => {
+    if (status !== 'OFFER_PENDING' || !currentOffer?.orderId) return;
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate([300, 150, 300, 150, 300]); } catch { /* unsupported */ }
+    }
+    try {
+      const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      [0, 0.35].forEach((delay) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.4, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.3);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + 0.3);
+      });
+      window.setTimeout(() => void ctx.close(), 1200);
+    } catch { /* autoplay policy may block before first gesture — vibration still fires */ }
+  }, [status, currentOffer?.orderId]);
+
   // Clock-accurate countdown
   useEffect(() => {
     if (status !== 'OFFER_PENDING') return;

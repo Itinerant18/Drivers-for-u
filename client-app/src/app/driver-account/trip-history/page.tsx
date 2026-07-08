@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { TripItem, TRIP_HISTORY } from './tripData';
-import { DriverTrip, getTripHistory } from '@/api/client';
+import { TripItem } from './tripData';
+import { DriverTrip, getTripHistory, createSupportTicket } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
 import { FareDisplay } from '@/components/ds';
 import { LocationIcon, FlagIcon, StarIcon } from '@/components/ds/Icon';
@@ -92,16 +92,29 @@ export default function DriverTripHistoryPage() {
     };
   }, [token]);
 
-  const history = liveLoaded ? liveTrips : TRIP_HISTORY;
+  // No mock fallback — showing fabricated trips when the API fails erodes
+  // trust in the earnings numbers. The error line above the list explains why
+  // it's empty.
+  const history = liveLoaded ? liveTrips : [];
 
   const filteredHistory = filterType === 'ALL'
     ? history 
     : history.filter((t) => t.type === filterType);
 
-  const handleDispute = (id: string) => {
+  const handleDispute = async (id: string) => {
     const reason = prompt('Enter the reason for disputing this trip fare:');
-    if (reason) {
-      alert(`Dispute ticket registered successfully for Trip ${id}. Central dispatcher agents will verify GPS trail maps and odometer uploads.`);
+    if (!reason || !token) return;
+    try {
+      const res = await createSupportTicket(token, {
+        category: 'TRIP',
+        subject: `Fare dispute — trip ${id}`,
+        description: reason,
+        order_id: id,
+      });
+      alert(`Dispute ticket ${res.ticket_number} registered. Support will verify the GPS trail and odometer uploads.`);
+    } catch (err) {
+      alert('Failed to register the dispute. Please try again or contact support.');
+      console.warn('Dispute ticket failed:', err);
     }
   };
 

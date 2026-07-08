@@ -969,6 +969,21 @@ export async function getPresignedUrl(
   });
 }
 
+// Uploads a trip photo (e.g. odometer/dashboard capture) via a presigned PUT
+// and returns the public storage URL to reference in trip payloads.
+export async function uploadTripPhoto(token: string, file: File, docType: string): Promise<string> {
+  const { upload_url, storage_url } = await getPresignedUrl(token, file.name, docType);
+  const res = await fetch(upload_url, {
+    method: 'PUT',
+    headers: { 'Content-Type': file.type || 'image/jpeg' },
+    body: file,
+  });
+  if (!res.ok) {
+    throw new ApiClientError(`photo_upload_failed_${res.status}`, res.status, await res.text());
+  }
+  return storage_url;
+}
+
 export async function validateQuiz(
   token: string,
   answers: Record<string, number>,
@@ -1593,5 +1608,33 @@ export interface DriverLocationStatus {
 
 export async function getDriverLocationStatus(token: string): Promise<DriverLocationStatus> {
   return request<DriverLocationStatus>("/api/v1/driver/location/status", { method: "GET", token });
+}
+
+// ─── In-trip route polyline (OSRM-backed, straight-line fallback server-side) ──
+
+export interface RoutePoint {
+  lat: number;
+  lng: number;
+}
+
+export interface DriverRouteResponse {
+  geometry: RoutePoint[];
+  distance_meters: number;
+  duration_seconds: number;
+  source: string;
+}
+
+export async function getDriverRoute(
+  token: string,
+  driver: RoutePoint | null,
+  pickup: RoutePoint,
+  dropoff?: RoutePoint,
+): Promise<DriverRouteResponse> {
+  const raw = await request<any>('/api/v1/driver/map/route', {
+    method: 'POST',
+    token,
+    body: { driver, pickup, dropoff },
+  });
+  return raw?.data ?? raw;
 }
 

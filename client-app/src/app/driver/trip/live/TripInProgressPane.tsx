@@ -24,6 +24,8 @@ interface TripInProgressPaneProps {
   handleSlideToEndTrip: () => Promise<void>;
   triggerSOS?: () => void;
   logAudit?: (event: string, meta: any) => void;
+  // Expands the rider-chat panel in the bottom sheet on /driver.
+  onOpenChat?: () => void;
 }
 
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -59,6 +61,7 @@ export const TripInProgressPane: React.FC<TripInProgressPaneProps> = ({
   handleSlideToEndTrip,
   triggerSOS,
   logAudit,
+  onOpenChat,
 }) => {
   const { token } = useAuthStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -240,7 +243,7 @@ export const TripInProgressPane: React.FC<TripInProgressPaneProps> = ({
                   <PhoneIcon size={18} />
                 </button>
                 <button
-                  onClick={() => alert('Opening chat')}
+                  onClick={onOpenChat}
                   aria-label="Chat with rider"
                   className="h-9 px-3 rounded-sm bg-background-secondary border border-border-opaque
                     text-label-small text-content-primary cursor-pointer

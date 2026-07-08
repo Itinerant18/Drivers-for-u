@@ -38,6 +38,7 @@ import {
   startWait,
   resumeTrip,
   abandonTrip,
+  getDriverRoute,
 } from '@/api/client';
 import { connectDispatchStream } from '@/services/dispatchStream';
 import { connectHeatmapStream, HeatmapData } from '@/services/heatmapStream';
@@ -46,6 +47,22 @@ import { OfferPopup } from '@/components/OfferPopup';
 import { RefreshIcon, MenuIcon, SirenIcon, NavigateIcon, SignalIcon, FlameIcon, PauseIcon, ChatIcon, OctagonAlertIcon, ClockIcon } from '@/components/ds';
 import { useOfferStore } from '@/store/useOfferStore';
 import { openGoogleMapsNavigation } from '@/lib/map/navigation';
+import { useToastStore } from '@/store/useToastStore';
+import { friendlyError } from '@/lib/ui/errorMessage';
+
+// Dispatch matching and SOS need the driver's real position; fall back to the
+// KOL city center only when the device denies or can't produce a fix in time.
+const KOL_CENTER = { lat: 22.5726, lng: 88.3639 };
+function getDevicePosition(): Promise<{ lat: number; lng: number }> {
+  return new Promise((resolve) => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return resolve(KOL_CENTER);
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => resolve(KOL_CENTER),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 30000 },
+    );
+  });
+}
 
 interface ActiveOrderAssignment {
   order_id: string;
@@ -187,7 +204,9 @@ export default function DriverTerminalPage() {
   const [selectedCancelReason, setSelectedCancelReason] = useState('');
   
   // Map visualization state: simulated marker position along route (0 to 100%)
-  const [mapGlideProgress, setMapGlideProgress] = useState(0);
+  const [currentPos, setCurrentPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [routePath, setRoutePath] = useState<{ lat: number; lng: number }[] | null>(null);
+  const routeOriginRef = useRef<{ lat: number; lng: number } | null>(null);
   const [heatmapData, setHeatmapData] = useState<HeatmapData | null>(null);
 
   // Live Audit Telemetry Log Vault
@@ -230,10 +249,10 @@ export default function DriverTerminalPage() {
         sosHoldTimerRef.current = null;
         setSosHolding(false);
         setSosProgress(0);
-        const lat = 22.5726;
-        const lng = 88.3639;
         const orderId = activeTrip?.order_id || "";
-        useSafetyStore.getState().triggerSOS(lat, lng, orderId);
+        void getDevicePosition().then((pos) => {
+          useSafetyStore.getState().triggerSOS(pos.lat, pos.lng, orderId);
+        });
       }
     }, 50);
   };
@@ -389,45 +408,62 @@ export default function DriverTerminalPage() {
     return () => clearTimeout(t);
   }, [cooldownSecs]);
 
-  // Simulated SVG Map Glide coordinate adjustments
+  // Real device GPS drives the map marker while a trip is live (the telemetry
+  // stream posts the same positions to the backend independently).
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (dutyState === 'EN_ROUTE' || dutyState === 'DELIVERING') {
-      setMapGlideProgress(0);
-      interval = setInterval(() => {
-        setMapGlideProgress((prev) => {
-          const next = prev + 1;
-          if (next >= 100) {
-            return 0; // loop back to simulate telemetry loop
-          }
-          const currentLat = dutyState === 'EN_ROUTE'
-            ? 22.5487 + (next / 100) * (22.5726 - 22.5487)
-            : 22.5726 + (next / 100) * (22.5855 - 22.5726);
-          const currentLng = dutyState === 'EN_ROUTE'
-            ? 88.3561 + (next / 100) * (88.3639 - 88.3561)
-            : 88.3639 + (next / 100) * (88.3411 - 88.3639);
+    if (dutyState !== 'EN_ROUTE' && dutyState !== 'DELIVERING') return;
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+    const watchId = navigator.geolocation.watchPosition(
+      (p) => {
+        setCurrentPos({ lat: p.coords.latitude, lng: p.coords.longitude });
+        setMapDrivers([{
+          id: driverID,
+          latitude: p.coords.latitude,
+          longitude: p.coords.longitude,
+          bearing: p.coords.heading || 0,
+          speed: (p.coords.speed || 0) * 3.6,
+        }]);
+      },
+      (err) => console.warn('[DRIVER_MAP] GPS watch error:', err),
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 10000 },
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [dutyState, driverID]);
 
-          // Log a sample coordinate ping every 5 seconds equivalent (progress splits)
-          if (next % 10 === 0) {
-            logAudit('GPS_PING', { lat: currentLat.toFixed(6), lng: currentLng.toFixed(6), speed_kmh: 42 + Math.floor(Math.random() * 15) });
-          }
-
-          setMapDrivers([{
-            id: driverID,
-            latitude: currentLat,
-            longitude: currentLng,
-            bearing: dutyState === 'EN_ROUTE' ? 45 : 135,
-            speed: 42
-          }]);
-
-          return next;
-        });
-      }, 300);
+  // Road-following route polyline for the in-trip map. Refetched when the trip
+  // leg changes or the driver moves >250m from the last routed origin; the
+  // backend caches identical origins so this stays cheap.
+  useEffect(() => {
+    const target =
+      activeTrip && dutyState === 'DELIVERING'
+        ? { lat: activeTrip.dropoff_lat, lng: activeTrip.dropoff_lng }
+        : activeTrip && (dutyState === 'EN_ROUTE' || dutyState === 'ARRIVED')
+          ? { lat: activeTrip.pickup_lat, lng: activeTrip.pickup_lng }
+          : null;
+    if (!token || !target?.lat || !target?.lng) {
+      setRoutePath(null);
+      routeOriginRef.current = null;
+      return;
     }
+    if (currentPos && routeOriginRef.current) {
+      const movedKm =
+        Math.hypot(
+          (currentPos.lat - routeOriginRef.current.lat) * 110.57,
+          (currentPos.lng - routeOriginRef.current.lng) * 111.32 * Math.cos((currentPos.lat * Math.PI) / 180),
+        );
+      if (movedKm < 0.25) return; // still on the routed path
+    }
+    let cancelled = false;
+    routeOriginRef.current = currentPos;
+    getDriverRoute(token, currentPos, target)
+      .then((r) => {
+        if (!cancelled && r?.geometry?.length >= 2) setRoutePath(r.geometry);
+      })
+      .catch(() => { /* straight-line fallback is drawn by the map itself */ });
     return () => {
-      if (interval) clearInterval(interval);
+      cancelled = true;
     };
-  }, [dutyState]);
+  }, [token, dutyState, activeTrip, currentPos]);
 
   // hydrateForceMatch pulls a directly-assigned (force-matched) order, builds the active
   // trip from it, and pushes the driver into EN_ROUTE with a banner. Coordinates and fare
@@ -636,8 +672,8 @@ export default function DriverTerminalPage() {
     if (dutyState === 'OFFLINE') {
       if (token) {
         try {
-          // Send KOL center lat/lng coordinates (22.5726, 88.3639) for dispatcher GeoHash
-          await setDriverDutyState(token, 'ONLINE', 22.5726, 88.3639);
+          const pos = await getDevicePosition();
+          await setDriverDutyState(token, 'ONLINE', pos.lat, pos.lng);
         } catch (err) {
           console.warn('[DRIVER_STATUS] Online duty state sync failed:', err);
         }
@@ -774,82 +810,31 @@ export default function DriverTerminalPage() {
       parking: parkingCharges
     });
 
-    let finalBillData: any = null;
-    if (activeTrip?.order_id && token) {
-      try {
-        const bill = await driverEndTrip(token, activeTrip.order_id, {
-          odometer_reading: parseInt(endOdometer, 10),
-          fuel_level: endFuel,
-          photo_url: endOdoPhoto || '',
-        });
-        setFinalBill(bill);
-        finalBillData = bill;
-        logAudit('TRIP_END_SYNCED', { orderId: activeTrip.order_id, total: bill.total_fare_paise });
-      } catch (err) {
-        console.warn('End trip sync failed, using local fallback calculations:', err);
-        const fallbackBill = {
-          order_id: activeTrip.order_id,
-          base_fare_paise: activeTrip.quoted_fare_paise,
-          distance_km: endNum - startNum,
-          distance_charge_paise: Math.max(0, (endNum - startNum) - 15) * 1800,
-          wait_minutes: Math.round(waitingCharges / 2),
-          wait_charge_paise: Math.round(waitingCharges) * 100,
-          overtime_minutes: 10,
-          overtime_charge_paise: 500,
-          tolls_paise: tollCharges * 100,
-          parking_charges_paise: parkingCharges * 100,
-          night_surge_paise: 5000,
-          care_surcharge_paise: 1500,
-          total_fare_paise: calculateTotalBill() * 100,
-          // Local offline estimate at the base take rate; the backend returns the
-          // authoritative tiered payout on the real /end response.
-          driver_payout_paise: Math.max(
-            0,
-            Math.round((calculateTotalBill() * 100 - tollCharges * 100 - parkingCharges * 100) * 0.8) +
-              tollCharges * 100 +
-              parkingCharges * 100,
-          ),
-        };
-        setFinalBill(fallbackBill);
-        finalBillData = fallbackBill;
-      }
-    } else if (activeTrip) {
-      const mockBill = {
-        order_id: activeTrip.order_id,
-        base_fare_paise: activeTrip.quoted_fare_paise,
-        distance_km: endNum - startNum,
-        distance_charge_paise: Math.max(0, (endNum - startNum) - 15) * 1800,
-        wait_minutes: Math.round(waitingCharges / 2),
-        wait_charge_paise: Math.round(waitingCharges) * 100,
-        overtime_minutes: 10,
-        overtime_charge_paise: 500,
-        tolls_paise: tollCharges * 100,
-        parking_charges_paise: parkingCharges * 100,
-        night_surge_paise: 5000,
-        care_surcharge_paise: 1500,
-        total_fare_paise: calculateTotalBill() * 100,
-        // Local offline estimate at the base take rate; the backend returns the
-        // authoritative tiered payout on the real /end response.
-        driver_payout_paise: Math.max(
-          0,
-          Math.round((calculateTotalBill() * 100 - tollCharges * 100 - parkingCharges * 100) * 0.8) +
-            tollCharges * 100 +
-            parkingCharges * 100,
-        ),
-      };
-      setFinalBill(mockBill);
-      finalBillData = mockBill;
+    // No local/mock bill fallback: the bill page confirms payment against the
+    // backend, which requires the order to really be COMPLETED. Faking a bill
+    // here would let the driver collect against numbers the ledger never saw.
+    if (!activeTrip?.order_id || !token) {
+      useToastStore.getState().show('Session expired — log in again to end the trip.', 'error');
+      return;
     }
-
-    if (finalBillData && activeTrip) {
+    try {
+      const bill = await driverEndTrip(token, activeTrip.order_id, {
+        odometer_reading: parseInt(endOdometer, 10),
+        fuel_level: endFuel,
+        photo_url: endOdoPhoto || '',
+      });
+      setFinalBill(bill);
+      logAudit('TRIP_END_SYNCED', { orderId: activeTrip.order_id, total: bill.total_fare_paise });
       try {
-        sessionStorage.setItem(`final_bill_${activeTrip.order_id}`, JSON.stringify(finalBillData));
-        sessionStorage.setItem('current_final_bill', JSON.stringify(finalBillData));
+        sessionStorage.setItem(`final_bill_${activeTrip.order_id}`, JSON.stringify(bill));
+        sessionStorage.setItem('current_final_bill', JSON.stringify(bill));
       } catch {}
       setDutyState('COMPLETED');
       router.push(`/driver/trip/bill?order_id=${activeTrip.order_id}`);
-    } else {
-      setDutyState('COMPLETED');
+    } catch (err) {
+      console.warn('End trip sync failed:', err);
+      useToastStore.getState().show(friendlyError(err), 'error');
+      // Stay in DELIVERING so the driver can retry the slide once connectivity is back.
     }
   };
 
@@ -977,10 +962,10 @@ export default function DriverTerminalPage() {
   }
 
   const triggerSOS = () => {
-    const lat = 22.5726;
-    const lng = 88.3639;
     const orderId = activeTrip?.order_id || "";
-    useSafetyStore.getState().triggerSOS(lat, lng, orderId);
+    void getDevicePosition().then((pos) => {
+      useSafetyStore.getState().triggerSOS(pos.lat, pos.lng, orderId);
+    });
     logAudit('SOS_CRITICAL_TRIGGERED', { driverID, time: new Date().toISOString() });
   };
 
@@ -1241,6 +1226,7 @@ export default function DriverTerminalPage() {
                     : activeTrip ? { lat: activeTrip.pickup_lat, lng: activeTrip.pickup_lng } : null
                 }
                 destination={activeTrip ? { lat: activeTrip.dropoff_lat, lng: activeTrip.dropoff_lng } : null}
+                routePath={routePath}
                 center={activeTrip ? { lat: activeTrip.pickup_lat, lng: activeTrip.pickup_lng } : { lat: 22.5726, lng: 88.3639 }}
                 theme="dark"
               />
@@ -1265,10 +1251,8 @@ export default function DriverTerminalPage() {
                 <NavigateIcon size={16} />
                 <span>{dutyState === 'EN_ROUTE' ? 'Drive to Pickup' : 'Drive to Dropoff'}</span>
               </div>
-              <div className="text-content-secondary">
-                {dutyState === 'EN_ROUTE'
-                  ? `Turn Left — Howrah Bridge Rd in ${(150 - mapGlideProgress * 1.5).toFixed(0)}m`
-                  : `Turn Right — E.M. Bypass in ${(200 - mapGlideProgress * 2).toFixed(0)}m`}
+              <div className="text-content-secondary truncate">
+                {dutyState === 'EN_ROUTE' ? activeTrip.pickup_address : activeTrip.dropoff_address}
               </div>
             </button>
           )}
@@ -1386,6 +1370,7 @@ export default function DriverTerminalPage() {
           <SentryErrorBoundary name="driver-trip-manager">
           <DriverTripManager
             activeTrip={activeTrip}
+            onOpenChat={() => setChatOpen(true)}
             stats={stats}
             profile={profile}
             activeVehicle={activeVehicle}
@@ -1395,7 +1380,7 @@ export default function DriverTerminalPage() {
             handleToggleDutySwitch={handleToggleDutySwitch}
             logAudit={logAudit}
             triggerSOS={triggerSOS}
-            mapGlideProgress={mapGlideProgress}
+            currentPosition={currentPos}
             setShowCancelModal={setShowCancelModal}
             handleArrivedAtPickup={handleArrivedAtPickup}
             freeWaitSeconds={freeWaitSeconds}

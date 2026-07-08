@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useDriverOnboardingStore } from '@/store/useDriverOnboardingStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { saveOnboardingStep, uploadDocument, syncOfflineOnboarding, updateDriverProfile } from '@/api/client';
+import { useToastStore } from '@/store/useToastStore';
 import { AnimatedIcon } from '@/components/ds/Icon';
 import { AnimSettings, AnimCar, AnimCheck } from '@/assets/icons/animated';
 
@@ -92,7 +93,7 @@ export default function DriverOnboardingWizard() {
 
   useEffect(() => {
     if (!token) {
-      alert("Authentication token required to access driver onboarding pipeline.");
+      useToastStore.getState().show('Log in to continue driver onboarding.', 'error');
       router.push('/login?role=driver');
       return;
     }
@@ -123,7 +124,7 @@ export default function DriverOnboardingWizard() {
     const { fieldName, docType } = activeUploadField;
 
     if (!token) {
-      alert("Session expired. Please log in again.");
+      useToastStore.getState().show('Session expired. Please log in again.', 'error');
       router.push('/login?role=driver');
       return;
     }
@@ -146,7 +147,7 @@ export default function DriverOnboardingWizard() {
       logEvent('UPLOAD_COMPLETE', { fieldName, docType, storage_url: res.storage_url });
     } catch (err) {
       logEvent('UPLOAD_ERROR', { fieldName, docType, error: String(err) });
-      alert("Failed to upload document. Please try again.");
+      useToastStore.getState().show('Failed to upload document. Please try again.', 'error');
       setUploadProgress((prev) => ({ ...prev, [fieldName]: 0 }));
     }
   };
@@ -243,7 +244,7 @@ export default function DriverOnboardingWizard() {
         logEvent('SAVE_AND_EXIT_SYNC_FAILED', { step: currentStep, error: String(err) });
       }
     }
-    alert('Onboarding status saved successfully. You can resume this application session later.');
+    useToastStore.getState().show('Progress saved — you can resume this application later.', 'success');
     router.push('/login?role=driver');
   };
 
@@ -281,7 +282,7 @@ export default function DriverOnboardingWizard() {
         driverName: onboardingData.fullName,
         timestamp: new Date().toISOString()
       });
-      alert('Verification Completed! Welcome to Vahnly Fleet Engine. Your application has been submitted for administrative KYC approval.');
+      useToastStore.getState().show('Application submitted — pending KYC approval.', 'success');
 
       // Clear wizard store
       clearStore();
@@ -289,7 +290,7 @@ export default function DriverOnboardingWizard() {
       router.push('/driver');
     } catch (err) {
       logEvent('ONBOARDING_SUBMIT_ERROR', { error: String(err) });
-      alert("Failed to submit application. Please check network connection.");
+      useToastStore.getState().show('Failed to submit application. Check your connection and try again.', 'error');
     }
   };
 

@@ -83,6 +83,18 @@ func (h *MapHandler) HandleETA(w http.ResponseWriter, r *http.Request) {
 	h.HandleRoute(w, r)
 }
 
+// HandleDriverRoute serves the same routing as HandleRoute for authenticated
+// drivers. Driver JWTs carry no rider context, so auth is enforced entirely by
+// the gateway middleware upstream; the request body is identical.
+func (h *MapHandler) HandleDriverRoute(w http.ResponseWriter, r *http.Request) {
+	var req mapRouteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid route request", "ERR_INVALID_REQUEST")
+		return
+	}
+	writeData(w, http.StatusOK, h.route(r.Context(), req))
+}
+
 func (h *MapHandler) route(ctx context.Context, req mapRouteRequest) mapRouteResponse {
 	points := routePoints(req)
 	if len(points) < 2 {

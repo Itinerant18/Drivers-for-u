@@ -25,6 +25,9 @@ interface DriverMapProps {
   h3Hexagons?: MapH3Hex[];
   pickup?: { lat: number; lng: number } | null;
   destination?: { lat: number; lng: number } | null;
+  /** Road-following polyline from the routing service; falls back to a straight
+   *  pickup→destination line when absent. */
+  routePath?: { lat: number; lng: number }[] | null;
   center?: { lat: number; lng: number };
   zoom?: number;
   theme?: 'light' | 'dark';
@@ -112,6 +115,7 @@ export default function DriverMap({
   h3Hexagons = [],
   pickup = null,
   destination = null,
+  routePath = null,
   center = DEFAULT_CENTER,
   zoom = 15,
 }: DriverMapProps) {
@@ -204,7 +208,12 @@ export default function DriverMap({
       properties: {},
       geometry: {
         type: 'LineString',
-        coordinates: pickup && destination ? [toLngLat(pickup), toLngLat(destination)] : [],
+        coordinates:
+          routePath && routePath.length >= 2
+            ? routePath.map(toLngLat)
+            : pickup && destination
+              ? [toLngLat(pickup), toLngLat(destination)]
+              : [],
       },
     };
 
@@ -226,7 +235,7 @@ export default function DriverMap({
 
     if (loaded.current) drawRoute();
     else map.once('load', drawRoute);
-  }, [pickup, destination]);
+  }, [pickup, destination, routePath]);
 
   useEffect(() => {
     const map = mapInstance.current;

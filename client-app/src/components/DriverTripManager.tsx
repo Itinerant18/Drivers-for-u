@@ -4,7 +4,7 @@ import { OfferPopup } from './OfferPopup';
 import { FinalBill, DriverProfile } from '../api/client';
 import { ArrivedVerificationPane } from '../app/driver/trip/live/ArrivedVerificationPane';
 import { TripInProgressPane } from '../app/driver/trip/live/TripInProgressPane';
-import { FareDisplay, ETADisplay, StatusBadge, BellIcon, PhoneIcon, ChatIcon, NavigateIcon, CheckIcon, CashIcon, CardIcon } from './ds';
+import { FareDisplay, ETADisplay, StatusBadge, PhoneIcon, ChatIcon, NavigateIcon, CheckIcon, CashIcon, CardIcon } from './ds';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DashboardHome — Duty toggle + stats
@@ -149,18 +149,6 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         </div>
       )}
 
-      {/* ── Demo trigger (dev only) ── */}
-      <button
-        onClick={() => {
-          useDriverDutyStore.getState().setDutyState('OFFER_PENDING');
-          logAudit('INCOMING_OFFER_RECEIVED', { source: 'DEMO' });
-        }}
-        className="w-full bg-surface-warning border border-border-opaque rounded-sm py-3 text-label-medium text-content-warning cursor-pointer transition-base hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
-      >
-        <span className="inline-flex items-center justify-center gap-2">
-          <BellIcon size={16} /> Simulate Incoming Booking (Demo)
-        </span>
-      </button>
     </div>
   );
 };
@@ -171,18 +159,39 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
 
 interface NavigationPaneProps {
   activeTrip: any;
-  mapGlideProgress: number;
+  currentPosition: { lat: number; lng: number } | null;
   setShowCancelModal: (show: boolean) => void;
   handleArrivedAtPickup: () => Promise<void>;
+  onOpenChat?: () => void;
 }
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// City-traffic average used to turn straight-line distance into an ETA when no
+// routing service is available for drivers.
+const AVG_CITY_SPEED_KMH = 22;
 
 export const NavigationPane: React.FC<NavigationPaneProps> = ({
   activeTrip,
-  mapGlideProgress,
+  currentPosition,
   setShowCancelModal,
   handleArrivedAtPickup,
+  onOpenChat,
 }) => {
-  const etaMinutes = Math.max(1, Math.round(6 - (mapGlideProgress / 100) * 5));
+  const distanceKm =
+    currentPosition && activeTrip.pickup_lat && activeTrip.pickup_lng
+      ? haversineKm(currentPosition.lat, currentPosition.lng, activeTrip.pickup_lat, activeTrip.pickup_lng)
+      : null;
+  const etaMinutes =
+    distanceKm !== null ? Math.max(1, Math.round((distanceKm / AVG_CITY_SPEED_KMH) * 60)) : null;
 
   return (
     <div className="space-y-4 text-left animate-enter">
@@ -191,8 +200,16 @@ export const NavigationPane: React.FC<NavigationPaneProps> = ({
       <div className="flex items-center justify-between">
         <StatusBadge status="active" label="Heading to pickup" />
         <div className="flex items-baseline gap-1">
-          <span className="text-label-small text-content-secondary">Arrive in</span>
-          <ETADisplay minutes={etaMinutes} />
+          {etaMinutes !== null ? (
+            <>
+              <span className="text-label-small text-content-secondary">
+                {distanceKm !== null ? `${distanceKm.toFixed(1)} km · arrive in` : 'Arrive in'}
+              </span>
+              <ETADisplay minutes={etaMinutes} />
+            </>
+          ) : (
+            <span className="text-label-small text-content-tertiary">Acquiring GPS…</span>
+          )}
         </div>
       </div>
 
@@ -242,7 +259,7 @@ export const NavigationPane: React.FC<NavigationPaneProps> = ({
           <span>Call</span>
         </button>
         <button
-          onClick={() => alert('Opening in-app chat')}
+          onClick={onOpenChat}
           className="flex flex-col items-center justify-center gap-1 h-16 bg-background-secondary rounded-sm border border-border-opaque
             text-label-small text-content-primary cursor-pointer transition-base
             hover:bg-background-tertiary active:scale-95
@@ -454,7 +471,7 @@ interface DriverTripManagerProps {
   setPreferredTripFilter: (f: 'ALL' | 'CITY' | 'OUTSTATION') => void;
   handleToggleDutySwitch: () => Promise<void>;
   logAudit: (e: string, m: any) => void;
-  mapGlideProgress: number;
+  currentPosition: { lat: number; lng: number } | null;
   setShowCancelModal: (show: boolean) => void;
   handleArrivedAtPickup: () => Promise<void>;
   freeWaitSeconds: number;
@@ -486,6 +503,8 @@ interface DriverTripManagerProps {
   endOdoPhoto: string | null;
   setEndOdoPhoto: (p: string | null) => void;
   handleSlideToEndTrip: () => Promise<void>;
+  // Expands the rider-chat panel in the bottom sheet on /driver.
+  onOpenChat?: () => void;
   triggerSOS?: () => void;
   riderRating: number;
   setRiderRating: (r: number) => void;
@@ -508,9 +527,10 @@ export const DriverTripManager: React.FC<DriverTripManagerProps> = (props) => {
       return (
         <NavigationPane
           activeTrip={props.activeTrip}
-          mapGlideProgress={props.mapGlideProgress}
+          currentPosition={props.currentPosition}
           setShowCancelModal={props.setShowCancelModal}
           handleArrivedAtPickup={props.handleArrivedAtPickup}
+          onOpenChat={props.onOpenChat}
         />
       );
 
@@ -560,6 +580,7 @@ export const DriverTripManager: React.FC<DriverTripManagerProps> = (props) => {
           handleSlideToEndTrip={props.handleSlideToEndTrip}
           triggerSOS={props.triggerSOS}
           logAudit={props.logAudit}
+          onOpenChat={props.onOpenChat}
         />
       );
 

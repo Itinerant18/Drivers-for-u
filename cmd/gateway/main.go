@@ -807,6 +807,8 @@ func main() {
 	// Rider App: nearby-driver markers for the map idle state (deterministic stub).
 	mux.HandleFunc("GET /api/v1/rider/nearby-drivers", riderAuthMW.Require(riderNearbyHandler.HandleNearbyDrivers))
 	mux.HandleFunc("POST /api/map/route", riderAuthMW.Require(riderMapHandler.HandleRoute))
+	// Driver App: in-trip route polyline (same OSRM-backed service, driver JWT auth).
+	mux.HandleFunc("POST /api/v1/driver/map/route", authGuard.AuthenticateJWT(riderMapHandler.HandleDriverRoute))
 	mux.HandleFunc("POST /api/map/eta", riderAuthMW.Require(riderMapHandler.HandleETA))
 	mux.HandleFunc("GET /api/map/drivers/nearby", riderAuthMW.Require(riderMapHandler.HandleNearbyDrivers))
 	mux.HandleFunc("GET /api/map/geocode", riderAuthMW.Require(riderMapHandler.HandleGeocode))

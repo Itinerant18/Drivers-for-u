@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
@@ -717,13 +718,13 @@ export default function LoginPage() {
         {/* Terms */}
         <p className="mt-8 pb-4 text-center text-label-small text-content-secondary leading-10">
           By continuing, you agree to our{" "}
-          <button type="button" className="inline-flex items-center min-h-[44px] text-content-accent hover:underline px-1">
+          <Link href="/terms/" className="inline-flex items-center min-h-[44px] text-content-accent hover:underline px-1">
             Terms of Service
-          </button>{" "}
+          </Link>{" "}
           and{" "}
-          <button type="button" className="inline-flex items-center min-h-[44px] text-content-accent hover:underline px-1">
+          <Link href="/privacy/" className="inline-flex items-center min-h-[44px] text-content-accent hover:underline px-1">
             Privacy Policy
-          </button>
+          </Link>
         </p>
       </motion.div>
     </main>

@@ -14,11 +14,6 @@ const INPUT =
   "w-full rounded-xl bg-background-tertiary px-4 py-3 text-sm text-content-primary outline-none placeholder:text-content-tertiary focus:ring-1 focus:ring-border-accent";
 
 const GENDERS = ["Male", "Female", "Other", "Prefer not to say"];
-const LANGUAGES = [
-  { code: "en", label: "English" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "bn", label: "বাংলা" },
-];
 
 type Field = "name" | "email" | "dob";
 type Errors = Partial<Record<Field, string>>;
@@ -76,7 +71,6 @@ export default function ProfilePage() {
   const [email, setEmail] = useState(rider?.email ?? "");
   const [dob, setDob] = useState(rider?.date_of_birth ?? "");
   const [gender, setGender] = useState(rider?.gender ?? "");
-  const [lang, setLang] = useState(rider?.preferred_language ?? "en");
   const [photo, setPhoto] = useState<string | null>(rider?.profile_photo_url ?? null);
 
   const [errors, setErrors] = useState<Errors>({});
@@ -133,7 +127,7 @@ export default function ProfilePage() {
         name: name.trim(),
         email: email.trim() || undefined,
         gender: gender || undefined,
-        preferred_language: lang,
+        preferred_language: "en",
         date_of_birth: dob || undefined,
         profile_photo_url: photo ?? undefined,
       });
@@ -291,22 +285,6 @@ export default function ProfilePage() {
                   }`}
                 >
                   {g}
-                </button>
-              ))}
-            </div>
-          </Field>
-
-          <Field label="Language">
-            <div className="flex gap-2">
-              {LANGUAGES.map((l) => (
-                <button
-                  key={l.code}
-                  onClick={() => setLang(l.code)}
-                  className={`flex-1 rounded-xl py-2.5 text-sm active:scale-95 press-spring ${
-                    lang === l.code ? "bg-secondary text-content-primary" : "bg-background-tertiary text-content-secondary"
-                  }`}
-                >
-                  {l.label}
                 </button>
               ))}
             </div>

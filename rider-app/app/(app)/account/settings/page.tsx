@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { AccountScaffold } from "@/components/account/AccountScaffold";
 import { useAuthStore } from "@/lib/store/authStore";
-import { authApi } from "@/lib/api/auth";
 import { accountApi } from "@/lib/api/account";
 import type { NotificationPreferences, NotifChannelPrefs } from "@/lib/api/types";
 import { Capacitor } from "@capacitor/core";
@@ -22,11 +21,6 @@ const NOTIF_ROWS: { key: NotifCategory; label: string }[] = [
   { key: "document_expiry", label: "Document expiry" },
 ];
 
-const LANGS = [
-  { code: "en", label: "English" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "bn", label: "বাংলা" },
-];
 const THEMES = ["System", "Light", "Dark"] as const;
 type Theme = (typeof THEMES)[number];
 const UNITS = ["km", "miles"] as const;
@@ -62,8 +56,6 @@ function normalizePerm(s: string | undefined): PermState {
 export default function SettingsPage() {
   const logout = useAuthStore((s) => s.logout);
 
-  const [lang, setLang] = useState("en");
-
   const [unit, setUnit] = useState<(typeof UNITS)[number]>("km");
   const [prefs, setPrefs] = useState<NotificationPreferences>(defaultPrefs);
   const [locationPerm, setLocationPerm] = useState<PermState>("ask");
@@ -77,8 +69,6 @@ export default function SettingsPage() {
 
   // Mount: load stored prefs, apply theme, fetch server notif prefs, read permissions.
   useEffect(() => {
-    const storedLang = load("dfu_lang", "en");
-    setLang(storedLang);
     setUnit(load("dfu_unit", "km"));
     setWomenSafety(load("dfu_women_safety", false));
 
@@ -103,21 +93,6 @@ export default function SettingsPage() {
       active = false;
     };
   }, []);
-
-  // ── Language ──────────────────────────────────────────────────────────────
-  const selectLang = (code: string) => {
-    setLang(code);
-    persist("dfu_lang", code);
-    (async () => {
-      try {
-        await authApi.updateProfile({ preferred_language: code });
-      } catch {
-        /* backend may 404; localStorage already persisted */
-      }
-    })();
-  };
-
-
 
   // ── Notification prefs ──────────────────────────────────────────────────────
   const togglePref = (cat: NotifCategory, ch: Channel) => {
@@ -234,27 +209,8 @@ export default function SettingsPage() {
 
   return (
     <AccountScaffold title="Settings">
-      {/* Language */}
-      <BlurFade delay={0.1}>
-        <Group title="Language">
-          <div className="flex gap-2">
-            {LANGS.map((l) => (
-              <button
-                key={l.code}
-                onClick={() => selectLang(l.code)}
-                className={`flex-1 rounded-xl py-2.5 text-sm active:scale-95 press-spring ${
-                  lang === l.code ? "bg-secondary text-content-primary" : "bg-background-tertiary text-content-secondary"
-                }`}
-              >
-                {l.label}
-              </button>
-            ))}
-          </div>
-        </Group>
-      </BlurFade>
-
       {/* Distance */}
-      <BlurFade delay={0.15}>
+      <BlurFade delay={0.1}>
         <Group title="Distance Unit">
           <div className="flex gap-2">
             {UNITS.map((u) => (

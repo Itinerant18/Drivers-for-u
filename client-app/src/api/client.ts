@@ -551,6 +551,21 @@ export async function completeTrip(
   });
 }
 
+export interface UpcomingTrip {
+  id: string;
+  status: string;
+  scheduled_at: string;
+  trip_type: string;
+  pickup_lat: number;
+  pickup_lng: number;
+  base_fare_paise: number;
+}
+
+// Trip Planner: future-scheduled orders already assigned to this driver.
+export async function getUpcomingTrips(token: string): Promise<{ trips: UpcomingTrip[] }> {
+  return request<{ trips: UpcomingTrip[] }>('/api/v1/driver/trips/upcoming', { method: 'GET', token });
+}
+
 export async function getTripHistory(
   token: string,
   limit: number,
@@ -1482,6 +1497,31 @@ export async function changeDriverPassword(token: string, currentPassword: strin
     token,
     body: { current_password: currentPassword, new_password: newPassword },
   });
+}
+
+export interface EmergencyContact {
+  name: string;
+  relation?: string;
+  phone: string;
+}
+
+export async function updateEmergencyContact(token: string, contact: EmergencyContact): Promise<{ emergency_contact: EmergencyContact }> {
+  return request<{ emergency_contact: EmergencyContact }>('/api/v1/driver/profile/emergency-contact', {
+    method: 'PATCH',
+    token,
+    body: contact,
+  });
+}
+
+export interface DriverCityConfig {
+  city_prefix: string;
+  city_name: string | null;
+  operating_hours_start: string | null;
+  operating_hours_end: string | null;
+}
+
+export async function getDriverCityConfig(token: string): Promise<DriverCityConfig> {
+  return request<DriverCityConfig>('/api/v1/driver/city-config', { method: 'GET', token });
 }
 
 export async function deleteDriverAccount(token: string): Promise<{ status: string }> {

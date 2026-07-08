@@ -10,6 +10,8 @@ import {
   uploadDocument,
   getVehicles,
   DriverVehicleFull,
+  getDriverCityConfig,
+  DriverCityConfig,
 } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
 import { UserIcon, EditIcon, StarIcon, SettingsIcon, VehicleIcon } from '@/components/ds/Icon';
@@ -21,6 +23,7 @@ export default function DriverProfilePage() {
   const driverName = profile?.name || user?.name || 'Driver Partner';
   const driverPhone = profile?.phone || user?.phone || 'Phone unavailable';
   const cityPrefix = profile?.city_prefix || 'KOL';
+  const [cityConfig, setCityConfig] = useState<DriverCityConfig | null>(null);
 
   const [bio, setBio] = useState('Professional pilot dedicated to safe, smooth, and premium commuter and outstation transits across Kolkata.');
   const [isEditingBio, setIsEditingBio] = useState(false);
@@ -75,6 +78,12 @@ export default function DriverProfilePage() {
         if (!cancelled) setVehicles(data?.vehicles ?? []);
       })
       .catch(() => { /* section renders a fallback line */ });
+
+    getDriverCityConfig(token)
+      .then((cfg) => {
+        if (!cancelled) setCityConfig(cfg);
+      })
+      .catch(() => { /* falls back to the prefix */ });
 
     return () => {
       cancelled = true;
@@ -319,8 +328,12 @@ export default function DriverProfilePage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5">
           <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Serviced City</span>
-          {/* ponytail: profile only carries the city prefix; render the city name when an API exposes it */}
-          <p className="text-xs text-content-primary leading-relaxed">Regional hub: {cityPrefix}</p>
+          <p className="text-xs text-content-primary leading-relaxed">
+            {cityConfig?.city_name ? `${cityConfig.city_name} (${cityConfig.city_prefix})` : `Regional hub: ${cityPrefix}`}
+            {cityConfig?.operating_hours_start && cityConfig?.operating_hours_end
+              ? ` · ${cityConfig.operating_hours_start}–${cityConfig.operating_hours_end}`
+              : ''}
+          </p>
         </div>
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5">
           <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Registered Vehicles</span>

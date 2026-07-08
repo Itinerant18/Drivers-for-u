@@ -8,6 +8,70 @@ import { useLocaleSwitch, SUPPORTED_LOCALES, type Locale } from '@/i18n/LocalePr
 import { getPref, setPref } from '@/lib/prefs';
 import { isBiometricAvailable, enrollBiometric } from '@/lib/biometric';
 import { useToastStore } from '@/store/useToastStore';
+import { updateEmergencyContact } from '@/api/client';
+
+// Emergency contact editor — same JSONB the SOS console and /driver/me read.
+function EmergencyContactSection() {
+  const { token } = useAuthStore();
+  const [name, setName] = useState('');
+  const [relation, setRelation] = useState('');
+  const [phone, setPhone] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    getDriverProfile(token)
+      .then((p) => {
+        if (!cancelled && p.emergency_contact) {
+          setName(p.emergency_contact.name);
+          setRelation(p.emergency_contact.relation || '');
+          setPhone(p.emergency_contact.phone);
+        }
+      })
+      .catch(() => { /* fields stay editable and empty */ });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  const save = async () => {
+    if (!token || !name.trim() || !phone.trim()) {
+      useToastStore.getState().show('Name and phone number are required.', 'error');
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateEmergencyContact(token, { name: name.trim(), relation: relation.trim(), phone: phone.trim() });
+      useToastStore.getState().show('Emergency contact saved.', 'success');
+    } catch {
+      useToastStore.getState().show('Failed to save the emergency contact. Try again.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3">
+      <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider">Emergency contact</h4>
+      <p className="text-paragraph-small text-content-secondary">
+        Notified with your live location when you trigger SOS.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="input" aria-label="Contact name" />
+        <input value={relation} onChange={(e) => setRelation(e.target.value)} placeholder="Relation (optional)" className="input" aria-label="Relation" />
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 phone number" inputMode="tel" className="input sm:col-span-2" aria-label="Contact phone" />
+      </div>
+      <button
+        onClick={save}
+        disabled={saving}
+        className="h-11 px-5 rounded-sm bg-interactive-primary text-interactive-primary-text text-label-medium font-semibold cursor-pointer disabled:opacity-50 transition-base"
+      >
+        {saving ? 'Saving…' : 'Save contact'}
+      </button>
+    </section>
+  );
+}
 import {
   updateLanguage, updateNotificationPrefs, changeDriverPassword, deleteDriverAccount,
   getDriverProfile, updateDriverProfile,
@@ -151,6 +215,9 @@ export default function DriverSettingsPage() {
           </div>
         ))}
       </section>
+
+      {/* Emergency contact — notified on SOS; shown on the SOS console */}
+      <EmergencyContactSection />
 
       {/* Navigation app */}
       <section className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3">

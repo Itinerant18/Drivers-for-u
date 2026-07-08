@@ -2196,6 +2196,88 @@ func (h *GatewayHandler) HandleDriverGetProfile(w http.ResponseWriter, r *http.R
 	})
 }
 
+// HandleDriverUpdateEmergencyContact edits the emergency contact after
+// onboarding. Writes the same drivers.onboarding_data JSONB keys that
+// onboarding step 6 creates and /driver/me reads.
+func (h *GatewayHandler) HandleDriverUpdateEmergencyContact(w http.ResponseWriter, r *http.Request) {
+	driverID, ok := requireDriverIdentity(w, r)
+	if !ok {
+		return
+	}
+
+	var req struct {
+		Name     string `json:"name"`
+		Relation string `json:"relation"`
+		Phone    string `json:"phone"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "malformed_json_payload", http.StatusBadRequest)
+		return
+	}
+	if strings.TrimSpace(req.Name) == "" || strings.TrimSpace(req.Phone) == "" {
+		http.Error(w, "emergency_contact_requires_name_and_phone", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 800*time.Millisecond)
+	defer cancel()
+
+	if _, err := h.dbPool.Exec(ctx, `
+		UPDATE drivers
+		SET onboarding_data = COALESCE(onboarding_data, '{}'::jsonb) ||
+		    jsonb_build_object('emergencyName', $2::text, 'emergencyRelation', $3::text, 'emergencyPhone', $4::text),
+		    updated_at = NOW()
+		WHERE id = $1::uuid`, driverID, strings.TrimSpace(req.Name), strings.TrimSpace(req.Relation), strings.TrimSpace(req.Phone)); err != nil {
+		http.Error(w, "emergency_contact_update_failed", http.StatusInternalServerError)
+		return
+	}
+
+	writeJSONResponse(w, http.StatusOK, map[string]interface{}{
+		"emergency_contact": map[string]string{
+			"name":     strings.TrimSpace(req.Name),
+			"relation": strings.TrimSpace(req.Relation),
+			"phone":    strings.TrimSpace(req.Phone),
+		},
+	})
+}
+
+// HandleDriverGetCityConfig returns the driver's regional city metadata
+// (name + operating hours) resolved from their own city_prefix.
+func (h *GatewayHandler) HandleDriverGetCityConfig(w http.ResponseWriter, r *http.Request) {
+	driverID, ok := requireDriverIdentity(w, r)
+	if !ok {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 800*time.Millisecond)
+	defer cancel()
+
+	var cityPrefix string
+	var cityName, start, end sql.NullString
+	err := h.dbPool.QueryRow(ctx, `
+		SELECT d.city_prefix, rc.city_name,
+		       to_char(rc.operating_hours_start, 'HH24:MI'),
+		       to_char(rc.operating_hours_end,   'HH24:MI')
+		FROM drivers d
+		LEFT JOIN regional_cities rc ON rc.city_prefix = d.city_prefix
+		WHERE d.id = $1::uuid`, driverID).Scan(&cityPrefix, &cityName, &start, &end)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			http.Error(w, "driver_not_found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "city_config_read_failed", http.StatusInternalServerError)
+		return
+	}
+
+	writeJSONResponse(w, http.StatusOK, map[string]interface{}{
+		"city_prefix":           cityPrefix,
+		"city_name":             nullableString(cityName),
+		"operating_hours_start": nullableString(start),
+		"operating_hours_end":   nullableString(end),
+	})
+}
+
 func (h *GatewayHandler) HandleDriverSetStatus(w http.ResponseWriter, r *http.Request) {
 	authDriverID, ok := requireDriverIdentity(w, r)
 	if !ok {
@@ -2580,6 +2662,66 @@ func (h *GatewayHandler) HandleDriverGetOrder(w http.ResponseWriter, r *http.Req
 		"surge_multiplier":   surgeMultiplier,
 		"customer_id":        customerID,
 	})
+}
+
+// HandleDriverGetUpcomingTrips returns future-scheduled orders already
+// assigned to this driver (Trip Planner "Upcoming" tab). Scheduled orders
+// normally dispatch near their start time via scheduled_dispatch_queue, so
+// this list holds early/force-matched assignments; empty is the common case.
+func (h *GatewayHandler) HandleDriverGetUpcomingTrips(w http.ResponseWriter, r *http.Request) {
+	driverID, ok := requireDriverIdentity(w, r)
+	if !ok {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 1200*time.Millisecond)
+	defer cancel()
+
+	rows, err := h.dbPool.Query(ctx, `
+		SELECT id::text, status::text, scheduled_at, COALESCE(trip_type::text, 'CITY'),
+		       ST_Y(pickup_location::geometry), ST_X(pickup_location::geometry),
+		       base_fare_paise
+		FROM orders
+		WHERE assigned_driver_id = $1::uuid
+		  AND scheduled_at IS NOT NULL AND scheduled_at > NOW()
+		  AND status NOT IN ('CANCELLED'::order_status_enum, 'COMPLETED'::order_status_enum)
+		ORDER BY scheduled_at
+		LIMIT 50;
+	`, driverID)
+	if err != nil {
+		http.Error(w, "driver_upcoming_trips_read_failed", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	trips := make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var (
+			id, status, tripType string
+			scheduledAt          time.Time
+			pickupLat, pickupLng float64
+			baseFarePaise        int64
+		)
+		if err := rows.Scan(&id, &status, &scheduledAt, &tripType, &pickupLat, &pickupLng, &baseFarePaise); err != nil {
+			http.Error(w, "driver_upcoming_trips_decode_failed", http.StatusInternalServerError)
+			return
+		}
+		trips = append(trips, map[string]interface{}{
+			"id":              id,
+			"status":          status,
+			"scheduled_at":    scheduledAt,
+			"trip_type":       tripType,
+			"pickup_lat":      pickupLat,
+			"pickup_lng":      pickupLng,
+			"base_fare_paise": baseFarePaise,
+		})
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, "driver_upcoming_trips_cursor_failed", http.StatusInternalServerError)
+		return
+	}
+
+	writeJSONResponse(w, http.StatusOK, map[string]interface{}{"trips": trips})
 }
 
 func (h *GatewayHandler) HandleDriverGetTrips(w http.ResponseWriter, r *http.Request) {

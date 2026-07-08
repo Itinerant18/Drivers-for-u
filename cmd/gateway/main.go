@@ -632,6 +632,8 @@ func main() {
 	mux.HandleFunc("POST /api/v1/trip/start", authGuard.AuthenticateJWT(regionRouter.RouteRegionalTraffic(rateLimiter.LimitRouteConcurrency(handler.HandleStartTrip))))
 	mux.HandleFunc("POST /api/v1/trip/complete", authGuard.AuthenticateJWT(regionRouter.RouteRegionalTraffic(rateLimiter.LimitRouteConcurrency(handler.HandleCompleteTrip))))
 	mux.HandleFunc("GET /api/v1/driver/me", authGuard.AuthenticateJWT(handler.HandleDriverGetProfile))
+	mux.HandleFunc("PATCH /api/v1/driver/profile/emergency-contact", authGuard.AuthenticateJWT(handler.HandleDriverUpdateEmergencyContact))
+	mux.HandleFunc("GET /api/v1/driver/city-config", authGuard.AuthenticateJWT(handler.HandleDriverGetCityConfig))
 	mux.HandleFunc("POST /api/v1/driver/status", authGuard.AuthenticateJWT(handler.HandleDriverSetStatus))
 	mux.HandleFunc("GET /api/v1/driver/location/status", authGuard.AuthenticateJWT(handler.HandleDriverLocationStatus))
 	mux.HandleFunc("GET /api/v1/driver/offer", authGuard.AuthenticateJWT(handler.HandleDriverGetOffer))
@@ -651,6 +653,7 @@ func main() {
 	mux.HandleFunc("POST /api/v1/driver/orders/{id}/rate-rider", authGuard.AuthenticateJWT(regionRouter.RouteRegionalTraffic(rateLimiter.LimitRouteConcurrency(handler.HandleDriverRateRider))))
 	mux.HandleFunc("POST /api/v1/driver/orders/{id}/car-issue-report", authGuard.AuthenticateJWT(regionRouter.RouteRegionalTraffic(rateLimiter.LimitRouteConcurrency(handler.HandleDriverCarIssueReport))))
 	mux.HandleFunc("GET /api/v1/driver/trips", authGuard.AuthenticateJWT(handler.HandleDriverGetTrips))
+	mux.HandleFunc("GET /api/v1/driver/trips/upcoming", authGuard.AuthenticateJWT(handler.HandleDriverGetUpcomingTrips))
 	// Driver Earnings / Payouts / Wallet (rich, ledger-backed). The legacy
 	// handler.HandleDriverGetEarnings is superseded by GetEarnings below.
 	mux.HandleFunc("GET /api/v1/driver/earnings", authGuard.AuthenticateJWT(driverEarningsHandler.GetEarnings))

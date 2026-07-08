@@ -5,13 +5,14 @@ import { API_GATEWAY_BASE_URL } from '../../config';
 import Link from 'next/link';
 import AuthGuard from '../../components/AuthGuard';
 import { useAuthStore } from '@/store/useAuthStore';
+import { getDriverProfile } from '@/api/client';
 
 const AUTO_DISPATCH_SECONDS = 5;
 
 type DispatchState = 'ARMING' | 'DISPATCHED' | 'CANCELLED';
 
 function SosConsole() {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const driverID = user?.id || '';
 
   const [state, setState] = useState<DispatchState>('ARMING');
@@ -20,8 +21,21 @@ function SosConsole() {
   const [locError, setLocError] = useState<string | null>(null);
   const firedRef = useRef(false);
 
-  // Emergency contact — wired from onboarding §1.3 step 6; mock until store carries it.
-  const emergencyContact = { name: 'Riya Karmakar', relation: 'Spouse', phone: '+91 98301 44552' };
+  // Emergency contact from the driver profile (collected at onboarding step 6);
+  // null when the driver never provided one.
+  const [emergencyContact, setEmergencyContact] = useState<{ name: string; relation?: string; phone: string } | null>(null);
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    getDriverProfile(token)
+      .then((p) => {
+        if (!cancelled && p.emergency_contact) setEmergencyContact(p.emergency_contact);
+      })
+      .catch(() => { /* SOS still dispatches without a contact on file */ });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   // Grab a location fix immediately so it can ride along with the alert.
   useEffect(() => {
@@ -47,7 +61,7 @@ function SosConsole() {
         body: JSON.stringify({
           driver_id: driverID,
           location: coords,
-          emergency_contact: emergencyContact.phone,
+          emergency_contact: emergencyContact?.phone,
           triggered_at: new Date().toISOString(),
         }),
       });
@@ -108,7 +122,9 @@ function SosConsole() {
           <div className="space-y-2">
             <h1 className="text-2xl font-bold tracking-tight">Help is on the way</h1>
             <p className="text-gray-0/80 text-sm max-w-xs">
-              Support alerted, live location shared with {emergencyContact.name} ({emergencyContact.relation}).
+              {emergencyContact
+                ? `Support alerted, live location shared with ${emergencyContact.name}${emergencyContact.relation ? ` (${emergencyContact.relation})` : ''}.`
+                : 'Support alerted with your live location. No emergency contact on file — add one in Account settings.'}
             </p>
           </div>
         ) : (

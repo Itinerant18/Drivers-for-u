@@ -11,8 +11,6 @@ import { useBookingStore } from "@/lib/store/bookingStore";
 import { FareDisplay } from "@/components/ds";
 import type { Order, TripStatus } from "@/lib/api/types";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { WordRotate } from "@/components/ui/word-rotate";
-import { ShineBorder } from "@/components/ui/shine-border";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/animated-list";
 
 type Tab = "Upcoming" | "Completed" | "Cancelled";
@@ -42,7 +40,6 @@ function bucket(status: TripStatus): Tab {
 function TripCard({ order, onRebook, onCancel }: { order: Order; onRebook: () => void; onCancel?: () => void }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const isScheduled = !!order.scheduled_at;
   const terminal = order.status === "COMPLETED" || order.status === "CANCELLED";
   // Scheduled bookings show their real future pickup time; past trips show the
@@ -54,11 +51,7 @@ function TripCard({ order, onRebook, onCancel }: { order: Order; onRebook: () =>
       ? new Date(order.created_at)
       : null;
   return (
-    <div className="relative rounded-2xl bg-background-secondary p-4 overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {hovered && <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" />}
+    <div className="relative rounded-xl bg-background-primary border border-border-opaque p-4 shadow-elevation-1">
       <button
         onClick={() => router.push(`/account/bookings/detail?orderId=${order.id}`)}
         className="block w-full text-left"
@@ -90,7 +83,7 @@ function TripCard({ order, onRebook, onCancel }: { order: Order; onRebook: () =>
           )}
         </p>
         <div className="mt-2 flex items-center gap-2">
-          <FareDisplay amount={order.base_fare_paise} size="md" className="font-bold text-content-accent" />
+          <FareDisplay amount={order.base_fare_paise} size="md" className="font-bold text-content-primary" />
           {order.trip_type && (
             <span className="rounded-pill bg-surface-neutral px-2 py-0.5 text-[10px] font-medium text-content-secondary">
               {order.trip_type}
@@ -107,13 +100,13 @@ function TripCard({ order, onRebook, onCancel }: { order: Order; onRebook: () =>
           <div className="mt-2 flex gap-2">
             <button
               onClick={() => setConfirming(false)}
-              className="flex-1 rounded-xl bg-background-tertiary py-2 text-xs font-semibold text-content-primary min-h-[44px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="flex-1 rounded-xl bg-background-tertiary py-2 text-xs font-semibold text-content-primary min-h-[44px] active:scale-95 press-spring"
             >
               Keep booking
             </button>
             <button
               onClick={() => { setConfirming(false); onCancel?.(); }}
-              className="flex-1 rounded-xl bg-negative-400 py-2 text-xs font-semibold text-white min-h-[44px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="flex-1 rounded-xl bg-negative-400 py-2 text-xs font-semibold text-white min-h-[44px] active:scale-95 press-spring"
             >
               Cancel booking
             </button>
@@ -123,21 +116,21 @@ function TripCard({ order, onRebook, onCancel }: { order: Order; onRebook: () =>
         <div className="mt-3 flex gap-2">
           <button
             onClick={onRebook}
-            className="flex-1 rounded-xl bg-background-tertiary py-2.5 text-xs font-semibold text-content-accent min-h-[44px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            className="flex-1 rounded-xl bg-background-tertiary py-2.5 text-xs font-semibold text-content-accent min-h-[44px] active:scale-95 press-spring"
           >
             Rebook
           </button>
           {onCancel ? (
             <button
               onClick={() => setConfirming(true)}
-              className="flex-1 rounded-xl bg-background-tertiary py-2.5 text-xs font-semibold text-content-negative min-h-[44px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="flex-1 rounded-xl bg-background-tertiary py-2.5 text-xs font-semibold text-content-negative min-h-[44px] active:scale-95 press-spring"
             >
               Cancel
             </button>
           ) : (
             <button
               onClick={() => router.push(`/account/bookings/detail?orderId=${order.id}`)}
-              className="flex-1 rounded-xl bg-background-tertiary py-2.5 text-xs font-semibold text-content-primary min-h-[44px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="flex-1 rounded-xl bg-background-tertiary py-2.5 text-xs font-semibold text-content-primary min-h-[44px] active:scale-95 press-spring"
             >
               Details
             </button>
@@ -196,16 +189,16 @@ export default function BookingsPage() {
   };
 
   return (
-    <AccountScaffold title={<WordRotate words={["My Trips", "Ride History", "Your Journeys"]} duration={3000} />}>
-      {/* Tabs */}
+    <AccountScaffold title="My Trips">
+      {/* Tabs — segmented control, lime thumb per the design system */}
       <BlurFade delay={0.1}>
-        <div className="mb-4 flex gap-1 rounded-xl bg-background-secondary p-1">
+        <div className="mb-4 flex rounded-pill bg-background-tertiary p-1 border border-border-opaque">
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-95 ${
-                tab === t ? "bg-accent-400 text-content-primary" : "text-content-secondary"
+              className={`flex-1 rounded-pill py-2 text-sm font-medium press-spring active:scale-95 ${
+                tab === t ? "bg-secondary text-content-primary font-semibold" : "text-content-secondary"
               }`}
             >
               {t}

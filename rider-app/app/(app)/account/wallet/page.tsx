@@ -10,8 +10,6 @@ import { formatCurrency } from "@/lib/utils/formatCurrency";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { BorderBeam } from "@/components/ui/border-beam";
-import { WordRotate } from "@/components/ui/word-rotate";
 import type { Wallet, WalletTransaction } from "@/lib/api/types";
 
 const PRESETS = [10000, 50000, 100000]; // paise
@@ -66,25 +64,24 @@ export default function WalletPage() {
   }, [loadTxns]);
 
   return (
-    <AccountScaffold title={<WordRotate words={["Wallet", "Balance", "Payments"]} duration={3000} />}>
+    <AccountScaffold title="Wallet">
       {/* Balance card */}
       {wallet === null ? (
         <Shimmer className="h-32 w-full" />
       ) : wallet === "error" ? (
         <ErrorState message="Could not load wallet." onRetry={loadWallet} />
       ) : (
-        <BlurFade className="relative rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 p-5 shadow-lg overflow-hidden">
-          <BorderBeam size={120} duration={8} colorFrom="#ffffff" colorTo="rgba(255,255,255,0.1)" borderWidth={2} />
+        <BlurFade className="relative rounded-xl border-2 border-secondary bg-secondary-tint/60 p-5">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-white/80">Wallet Balance</p>
-            <WalletIcon size={22} className="text-white/80" />
+            <p className="text-label-medium text-content-secondary">Wallet balance</p>
+            <WalletIcon size={22} />
           </div>
-          <p className="mt-2 block text-3xl font-bold text-white tabular-nums">
-            ₹<NumberTicker value={wallet.balance_paise / 100} decimalPlaces={2} className="text-white" />
+          <p className="mt-2 block font-mono text-3xl font-bold text-content-primary tabular-nums">
+            ₹<NumberTicker value={wallet.balance_paise / 100} decimalPlaces={2} className="text-content-primary" />
           </p>
           {wallet.locked_paise > 0 && (
-            <span className="mt-3 inline-block rounded-lg bg-black/20 px-2.5 py-1 text-xs text-white/80">
-              <NumberTicker value={wallet.locked_paise / 100} decimalPlaces={2} className="text-white/80" /> locked
+            <span className="badge badge-neutral mt-3">
+              ₹<NumberTicker value={wallet.locked_paise / 100} decimalPlaces={2} className="text-content-secondary" /> locked
             </span>
           )}
         </BlurFade>
@@ -96,8 +93,8 @@ export default function WalletPage() {
           onClick={() => setShowAdd(true)}
           shimmerColor="rgba(255,255,255,0.3)"
           background="var(--color-secondary)"
-          borderRadius="16px"
-          className="mt-3 py-3.5 text-sm font-bold"
+          borderRadius="999px"
+          className="mt-3 w-full py-3.5 text-sm font-bold"
         >
           + Add Money
         </ShimmerButton>
@@ -119,7 +116,7 @@ export default function WalletPage() {
             const credit = t.amount_paise >= 0;
             return (
               <BlurFade key={t.id} delay={0.2 + i * 0.03} inView inViewMargin="-20px">
-              <div className="flex items-center gap-3 rounded-xl bg-background-secondary p-3">
+              <div className="flex items-center gap-3 rounded-xl bg-background-primary border border-border-opaque p-3">
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-full text-sm ${
                     credit ? "bg-surface-positive text-content-positive" : "bg-surface-negative text-content-negative"
@@ -181,8 +178,8 @@ function AddMoneySheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/60" onClick={onClose}>
-      <div className="w-full rounded-t-3xl bg-background-secondary p-6 animate-spring-up" onClick={(e) => e.stopPropagation()}>
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
+      <div className="w-full rounded-t-3xl bg-background-primary p-6 animate-spring-up" onClick={(e) => e.stopPropagation()}>
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border-opaque" />
 
         {phase === "amount" && (
           <>
@@ -196,7 +193,7 @@ function AddMoneySheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
                     setCustom("");
                   }}
                   className={`flex-1 rounded-xl py-3 text-sm font-semibold ${
-                    amount === p && !custom ? "bg-accent-400 text-content-primary" : "bg-background-tertiary text-content-secondary"
+                    amount === p && !custom ? "bg-secondary text-content-primary" : "bg-background-tertiary text-content-secondary"
                   }`}
                 >
                   {formatCurrency(p)}
@@ -219,8 +216,8 @@ function AddMoneySheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
               onClick={pay}
               shimmerColor="rgba(255,255,255,0.3)"
               background="var(--color-secondary)"
-              borderRadius="16px"
-              className="py-4 text-base font-bold disabled:opacity-40"
+              borderRadius="999px"
+              className="w-full py-4 text-base font-bold disabled:opacity-40"
             >
               Add {formatCurrency(paise > 0 ? paise : 0)}
             </ShimmerButton>

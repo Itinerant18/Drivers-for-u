@@ -10,11 +10,8 @@ import { RiderStreamManager } from "@/lib/websocket/RiderStreamManager";
 import type { RiderWebSocketMessage } from "@/lib/websocket/types";
 import { FareDisplay } from "@/components/ds";
 import { Ripple } from "@/components/ui/ripple";
-import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { Particles } from "@/components/ui/particles";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { MorphingText } from "@/components/ui/morphing-text";
 
 type DispatchState = "BOOKING" | "SEARCHING" | "TIMEOUT";
@@ -40,10 +37,10 @@ function RadarAnimation() {
   return (
     <div className="relative flex h-48 w-48 items-center justify-center">
       <Ripple mainCircleSize={90} mainCircleOpacity={0.2} numCircles={5} />
-      <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-surface-accent ring-2 ring-border-accent">
+      <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-secondary ring-2 ring-secondary-strong/40">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="var(--accent-400)" strokeWidth="1.5" />
-          <path d="M12 7v5l3 3" stroke="var(--accent-400)" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="12" cy="12" r="10" stroke="var(--gray-1000)" strokeWidth="1.5" />
+          <path d="M12 7v5l3 3" stroke="var(--gray-1000)" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
     </div>
@@ -63,14 +60,14 @@ function CountdownRing({ seconds, total }: { seconds: number; total: number }) {
         cy="32"
         r={r}
         fill="none"
-        stroke="var(--accent-400)"
+        stroke="var(--brand-secondary-strong)"
         strokeWidth="4"
         strokeDasharray={`${dash} ${circ - dash}`}
         strokeLinecap="round"
         transform="rotate(-90 32 32)"
         style={{ transition: "stroke-dasharray 0.5s linear" }}
       />
-      <text x="32" y="37" textAnchor="middle" fill="var(--content-primary)" fontSize="14" fontWeight="bold">
+      <text x="32" y="37" textAnchor="middle" fill="var(--content-primary)" fontSize="14" fontWeight="bold" fontFamily="var(--font-mono)">
         {seconds}
       </text>
     </svg>
@@ -144,7 +141,7 @@ function DriverAssignedModal({
             onClick={onGoToTrip}
             shimmerColor="rgba(255,255,255,0.3)"
             background="var(--color-secondary)"
-            borderRadius="16px"
+            borderRadius="999px"
             className="h-12 flex-[2] text-base font-bold shadow-elevation-2"
           >
             Go to trip
@@ -359,7 +356,7 @@ function DispatchContent() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center bg-background-primary px-6 overflow-hidden">
-      <Particles className="absolute inset-0 z-0" quantity={30} color="#4F46E5" size={0.3} staticity={30} />
+      
       <div className="relative z-10 flex w-full flex-col items-center">
       {state === "BOOKING" && (
         <BlurFade className="flex flex-col items-center gap-6 text-center">
@@ -375,9 +372,9 @@ function DispatchContent() {
           <div>
             <MorphingText
               texts={[
-                "Finding a driver near you…",
-                "Scanning nearby drivers…",
-                "Matching with the best…",
+                "Finding your driver…",
+                "Scanning nearby…",
+                "Matching drivers…",
               ]}
               className="h-8 text-xl font-bold leading-none text-content-primary"
             />
@@ -456,7 +453,7 @@ function DispatchContent() {
               onClick={handleTryAgain}
               shimmerColor="rgba(255,255,255,0.3)"
               background="var(--color-secondary)"
-              borderRadius="16px"
+              borderRadius="999px"
               className="h-14 w-full text-base font-bold shadow-elevation-2"
             >
               Try Again

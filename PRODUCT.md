@@ -14,15 +14,15 @@ Vahnly connects car-owning riders with vetted drivers for their own vehicle. Unl
 
 ## Brand Personality
 
-Premium, Dependable, Refined. The interface earns its polish — warm off-white canvas and charcoal ink as the base, with a frosted-glass booking surface and a deep indigo-to-violet brand gradient (#0040E0 → #2563EB → #4F46E5) carrying emphasis on the primary action and active states. Every element has a job; the glass and gradient are used deliberately at the booking surface and CTA, not scattered decoratively across the whole app. The brand earns trust through clarity and consistency, not flash — polish serves legibility and hierarchy, it never substitutes for them.
+Premium, Precise, Operational. The interface reads like a purchase-inspection sheet for the rider's own car: pure-white canvas, ink (#111827) typography, compact flat panels with hairline borders, mono-set numbers — and one electric decision color. Brand lime (#B7EC4B, `tokens.css` `--brand-secondary*`) fills the primary CTA and the active selection, always with ink text on top. Indigo (#4F46E5, the accent ramp) carries links, focus rings, and informational accents. The brand earns trust through clarity, density, and consistency — polish serves legibility and hierarchy, it never substitutes for them.
 
 ## Anti-references
 
-- No dark mode. Single warm off-white light theme.
-- No gradient text (`background-clip: text`) — the brand gradient lives on surfaces/buttons, never behind text.
-- No glassmorphism scattered arbitrarily — frosted glass is reserved for the booking surface (tiles, panels, sheet) as a deliberate, named system (`.glass-tile`/`.glass-panel`/`.glass-sheet`), not applied ad hoc to unrelated screens.
-- No random brand colors beyond the defined palette: charcoal (#1A1A1A) for ink/emphasis, steel-blue (#4A6FA5) for informational accents/focus rings/borders, and the brand gradient (#0040E0/#2563EB/#4F46E5, `tokens.css` `--brand-secondary*`) reserved for the primary CTA and active-state indicators only.
-- No unmapped inverse text — any element using the brand gradient as a background MUST use `--color-content-inverse`, verified against 4.5:1 contrast. This was shipped broken once (charcoal text on the gradient CTA); never again silently.
+- No dark mode. Single pure-white light theme.
+- No gradient text (`background-clip: text`) and no brand gradients at all — fills are solid.
+- No frosted glass — the legacy `.glass-*` class names render flat white panels with hairline borders; no backdrop blur, no translucent white borders.
+- No random brand colors beyond the defined palette: ink (#111827), lime (#B7EC4B fill / #5F821F text-safe "strong" / #F2FBDC tint), indigo (#4F46E5 accent ramp), and the status set. Grays come from the neutral ramp only.
+- No white-on-lime — any lime-filled element MUST use ink text/icons (`--interactive-primary-text` is pre-paired). Raw lime is never text, thin strokes, or small dots on white; those use lime-strong (#5F821F, ≥4.5:1).
 - No all-caps display headlines.
 
 ## Design Principles

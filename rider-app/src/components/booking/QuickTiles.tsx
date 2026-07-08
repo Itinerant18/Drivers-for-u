@@ -97,7 +97,7 @@ export function QuickTiles() {
             <span className="text-content-accent">{t.icon}</span>
             <span className="text-label-small text-content-secondary">{t.label}</span>
             {"badge" in t && t.badge && (
-              <span className="absolute -top-1.5 -right-1 rounded-pill bg-positive-400 px-1.5 py-0.5 text-[9px] font-medium text-white">
+              <span className="absolute -top-1.5 -right-1 rounded-pill bg-positive-400 px-1.5 py-0.5 text-[9px] font-medium text-content-primary">
                 {t.badge}
               </span>
             )}

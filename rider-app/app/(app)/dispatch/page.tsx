@@ -143,7 +143,7 @@ function DriverAssignedModal({
             type="button"
             onClick={onGoToTrip}
             shimmerColor="rgba(255,255,255,0.3)"
-            background="#1a5cff"
+            background="var(--color-secondary)"
             borderRadius="16px"
             className="h-12 flex-[2] text-base font-bold shadow-elevation-2"
           >
@@ -359,7 +359,7 @@ function DispatchContent() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center bg-background-primary px-6 overflow-hidden">
-      <Particles className="absolute inset-0 z-0" quantity={30} color="#4A6FA5" size={0.3} staticity={30} />
+      <Particles className="absolute inset-0 z-0" quantity={30} color="#4F46E5" size={0.3} staticity={30} />
       <div className="relative z-10 flex w-full flex-col items-center">
       {state === "BOOKING" && (
         <BlurFade className="flex flex-col items-center gap-6 text-center">
@@ -455,7 +455,7 @@ function DispatchContent() {
               type="button"
               onClick={handleTryAgain}
               shimmerColor="rgba(255,255,255,0.3)"
-              background="#1a5cff"
+              background="var(--color-secondary)"
               borderRadius="16px"
               className="h-14 w-full text-base font-bold shadow-elevation-2"
             >

@@ -18,44 +18,50 @@
    NOT use these directly — use semantic aliases below.
    ───────────────────────────────────────────── */
 :root {
-  /* Gray ramp (0 = warm off-white canvas, 1000 = deep charcoal ink) */
-  --gray-0:    #FAFAFA;
-  --gray-50:   #F4F4F1;
-  --gray-100:  #EAEAE5;
-  --gray-200:  #E0E0DA;
-  --gray-300:  #C9C9C2;
-  --gray-400:  #ADADA5;
-  --gray-500:  #7E7E77;
-  --gray-600:  #60605B;
-  --gray-700:  #454541;
-  --gray-800:  #30302E;
-  --gray-900:  #222221;
-  --gray-1000: #1A1A1A;
+  /* Gray ramp (0 = pure white canvas, 1000 = deep ink) — neutral cool grays,
+     anchored on the design spec: bg #FFFFFF, border #8E8E93, ink #111827. */
+  --gray-0:    #FFFFFF;
+  --gray-50:   #F9FAFB;
+  --gray-100:  #F3F4F6;
+  --gray-200:  #E5E7EB;
+  --gray-300:  #D1D5DB;
+  --gray-400:  #8E8E93;
+  --gray-500:  #6B7280;
+  --gray-600:  #4B5563;
+  --gray-700:  #374151;
+  --gray-800:  #253044;
+  --gray-900:  #1B2432;
+  --gray-1000: #111827;
 
-  /* Accent (muted steel-blue) ramp — informational accents, borders, focus rings */
-  --accent-50:  #F0F4F8;
-  --accent-100: #D9E2EC;
-  --accent-200: #BCCCDC;
-  --accent-300: #9FB3C8;
-  --accent-400: #4A6FA5;
-  --accent-500: #3B5A84;
-  --accent-600: #2D4566;
+  /* Accent (indigo) ramp — informational accents, links, borders, focus rings */
+  --accent-50:  #EEF2FF;
+  --accent-100: #E0E7FF;
+  --accent-200: #C7D2FE;
+  --accent-300: #A5B4FC;
+  --accent-400: #4F46E5;
+  --accent-500: #4338CA;
+  --accent-600: #3730A3;
 
-  /* Brand gradient (formalized 2026-07) — primary CTA + active-state indicator.
-     Canonical here; globals.css @theme only references these, never redeclares. */
-  --brand-secondary:       #0040E0;
-  --brand-secondary-hover: #0035BE;
-  --brand-secondary-2:     #2563EB;
-  --brand-secondary-3:     #4F46E5;
+  /* Brand lime (rebrand 2026-07) — primary CTA + active-state fill.
+     Canonical here; globals.css @theme only references these, never redeclares.
+     RULE: lime is a FILL color paired with ink text (--content-primary).
+     It fails contrast on white for text or thin strokes — for those use
+     --brand-secondary-strong (≥4.5:1 on white). */
+  --brand-secondary:        #B7EC4B;
+  --brand-secondary-hover:  #A9DE3D;
+  --brand-secondary-2:      #C7F26E; /* legacy gradient stop — near-flat */
+  --brand-secondary-3:      #B7EC4B; /* legacy gradient stop — flat */
+  --brand-secondary-strong: #5F821F; /* text/indicator-safe lime */
+  --brand-secondary-tint:   #F2FBDC; /* subtle lime surface wash */
 
-  /* Positive (green) ramp */
-  --positive-50:  #EAF6EC;
-  --positive-100: #C7E8D2;
-  --positive-200: #9CD6AF;
-  --positive-300: #6FC38B;
-  --positive-400: #3A9D68;
-  --positive-500: #2D7F53;
-  --positive-600: #205F3E;
+  /* Positive (green) ramp — 400 matches the design accent #34C759 (iOS green) */
+  --positive-50:  #EAF9EE;
+  --positive-100: #C8F0D4;
+  --positive-200: #9BE3B2;
+  --positive-300: #67D58D;
+  --positive-400: #34C759;
+  --positive-500: #279A45;
+  --positive-600: #1B7232;
 
   /* Warning (yellow) ramp */
   --warning-50:  #FFF8E7;
@@ -96,9 +102,9 @@
      ───────────────────────────────────────────── */
   --radius-none: 0px;
   --radius-sm:   8px;   /* buttons, inputs, tags */
-  --radius-md:   12px;  /* cards */
+  --radius-md:   8px;   /* cards — design spec: card radius 8px */
   --radius-lg:   16px;  /* bottom sheets (top corners) */
-  --radius-pill: 999px; /* chips, avatars */
+  --radius-pill: 999px; /* chips, avatars, primary CTA */
 
   /* ─────────────────────────────────────────────
      ELEVATION (box-shadow) - 50% softer for Minimalist style
@@ -122,8 +128,8 @@
   /* ─────────────────────────────────────────────
      FONT FAMILIES (CSS variable injection from next/font or link)
      ───────────────────────────────────────────── */
-  --font-display: var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
-  --font-body:    var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:    var(--font-jetbrains-mono), "JetBrains Mono", "Fira Code", monospace;
 
   /* ─────────────────────────────────────────────
@@ -131,29 +137,29 @@
      ───────────────────────────────────────────── */
 
   /* Background */
-  --background-primary:   var(--gray-0);       /* #FAFAFA */
-  --background-secondary: var(--gray-50);      /* #F4F4F1 */
-  --background-tertiary:  var(--gray-100);     /* #EAEAE5 */
+  --background-primary:   var(--gray-0);       /* #FFFFFF */
+  --background-secondary: var(--gray-50);      /* #F9FAFB */
+  --background-tertiary:  var(--gray-100);     /* #F3F4F6 */
 
   /* Content (text) */
-  --content-primary:   var(--gray-1000);  /* #1A1A1A */
-  --content-secondary: var(--gray-600);   /* #60605B */
-  --content-tertiary:  var(--gray-500);   /* #7E7E77 */
-  --content-accent:    var(--accent-400); /* #4A6FA5 */
-  --content-positive:  var(--positive-600); /* positive-400 read ~3.4:1 on canvas — 600 clears 4.5:1 */
+  --content-primary:   var(--gray-1000);  /* #111827 */
+  --content-secondary: var(--gray-600);   /* #4B5563 */
+  --content-tertiary:  var(--gray-500);   /* #6B7280 */
+  --content-accent:    var(--accent-400); /* #4F46E5 */
+  --content-positive:  var(--positive-600); /* positive-400 fails 4.5:1 on white — 600 clears it */
   --content-warning:   var(--warning-600);
   --content-negative:  var(--negative-400);
 
   /* Border */
-  --border-opaque:   var(--gray-200);   /* #E0E0DA */
-  --border-selected: var(--gray-1000);  /* #1A1A1A */
+  --border-opaque:   var(--gray-200);   /* #E5E7EB */
+  --border-selected: var(--gray-1000);  /* #111827 */
   --border-accent:   var(--accent-400);
 
-  /* Interactive */
-  --interactive-primary:      var(--gray-1000);  /* charcoal button bg */
-  --interactive-primary-text: var(--gray-0);     /* off-white button text */
+  /* Interactive — primary action is a lime fill with ink text (never white on lime) */
+  --interactive-primary:      var(--brand-secondary);        /* lime button bg */
+  --interactive-primary-text: var(--gray-1000);              /* ink button text */
   --interactive-secondary:    var(--gray-100);
-  --interactive-hover:        var(--gray-900);
+  --interactive-hover:        var(--brand-secondary-hover);
   --interactive-focus:        var(--accent-400);
 
   /* Status surfaces (for badge/pill backgrounds) */

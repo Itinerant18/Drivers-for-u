@@ -105,7 +105,7 @@ export default function RewardsPage() {
             disabled={!code.trim() || code.trim().toUpperCase() === savedCode}
             onClick={saveCode}
             shimmerColor="rgba(255,255,255,0.3)"
-            background="#1a5cff"
+            background="var(--color-secondary)"
             borderRadius="12px"
             className="px-5 text-sm font-bold disabled:opacity-40"
           >
@@ -145,7 +145,7 @@ export default function RewardsPage() {
               duration={1.5}
               delay={0.3}
               className="text-sm font-bold"
-              colors={["#1a5cff", "#4A6FA5", "#6B8EC4", "#8BADD5"]}
+              colors={["#4F46E5", "#4F46E5", "#A5B4FC", "#B7EC4B"]}
             />
             <span className="text-xs text-content-secondary">{trips} trips</span>
           </div>
@@ -182,11 +182,11 @@ export default function RewardsPage() {
               onMouseEnter={() => setHoveredCode(o.code)}
               onMouseLeave={() => setHoveredCode(null)}
             >
-              <BorderBeam size={60} duration={6} colorFrom="#1a5cff" colorTo="rgba(26,92,255,0.05)" borderWidth={1.5} delay={idx * 0.3} />
-              {hoveredCode === o.code && <ShineBorder borderWidth={1} duration={8} shineColor="#1a5cff" />}
+              <BorderBeam size={60} duration={6} colorFrom="#4F46E5" colorTo="rgba(79,70,229,0.05)" borderWidth={1.5} delay={idx * 0.3} />
+              {hoveredCode === o.code && <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" />}
               <div className="flex items-start justify-between">
                 <div>
-                  <SparklesText className="text-sm font-bold text-content-primary" sparklesCount={6} colors={{ first: "#1a5cff", second: "#4A6FA5" }}>
+                  <SparklesText className="text-sm font-bold text-content-primary" sparklesCount={6} colors={{ first: "#4F46E5", second: "#4F46E5" }}>
                     {o.title}
                   </SparklesText>
                   <p className="text-xs text-content-secondary">{o.desc}</p>

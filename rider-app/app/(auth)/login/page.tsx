@@ -34,12 +34,12 @@ function Logo() {
         className="absolute inset-0 flex items-center justify-center"
       >
         <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" stroke="white" strokeWidth="2.5" fill="none" />
-          <circle cx="24" cy="24" r="6" fill="white" />
-          <rect x="22.5" y="4" width="3" height="12" rx="1.5" fill="white" />
-          <rect x="22.5" y="32" width="3" height="12" rx="1.5" fill="white" />
-          <rect x="4" y="22.5" width="12" height="3" rx="1.5" fill="white" />
-          <rect x="32" y="22.5" width="12" height="3" rx="1.5" fill="white" />
+          <circle cx="24" cy="24" r="20" stroke="#111827" strokeWidth="2.5" fill="none" />
+          <circle cx="24" cy="24" r="6" fill="#111827" />
+          <rect x="22.5" y="4" width="3" height="12" rx="1.5" fill="#111827" />
+          <rect x="22.5" y="32" width="3" height="12" rx="1.5" fill="#111827" />
+          <rect x="4" y="22.5" width="12" height="3" rx="1.5" fill="#111827" />
+          <rect x="32" y="22.5" width="12" height="3" rx="1.5" fill="#111827" />
         </svg>
       </motion.div>
     </motion.div>
@@ -377,7 +377,7 @@ export default function LoginPage() {
                   disabled={isLoading}
                   onClick={handlePasswordLogin}
                   shimmerColor="rgba(255,255,255,0.3)"
-                  background="var(--accent-400)"
+                  background="var(--color-secondary)"
                   borderRadius="8px"
                   className="h-14 text-label-large font-medium shadow-elevation-1"
                 >
@@ -408,7 +408,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => { setError(""); setStep("phone_verify"); }}
                   shimmerColor="rgba(255,255,255,0.3)"
-                  background="var(--accent-400)"
+                  background="var(--color-secondary)"
                   borderRadius="8px"
                   className="h-14 text-label-large font-medium shadow-elevation-1"
                 >
@@ -602,7 +602,7 @@ export default function LoginPage() {
               disabled={isLoading || googlePhone.length !== 10 || googleOtp.length !== 6}
               onClick={onCompleteGoogleRegistration}
               shimmerColor="rgba(255,255,255,0.3)"
-              background="var(--accent-400)"
+              background="var(--color-secondary)"
               borderRadius="8px"
               className="h-14 text-label-large font-medium shadow-elevation-1"
             >
@@ -655,7 +655,7 @@ export default function LoginPage() {
               disabled={isLoading}
               onClick={handleResetSubmit}
               shimmerColor="rgba(255,255,255,0.3)"
-              background="var(--accent-400)"
+              background="var(--color-secondary)"
               borderRadius="8px"
               className="h-14 text-label-large font-medium shadow-elevation-1"
             >
@@ -698,7 +698,7 @@ export default function LoginPage() {
               disabled={savingPw}
               onClick={handleCreatePassword}
               shimmerColor="rgba(255,255,255,0.3)"
-              background="var(--accent-400)"
+              background="var(--color-secondary)"
               borderRadius="8px"
               className="h-14 text-label-large font-medium shadow-elevation-1"
             >

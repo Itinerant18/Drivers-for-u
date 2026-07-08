@@ -86,7 +86,7 @@ export default function IndexPage() {
   }
 
   return (
-    <div className="bg-background-primary text-content-primary relative min-h-screen overflow-x-hidden selection:bg-secondary selection:text-white flex flex-col font-sans">
+    <div className="bg-background-primary text-content-primary relative min-h-screen overflow-x-hidden selection:bg-secondary selection:text-content-primary flex flex-col font-sans">
       {/* Background Shader & Overlay Grid */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 w-full h-full opacity-60">
@@ -106,7 +106,7 @@ export default function IndexPage() {
         <div className="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
           {/* Brand */}
           <Link href="#" className="flex items-center gap-2 cursor-pointer group">
-            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg group-hover:scale-95 transition-transform">
+            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-content-primary font-bold text-lg group-hover:scale-95 transition-transform">
               V
             </div>
             <span className="font-extrabold text-content-primary text-xl tracking-tight">Vahnly</span>
@@ -130,7 +130,7 @@ export default function IndexPage() {
 
           {/* Trailing Action */}
           <div className="flex items-center gap-4">
-            <Link href="/login/" className="text-sm font-semibold text-content-primary hover:text-secondary transition-colors">
+            <Link href="/login/" className="text-sm font-semibold text-content-primary hover:text-secondary-strong transition-colors">
               Log In
             </Link>
           </div>
@@ -142,24 +142,24 @@ export default function IndexPage() {
 
         {/* Hero Section */}
         <section className="w-full max-w-3xl mx-auto text-center mb-20 animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary font-semibold text-xs mb-6 mx-auto shadow-sm border border-secondary/20">
-            <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-tint text-secondary-strong font-semibold text-xs mb-6 mx-auto shadow-sm border border-secondary/40">
+            <span className="w-2 h-2 rounded-full bg-secondary-strong animate-pulse"></span>
             Verified Professional Driver Dispatch
           </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-content-primary mb-6 tracking-tight leading-tight">
             Hire a Professional <br className="hidden md:block" />
             <span className="text-content-primary">Driver</span> <br className="hidden md:block" />
-            <span className="bg-gradient-to-r from-secondary via-secondary-2 to-secondary-3 bg-clip-text text-transparent">For Your Own Car</span>
+            <span className="text-secondary-strong">For Your Own Car</span>
           </h1>
           <p className="text-base md:text-lg text-content-secondary mb-10 max-w-2xl mx-auto leading-relaxed">
             Vahnly provides a premium, safe, and dynamic ride matching ecosystem. Connect instantly with verified, highly trained independent drivers to navigate your car, whether for daily commutes, road trips, or late-night events.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login/" className="w-full sm:w-auto bg-secondary text-white px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-secondary-hover active:scale-95 transition-all flex items-center justify-center gap-2">
+            <Link href="/login/" className="w-full sm:w-auto bg-secondary text-content-primary px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-secondary-hover active:scale-95 transition-all flex items-center justify-center gap-2">
               Get Started Now
               <ForwardIcon size={16} />
             </Link>
-            <a href="#features" className="w-full sm:w-auto bg-background-primary border border-secondary/30 text-secondary px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-secondary/5 active:scale-95 transition-all flex items-center justify-center">
+            <a href="#features" className="w-full sm:w-auto bg-background-primary border border-secondary-strong/40 text-secondary-strong px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-secondary-tint active:scale-95 transition-all flex items-center justify-center">
               Learn More
             </a>
           </div>
@@ -233,13 +233,13 @@ export default function IndexPage() {
             <p className="text-xs text-slate-500">© 2026 Vahnly Premium Services. All rights reserved.</p>
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-xs text-slate-500 font-semibold">
-            <Link href="/privacy/" className="hover:text-secondary transition-colors">
+            <Link href="/privacy/" className="hover:text-secondary-strong transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms/" className="hover:text-secondary transition-colors">
+            <Link href="/terms/" className="hover:text-secondary-strong transition-colors">
               Terms of Service
             </Link>
-            <a href="mailto:karmakaraniket018@gmail.com" className="hover:text-secondary transition-colors font-mono">
+            <a href="mailto:karmakaraniket018@gmail.com" className="hover:text-secondary-strong transition-colors font-mono">
               Contact Us
             </a>
           </div>

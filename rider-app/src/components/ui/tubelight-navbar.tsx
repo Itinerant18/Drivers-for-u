@@ -65,7 +65,7 @@ export function TubelightNavbar({ items, className }: TubelightNavbarProps) {
               className={cn(
                 "relative flex flex-col items-center justify-center flex-1 cursor-pointer transition-all duration-300 py-2.5 rounded-full",
                 "text-content-secondary hover:text-content-primary hover:scale-105",
-                isActive && "text-interactive-primary font-semibold scale-105"
+                isActive && "text-content-primary font-semibold scale-105"
               )}
             >
               <div className="relative flex flex-col items-center gap-1">
@@ -80,13 +80,10 @@ export function TubelightNavbar({ items, className }: TubelightNavbarProps) {
               {isActive && (
                 <motion.div
                   layoutId="lamp-v1"
-                  className="absolute inset-x-0 top-0 -z-10"
+                  className="absolute inset-x-1 inset-y-0.5 -z-10 rounded-full bg-secondary"
                   initial={false}
                   transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                >
-                  {/* Active-tab indicator — a plain solid bar on the top edge, no glow/blur */}
-                  <div className="absolute left-1/2 top-0 h-[3px] w-11 -translate-x-1/2 rounded-full bg-secondary" />
-                </motion.div>
+                />
               )}
             </Link>
           );

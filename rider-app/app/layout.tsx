@@ -1,22 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Inter, JetBrains_Mono, Geist } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/providers/ThemeProvider";
 import { Toaster } from "@/components/Toaster";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-
-// ── Inter — display, body, labels ──────────────────────────────────────────
-// RULE: Inter for ALL prose, headings, labels, addresses, phone numbers.
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
+// Display/body/labels use the native system font stack (-apple-system / Segoe UI /
+// Roboto), declared in tokens.css — no webfont download for prose.
 
 // ── JetBrains Mono — fares, ETAs, distances, IDs ONLY ─────────────────────
 // RULE: Never use font-mono for addresses or phone numbers.
@@ -24,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -48,7 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       data-theme="light"
-      className={cn(inter.variable, jetbrainsMono.variable, "font-sans", geist.variable)}
+      className={cn(jetbrainsMono.variable, "font-sans")}
       suppressHydrationWarning
     >
       <body

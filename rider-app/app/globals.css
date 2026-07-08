@@ -15,10 +15,10 @@
    TAILWIND v4 THEME — Design System Integration
    ───────────────────────────────────────────── */
 @theme {
-  /* ── Fonts ── */
-  --font-display: var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
-  --font-body:    var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
-  --font-sans:    var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
+  /* ── Fonts — native system stack (design spec: -apple-system display/body) ── */
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:    var(--font-jetbrains-mono), "JetBrains Mono", "Fira Code", monospace;
 
   /* ── Semantic Background Colors ── */
@@ -128,11 +128,15 @@
   --glass-border: rgba(255, 255, 255, 0.5);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 
-  /* ── Brand gradient (formalized) — sourced from tokens.css, never redeclared ── */
+  /* ── Brand lime — sourced from tokens.css, never redeclared.
+        Lime is a FILL paired with ink text; -strong is the only lime safe
+        for text or thin indicators on white. ── */
   --color-secondary: var(--brand-secondary);
   --color-secondary-hover: var(--brand-secondary-hover);
-  --color-secondary-2: var(--brand-secondary-2);  /* hero brand gradient — mid */
-  --color-secondary-3: var(--brand-secondary-3);  /* hero brand gradient — end (indigo) */
+  --color-secondary-2: var(--brand-secondary-2);  /* legacy gradient stop */
+  --color-secondary-3: var(--brand-secondary-3);  /* legacy gradient stop */
+  --color-secondary-strong: var(--brand-secondary-strong);
+  --color-secondary-tint: var(--brand-secondary-tint);
 }
 
 /* ─────────────────────────────────────────────
@@ -396,11 +400,9 @@ body {
    GLASS & SURFACE UTILITIES
    ───────────────────────────────────────────── */
 .glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  background: var(--background-primary);
+  border: 1px solid var(--border-opaque);
+  box-shadow: var(--elevation-1);
 }
 
 .glass-solid {
@@ -454,41 +456,25 @@ body {
 .delay-400 { animation-delay: 400ms; }
 
 /* ─────────────────────────────────────────────
-   GLASS HOME — premium booking surface
+   BOOKING SURFACE — flat white panels (rebrand 2026-07)
+   Former frosted-glass tiers, now clean operational panels per the
+   lime/white design: white fill, hairline gray border, soft shadow.
+   Class names kept so component markup stays untouched.
    ───────────────────────────────────────────── */
-
-/* Frosted glass tiers. -tile for small chips/tiles, -panel for section cards,
-   -sheet for the main booking surface over the map. */
 .glass-tile {
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 2px 12px rgba(15, 30, 80, 0.05);
+  background: var(--background-primary);
+  border: 1px solid var(--border-opaque);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
 }
 .glass-panel {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    0 8px 32px rgba(15, 30, 80, 0.07);
+  background: var(--background-primary);
+  border: 1px solid var(--border-opaque);
+  box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
 }
 .glass-sheet {
-  background: rgba(250, 251, 254, 0.82);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 -12px 48px rgba(15, 30, 80, 0.1);
-}
-
-/* Muted/tertiary text (placeholders, secondary captions) loses too much contrast
-   sitting on frosted glass — darken it a step on glass surfaces only. */
-.glass-tile, .glass-panel, .glass-sheet {
-  --content-tertiary: var(--gray-600);
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1px solid var(--border-opaque);
+  box-shadow: 0 -8px 32px rgba(17, 24, 39, 0.08);
 }
 
 /* Hero CTA sheen — a slow gloss sweep at long intervals. */
@@ -515,7 +501,7 @@ body {
   position: absolute;
   inset: -8px;
   border-radius: 50%;
-  background: rgba(0, 64, 224, 0.18);
+  background: rgba(183, 236, 75, 0.4);
   animation: pinPulse 2.4s var(--ease-out-quint) infinite;
 }
 @keyframes pinPulse {
@@ -684,7 +670,7 @@ body {
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: var(--brand-secondary);
-  --secondary-foreground: #ffffff;
+  --secondary-foreground: var(--gray-1000); /* ink on lime — white fails contrast */
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -698,7 +684,7 @@ body {
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.5rem; /* rounded-xl = 8px — design card/control radius */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);

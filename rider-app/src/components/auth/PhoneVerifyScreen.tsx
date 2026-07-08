@@ -228,8 +228,8 @@ export default function PhoneVerifyScreen({
       <div className="flex flex-[2] flex-col items-center justify-center gap-4 px-6 pt-safe-top">
         <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-interactive-primary shadow-elevation-2">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-            <rect x="5" y="2" width="14" height="20" rx="2" stroke="white" strokeWidth="2" />
-            <circle cx="12" cy="18" r="1" fill="white" />
+            <rect x="5" y="2" width="14" height="20" rx="2" stroke="#111827" strokeWidth="2" />
+            <circle cx="12" cy="18" r="1" fill="#111827" />
           </svg>
         </div>
         <div className="text-center">

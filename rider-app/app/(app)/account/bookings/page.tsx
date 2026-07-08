@@ -58,7 +58,7 @@ function TripCard({ order, onRebook, onCancel }: { order: Order; onRebook: () =>
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {hovered && <ShineBorder borderWidth={1} duration={8} shineColor="#4A6FA5" />}
+      {hovered && <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" />}
       <button
         onClick={() => router.push(`/account/bookings/detail?orderId=${order.id}`)}
         className="block w-full text-left"

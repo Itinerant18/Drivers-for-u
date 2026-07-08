@@ -157,7 +157,7 @@ function Chip({
         "active:scale-95",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
         active
-          ? "bg-secondary text-content-inverse"
+          ? "bg-secondary text-content-primary"
           : "glass-tile text-content-secondary hover:text-content-primary",
       ].join(" ")}
     >
@@ -298,9 +298,9 @@ function PlaceInput({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-3 rounded-2xl bg-white/55 px-3 py-2.5 border border-white/70
+      <div className="flex items-center gap-3 rounded-2xl bg-background-secondary px-3 py-2.5 border border-border-opaque
         transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]
-        focus-within:border-border-accent focus-within:bg-white/80 focus-within:shadow-elevation-1 focus-within:scale-[1.01]">
+        focus-within:border-border-accent focus-within:bg-background-primary focus-within:shadow-elevation-1 focus-within:scale-[1.01]">
         <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center">{icon}</div>
         <input
           className="flex-1 bg-transparent text-paragraph-medium text-content-primary
@@ -570,7 +570,7 @@ export function BookingSheet() {
                         "transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95",
                         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
                         active
-                          ? "text-content-inverse font-semibold scale-[1.04]"
+                          ? "text-content-primary font-semibold scale-[1.04]"
                           : "glass-tile text-content-secondary hover:text-content-primary",
                         disabled && "opacity-40 cursor-not-allowed",
                       ].join(" ")}
@@ -579,7 +579,7 @@ export function BookingSheet() {
                         <motion.span
                           layoutId="trip-aura"
                           transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                          className="absolute inset-0 rounded-pill bg-gradient-to-r from-secondary to-secondary-3"
+                          className="absolute inset-0 rounded-pill bg-secondary"
                           aria-hidden="true"
                         />
                       )}
@@ -626,18 +626,18 @@ export function BookingSheet() {
                     <PlaceInput
                       value={pickup?.address ?? ""}
                       placeholder="Pickup location"
-                      icon={<div className="h-3 w-3 rounded-pill bg-secondary" />}
+                      icon={<div className="h-3 w-3 rounded-pill bg-secondary-strong" />}
                       onSelect={setPickup}
                       onClear={() => setPickup(null)}
                     />
                     {needsDrop && (
                       <>
                         {/* Route connector — dotted line from pickup dot to drop pin */}
-                        <div className="pointer-events-none absolute left-[25px] top-[44px] h-[26px] border-l-2 border-dotted border-secondary/35" aria-hidden="true" />
+                        <div className="pointer-events-none absolute left-[25px] top-[44px] h-[26px] border-l-2 border-dotted border-secondary-strong/45" aria-hidden="true" />
                         <PlaceInput
                           value={dropoff?.address ?? ""}
                           placeholder="Where to?"
-                          icon={<PinIcon size={15} className="text-secondary-3" />}
+                          icon={<PinIcon size={15} className="text-secondary-strong" />}
                           onSelect={setDropoff}
                           onClear={() => setDropoff(null)}
                         />
@@ -664,7 +664,7 @@ export function BookingSheet() {
 
             {/* When — Now / Schedule chips */}
             {!isMonthly && (
-              <div className="mt-4 flex items-center gap-2 border-t border-white/60 pt-3">
+              <div className="mt-4 flex items-center gap-2 border-t border-border-opaque pt-3">
                 <span className="text-label-small text-content-secondary">When</span>
                 <Chip active={!scheduledAt} onClick={() => setScheduledAt(null)}>Now</Chip>
                 <Chip
@@ -688,7 +688,7 @@ export function BookingSheet() {
                   max={toLocalInput(new Date(Date.now() + SCHEDULE_MAX_DAYS * 86_400_000))}
                   value={toLocalInput(new Date(scheduledAt))}
                   onChange={(e) => { if (e.target.value) setScheduledAt(clampToHours(new Date(e.target.value), openH, closeH).toISOString()); }}
-                  className="w-full h-11 rounded-2xl border border-white/70 bg-white/55
+                  className="w-full h-11 rounded-2xl border border-border-opaque bg-background-secondary
                     px-3 text-paragraph-medium text-content-primary outline-none transition-base
                     focus:border-border-accent focus:ring-2 focus:ring-accent-400"
                 />
@@ -708,7 +708,7 @@ export function BookingSheet() {
             {/* Duration — hourly gets block chips; longer trips keep the slider */}
             {needsDuration && !isMonthly && (
               tripType === "IN_CITY_HOURLY" ? (
-                <div className="mt-4 border-t border-white/60 pt-3">
+                <div className="mt-4 border-t border-border-opaque pt-3">
                   <div className="flex items-center gap-2">
                     <span className="text-label-small text-content-secondary">Duration</span>
                     {HOURLY_BLOCKS.map((h) => (
@@ -719,7 +719,7 @@ export function BookingSheet() {
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 space-y-2 border-t border-white/60 pt-3">
+                <div className="mt-4 space-y-2 border-t border-border-opaque pt-3">
                   <div className="flex items-center justify-between">
                     <span className="text-label-small text-content-secondary">Duration</span>
                     <span className="font-mono text-mono-medium text-content-primary tabular-nums">
@@ -728,7 +728,7 @@ export function BookingSheet() {
                   </div>
                   <div className="relative h-2 rounded-pill bg-background-tertiary">
                     <div
-                      className="absolute left-0 top-0 h-full rounded-pill bg-gradient-to-r from-secondary to-secondary-3 transition-all"
+                      className="absolute left-0 top-0 h-full rounded-pill bg-secondary transition-all"
                       style={{ width: `${(((durationHours ?? 4) - 1) / 11) * 100}%` }}
                     />
                   </div>
@@ -756,7 +756,7 @@ export function BookingSheet() {
           <GlassSection index={2} span="col-span-6">
             <TileHeader label="Your car" icon={<CarIcon size={15} />} />
             {/* Transmission — luxury segmented control with a gliding thumb */}
-            <div className="relative flex rounded-pill bg-white/50 p-1 border border-white/70 shadow-[inset_0_1px_3px_rgba(15,30,80,0.06)]">
+            <div className="relative flex rounded-pill bg-background-tertiary p-1 border border-border-opaque">
               {TRANSMISSIONS.map((t) => {
                 const active = specTransmission === t.value;
                 return (
@@ -768,14 +768,14 @@ export function BookingSheet() {
                       "relative flex-1 rounded-pill py-2.5 text-label-medium cursor-pointer",
                       "transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
-                      active ? "text-content-inverse font-semibold" : "text-content-secondary hover:text-content-primary",
+                      active ? "text-content-primary font-semibold" : "text-content-secondary hover:text-content-primary",
                     ].join(" ")}
                   >
                     {active && (
                       <motion.span
                         layoutId="trans-thumb"
                         transition={{ type: "spring", stiffness: 360, damping: 32 }}
-                        className="absolute inset-0 rounded-pill bg-gradient-to-r from-secondary to-secondary-2"
+                        className="absolute inset-0 rounded-pill bg-secondary"
                         aria-hidden="true"
                       />
                     )}
@@ -805,13 +805,13 @@ export function BookingSheet() {
                       "transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.97]",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
                       active
-                        ? "bg-white/85 border-2 border-secondary -translate-y-0.5"
-                        : "glass-tile border border-white/65 opacity-85 hover:opacity-100",
+                        ? "bg-secondary-tint border-2 border-secondary-strong -translate-y-0.5"
+                        : "glass-tile opacity-85 hover:opacity-100",
                     ].join(" ")}
                     aria-pressed={active}
                     aria-label={c.label}
                   >
-                    <span className={active ? "text-secondary" : "text-content-tertiary"}>
+                    <span className={active ? "text-secondary-strong" : "text-content-tertiary"}>
                       <ClassSilhouette type={c.value} />
                     </span>
                     <span className="mt-1.5 block text-label-medium text-content-primary">{c.label}</span>
@@ -834,7 +834,7 @@ export function BookingSheet() {
           <GlassSection
             index={3}
             span="col-span-6"
-            className="border-2 border-secondary/15 bg-white/70"
+            className="border-2 border-secondary bg-secondary-tint/60"
           >
             <TileHeader label="Estimated fare" />
             {isSearching && !fareEstimate ? (
@@ -847,7 +847,7 @@ export function BookingSheet() {
                 aria-busy={isSearching}
                 className="relative space-y-2 overflow-hidden rounded-xl transition-opacity"
               >
-                <BorderBeam size={60} duration={8} colorFrom="var(--color-secondary)" colorTo="rgba(0,64,224,0.05)" borderWidth={1} delay={0.5} transition={{ repeat: 2 }} />
+                <BorderBeam size={60} duration={8} colorFrom="var(--color-secondary-strong)" colorTo="rgba(183,236,75,0.05)" borderWidth={1} delay={0.5} transition={{ repeat: 2 }} />
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
@@ -875,7 +875,7 @@ export function BookingSheet() {
                 {breakdownChips.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {breakdownChips.map((c) => (
-                      <span key={c.label} className="rounded-pill bg-white/60 border border-white/70 px-2 py-0.5 text-label-small text-content-secondary">
+                      <span key={c.label} className="rounded-pill bg-background-secondary border border-border-opaque px-2 py-0.5 text-label-small text-content-secondary">
                         {c.label} <FareDisplay amount={Number(c.paise)} size="sm" />
                       </span>
                     ))}
@@ -893,7 +893,7 @@ export function BookingSheet() {
               <button
                 type="button"
                 onClick={() => setShowPromo(true)}
-                className="mt-4 flex items-center gap-1.5 border-t border-white/60 pt-3 text-label-small text-content-accent
+                className="mt-4 flex items-center gap-1.5 border-t border-border-opaque pt-3 text-label-small text-content-accent
                   cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-sm"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
@@ -902,7 +902,7 @@ export function BookingSheet() {
                 Have a promo code?
               </button>
             ) : (
-            <div className="mt-4 flex items-center gap-2 border-t border-white/60 pt-3">
+            <div className="mt-4 flex items-center gap-2 border-t border-border-opaque pt-3">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
                 <path d="M7 7h.01M17 17h.01M3 12l9-9 9 9-9 9-9-9z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-content-tertiary" />
               </svg>
@@ -968,16 +968,16 @@ export function BookingSheet() {
                       "transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400",
                       active
-                        ? "bg-white/85 border-2 border-secondary"
-                        : "glass-tile border border-white/65",
+                        ? "bg-secondary-tint border-2 border-secondary-strong"
+                        : "glass-tile",
                     ].join(" ")}
                   >
-                    <span className={active ? "text-secondary" : "text-content-tertiary"}>
+                    <span className={active ? "text-secondary-strong" : "text-content-tertiary"}>
                       <PaymentIcon method={pm.value} />
                     </span>
                     <span className="text-label-small text-content-primary">{pm.label}</span>
                     {active && (
-                      <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-white">
+                      <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-content-primary">
                         <CheckIcon size={11} />
                       </span>
                     )}
@@ -1001,7 +1001,7 @@ export function BookingSheet() {
               <span className="flex items-center gap-2 text-label-medium font-semibold text-content-primary">
                 More options
                 {(d4mCare || ownerNotInCar) && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-secondary" aria-hidden="true" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-secondary-strong" aria-hidden="true" />
                 )}
               </span>
               <span className="flex items-center gap-1.5 text-label-small text-content-secondary">
@@ -1021,7 +1021,7 @@ export function BookingSheet() {
                   transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-3 grid grid-cols-6 gap-3 border-t border-white/60 pt-3">
+                  <div className="mt-3 grid grid-cols-6 gap-3 border-t border-border-opaque pt-3">
                     {/* D4M Care */}
                     <div
                       className={[
@@ -1095,7 +1095,7 @@ export function BookingSheet() {
                     </div>
 
                     {/* Persons */}
-                    <div className="col-span-6 flex items-center justify-between rounded-2xl bg-white/40 p-3">
+                    <div className="col-span-6 flex items-center justify-between rounded-2xl bg-background-secondary p-3">
                       <span className="text-label-medium font-semibold text-content-primary">Persons</span>
                       <div className="flex items-center gap-3">
                         <button
@@ -1147,8 +1147,8 @@ export function BookingSheet() {
               disabled={!!blocker || isMonthly || bookingState === "loading"}
               onClick={openReview}
               aria-live="polite"
-              className="cta-sheen h-16 w-full rounded-pill text-label-large font-semibold text-content-inverse cursor-pointer
-                bg-gradient-to-r from-secondary via-secondary-2 to-secondary-3
+              className="cta-sheen h-16 w-full rounded-pill text-label-large font-semibold text-content-primary cursor-pointer
+                bg-secondary hover:bg-secondary-hover
                 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98]
                 disabled:opacity-50 disabled:cursor-not-allowed
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"
@@ -1212,7 +1212,7 @@ export function BookingSheet() {
               type="button"
               onClick={confirmBooking}
               disabled={bookingState === "loading"}
-              className="mt-4 h-14 w-full rounded-pill bg-gradient-to-r from-secondary to-secondary-3 text-content-inverse text-label-large font-semibold
+              className="mt-4 h-14 w-full rounded-pill bg-secondary hover:bg-secondary-hover text-content-primary text-label-large font-semibold
                 cursor-pointer transition-transform active:scale-[0.99]
                 disabled:opacity-50 disabled:cursor-not-allowed
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"

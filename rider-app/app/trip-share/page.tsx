@@ -153,11 +153,11 @@ function TripShareView() {
                 toRef={dropoffRef}
                 curvature={-40}
                 duration={6}
-                pathColor="#4A6FA5"
+                pathColor="#4F46E5"
                 pathWidth={2}
                 pathOpacity={0.15}
-                gradientStartColor="#4A6FA5"
-                gradientStopColor="#1a5cff"
+                gradientStartColor="#4F46E5"
+                gradientStopColor="#4F46E5"
                 startYOffset={8}
                 endYOffset={8}
               />

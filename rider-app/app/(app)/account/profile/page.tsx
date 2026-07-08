@@ -224,9 +224,9 @@ export default function ProfilePage() {
           </div>
           <AvatarCircles
             avatarUrls={[
-              { imageUrl: "https://ui-avatars.com/api/?name=G&background=4A6FA5&color=fff", profileUrl: "#" },
-              { imageUrl: "https://ui-avatars.com/api/?name=A&background=1a5cff&color=fff", profileUrl: "#" },
-              { imageUrl: "https://ui-avatars.com/api/?name=E&background=6B8EC4&color=fff", profileUrl: "#" },
+              { imageUrl: "https://ui-avatars.com/api/?name=G&background=4F46E5&color=fff", profileUrl: "#" },
+              { imageUrl: "https://ui-avatars.com/api/?name=A&background=B7EC4B&color=111827", profileUrl: "#" },
+              { imageUrl: "https://ui-avatars.com/api/?name=E&background=A5B4FC&color=fff", profileUrl: "#" },
             ]}
             numPeople={1}
           />

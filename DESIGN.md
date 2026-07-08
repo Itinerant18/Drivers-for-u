@@ -1,49 +1,51 @@
 ---
 name: Vahnly Rider
-description: Frosted-glass booking cockpit over a warm-neutral, charcoal-inked product shell
+description: Lime-charged operational cockpit on a pure-white, ink-typed product shell
 colors:
-  ink-charcoal: "#1A1A1A"
-  ink-secondary: "#60605B"
-  ink-tertiary: "#7E7E77"
-  ink-tertiary-on-glass: "#60605B"
-  canvas: "#FAFAFA"
-  canvas-secondary: "#F4F4F1"
-  canvas-tertiary: "#EAEAE5"
-  brand-blue: "#0040E0"
-  brand-blue-hover: "#0035BE"
-  brand-blue-mid: "#2563EB"
-  brand-indigo: "#4F46E5"
-  accent-steel-blue: "#4A6FA5"
-  success-icon: "#3A9D68"
-  success-text: "#205F3E"
+  ink: "#111827"
+  ink-secondary: "#4B5563"
+  ink-tertiary: "#6B7280"
+  canvas: "#FFFFFF"
+  canvas-secondary: "#F9FAFB"
+  canvas-tertiary: "#F3F4F6"
+  border-hairline: "#E5E7EB"
+  border-strong: "#8E8E93"
+  brand-lime: "#B7EC4B"
+  brand-lime-hover: "#A9DE3D"
+  brand-lime-strong: "#5F821F"
+  brand-lime-tint: "#F2FBDC"
+  accent-indigo: "#4F46E5"
+  accent-indigo-deep: "#3730A3"
+  success-icon: "#34C759"
+  success-text: "#1B7232"
   warning-icon: "#F0B840"
   warning-text: "#986F1B"
   danger-icon: "#C94030"
   danger-text: "#7A2017"
 typography:
   display:
-    fontFamily: "Inter, system-ui, -apple-system, sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
     fontSize: "36px"
     fontWeight: 700
     lineHeight: "44px"
     letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Inter, system-ui, -apple-system, sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
     fontSize: "22px"
     fontWeight: 700
     lineHeight: "28px"
   title:
-    fontFamily: "Inter, system-ui, -apple-system, sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
     fontSize: "16px"
     fontWeight: 600
     lineHeight: "22px"
   body:
-    fontFamily: "Inter, system-ui, -apple-system, sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: "22px"
   label:
-    fontFamily: "Inter, system-ui, -apple-system, sans-serif"
+    fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
     fontSize: "12px"
     fontWeight: 600
     lineHeight: "18px"
@@ -54,7 +56,7 @@ typography:
     lineHeight: "24px"
 rounded:
   sm: "8px"
-  md: "12px"
+  md: "8px"
   lg: "16px"
   pill: "999px"
 spacing:
@@ -64,23 +66,18 @@ spacing:
   xl: "40px"
 components:
   button-primary:
-    backgroundColor: "{colors.brand-blue}"
-    textColor: "#FAFAFA"
+    backgroundColor: "{colors.brand-lime}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.pill}"
     padding: "0 24px"
     height: "64px"
   button-primary-hover:
-    backgroundColor: "{colors.brand-blue-hover}"
-  button-secondary:
-    backgroundColor: "{colors.ink-charcoal}"
-    textColor: "#FAFAFA"
-    rounded: "{rounded.sm}"
-    padding: "0 24px"
-    height: "56px"
-  glass-tile:
-    backgroundColor: "rgba(255,255,255,0.62)"
-    textColor: "{colors.ink-charcoal}"
+    backgroundColor: "{colors.brand-lime-hover}"
+  panel:
+    backgroundColor: "#FFFFFF"
+    textColor: "{colors.ink}"
     rounded: "{rounded.md}"
+    border: "1px solid {colors.border-hairline}"
     padding: "16px"
 ---
 
@@ -88,125 +85,112 @@ components:
 
 ## 1. Overview
 
-**Creative North Star: "The Frosted Cockpit"**
+**Creative North Star: "The Inspection Sheet"**
 
-Vahnly's booking surface is a premium car-owner control panel floating over the map — the road stays visible beneath a layer of frosted glass, and the one action that matters (book the driver) is the only element that fully commits to color: a deep blue-to-indigo gradient (#0040E0 → #2563EB → #4F46E5) that reads instantly against the restrained warm-neutral canvas underneath. Everywhere else — trip history, account, settings — the shell stays flat, charcoal-inked, and quiet. The glass and the gradient are earned real estate, reserved for the moment the rider is actively commanding a trip; they are not a default skin applied to the whole product.
+Vahnly's interface reads like a premium purchase-inspection dashboard for the rider's own car and trip: a pure-white operational surface, compact modular panels with hairline borders, ink typography, mono-set numbers — and one electric decision color. Lime (#B7EC4B) is the commit color: it fills the primary CTA and the currently-selected option, always carrying ink text on top. Indigo (#4F46E5) is the information color: links, focus rings, informational accents and effects. Everything else is white, gray, and ink.
 
-This system explicitly rejects glassmorphism as ambient decoration scattered across every screen — frost belongs to the cockpit (the booking sheet, its tiles, its panel), not to a settings row or a trip-history card. It rejects gradient text, all-caps display type, and any brand color beyond the three defined roles (charcoal ink, steel-blue accent, brand blue/indigo gradient). Every color used on a gradient background is checked against 4.5:1 before it ships — the CTA looking premium and the CTA being legible are the same requirement, not a tradeoff.
+This system explicitly rejects frosted glass, brand gradients, gradient text, and decorative glow. Panels are flat white with `#E5E7EB` hairlines; density and rhythm — not materials — signal hierarchy.
 
 **Key Characteristics:**
-- Warm off-white canvas (#FAFAFA) and charcoal ink (#1A1A1A) as the base, everywhere.
-- Frosted glass (three tiers: tile, panel, sheet) exclusively on the booking cockpit over the map.
-- One brand gradient, reserved for the primary CTA and active-state indicators only.
-- Steel-blue as the separate, calmer accent for links, focus rings, and informational borders.
-- Mono type (JetBrains Mono) exclusively for fares, ETAs, distances, and IDs — numbers that must not be mistaken for prose.
+- Pure white canvas (#FFFFFF) with ink (#111827) type, everywhere.
+- Flat modular panels: white fill, 1px hairline border, 8px radius, soft shadow.
+- Lime as a FILL only — CTA and active states — always paired with ink text.
+- Indigo as the calmer informational accent for links, focus, and effects.
+- Native system font for all prose; JetBrains Mono exclusively for fares, ETAs, distances, IDs.
 
 ## 2. Colors
 
-Restrained-to-committed: neutrals and charcoal ink carry the whole app; the brand gradient is deliberately rare, spent entirely on the CTA and active-state chrome of the booking cockpit.
+Restrained with one committed decision color: white/gray/ink carry the whole app; lime is spent entirely on the primary action and the active selection.
 
-### Primary
-- **Charcoal Ink** (#1A1A1A): default text, the flat secondary-action button background, borders on selected states outside the cockpit.
+### Primary action
+- **Brand Lime** (#B7EC4B): CTA fill, active chip/tab/card fill or tint. ~1.4:1 against white — it is NEVER text, never a thin stroke, never a small dot on white.
+- **Lime Strong** (#5F821F): the text-and-indicator-safe lime (≥4.5:1 on white). Selected-state labels, selected-card borders, small brand dots, route pickup markers.
+- **Lime Tint** (#F2FBDC): selected-card and highlight wash background.
 
-### Secondary
-- **Brand Blue** (#0040E0), **Brand Blue-Mid** (#2563EB), **Brand Indigo** (#4F46E5): the three-stop gradient reserved for the primary CTA (`bg-gradient-to-r from-secondary via-secondary-2 to-secondary-3`) and active-state indicators (trip pill, car class, payment method, nav tab glow). Never used for body text, never used behind text without the Inverse-Text Rule below.
-
-### Tertiary
-- **Steel-Blue Accent** (#4A6FA5): informational accent — focus rings, route-dot icons, "info" affordances. Calmer and more frequent than the brand gradient; this is the accent you see in borders and small icons, not buttons.
+### Informational accent
+- **Indigo** (#4F46E5): links, focus rings, informational borders/icons, decorative effect colors (shine, beams, particles). 6.3:1 on white — safe as text.
 
 ### Neutral
-- **Canvas** (#FAFAFA): app background.
-- **Canvas Secondary** (#F4F4F1) / **Canvas Tertiary** (#EAEAE5): layered surfaces (badges, secondary buttons, dividers).
-- **Ink Secondary** (#60605B) / **Ink Tertiary** (#7E7E77): secondary and placeholder text on the flat canvas.
-- **Ink Tertiary On Glass** (#60605B — one step darker than the flat-canvas tertiary): the same "tertiary" role, but on frosted glass. Frost eats contrast margin; this token exists so placeholder and caption text on the cockpit never drops under 4.5:1.
+- **Canvas** (#FFFFFF) / **Canvas Secondary** (#F9FAFB) / **Canvas Tertiary** (#F3F4F6): page, inset fields, segmented-control tracks.
+- **Hairline** (#E5E7EB): default panel/card border. **Border Strong** (#8E8E93): emphasized borders only.
+- **Ink** (#111827) / **Ink Secondary** (#4B5563) / **Ink Tertiary** (#6B7280): text ramp; tertiary clears 4.5:1 on white.
 
 ### Status
-- **Success**: icon #3A9D68, text #205F3E (the darker step — success text sits at 400 in dot form but always renders as 600 for legibility).
+- **Success**: icon/dot #34C759 (iOS green), text #1B7232.
 - **Warning**: icon #F0B840, text #986F1B.
-- **Danger**: icon #C94030, text #7A2017 (light-surface toasts always use the 600 step, never 400, to clear 4.5:1 on a tinted background).
+- **Danger**: icon #C94030, text #7A2017.
 
 ### Named Rules
-**The Inverse-Text Rule.** Any element painted with the brand gradient MUST set its text color via the `content-inverse` token (#FAFAFA), verified against 4.5:1. This shipped broken once — charcoal text on the CTA gradient, reading 2.3–3.4:1 — because the token was never mapped into the theme. It is mapped now; never leave it unmapped again.
+**The Ink-on-Lime Rule.** Any element filled with brand lime MUST use ink (`--content-primary`, #111827 ≈ 12:1) for its text and icons. White-on-lime is invisible and has shipped broken before in this codebase's previous palette era; the interactive tokens (`--interactive-primary` + `--interactive-primary-text`) are pre-paired to make the right thing automatic.
 
-**The Rare Gradient Rule.** The brand gradient appears in exactly two places: the primary CTA and the active-state indicator for a selectable chip/tile/tab. If a third use case seems to need it, it's asking for the steel-blue accent instead.
+**The Lime-Is-A-Fill Rule.** Raw lime (#B7EC4B) appears only as a filled surface ≥ roughly a chip in size. Text, thin borders, indicator dots, and strokes that must read against white use Lime Strong (#5F821F). If an element needs lime and can't take ink text, it's asking for Lime Strong or indigo instead.
 
 ## 3. Typography
 
-**Display Font:** Inter (system-ui, -apple-system fallback)
-**Body Font:** Inter (same family — one sans carries headings, buttons, labels, body; this is product UI, not a brand surface)
-**Mono Font:** JetBrains Mono (Fira Code fallback)
+**Display/Body Font:** native system stack (-apple-system / Segoe UI / Roboto) — zero webfont download, native feel per platform.
+**Mono Font:** JetBrains Mono (Fira Code fallback).
 
-**Character:** A single well-tuned sans for everything humans read, and a distinct mono exclusively for numbers riders are trusting with money and time. The pairing signals precision without ever feeling like two competing voices.
+**Character:** the OS's own voice for everything humans read; a distinct mono for the numbers riders trust with money and time.
 
 ### Hierarchy
-- **Display** (700, 36px/44px, -0.02em): rare — onboarding and empty-state headlines only.
+- **Display** (700, 36px/44px, -0.02em): onboarding and empty-state headlines only.
 - **Headline** (700, 22px/28px): screen titles, modal headers.
-- **Title** (600, 16px/22px): tile headers, card titles (`TileHeader` in the booking cockpit).
-- **Body** (400, 14px/22px): default prose, addresses, descriptions.
-- **Label** (600, 12px/18px, tracking 0.01em on the smallest step): buttons, chips, badges, captions.
+- **Title** (600, 16px/22px): tile headers, card titles.
+- **Body** (400, 14px/22px): default prose, addresses.
+- **Label** (600, 12px/18px): buttons, chips, badges, captions.
 - **Mono** (500, 16px/24px): fares, ETAs, distances, IDs — nowhere else.
 
 ### Named Rules
-**The Numbers-Are-Mono Rule.** Any figure the rider is trusting financially or temporally (fare, ETA, distance, surge multiplier, OTP) renders in `--font-mono`. If it's prose describing the number, it's Inter; if it *is* the number, it's mono.
+**The Numbers-Are-Mono Rule.** Any figure the rider trusts financially or temporally (fare, ETA, distance, surge multiplier, OTP) renders in `--font-mono`. Prose describing the number is system sans; the number itself is mono.
 
 ## 4. Elevation
 
-Hybrid by design, split cleanly along one line: the booking cockpit (map-overlay booking sheet and its tiles) uses frosted glass; every other screen (trip history, account, settings, rewards) stays flat with hairline borders and soft ambient shadows, exactly as the original flat system specified. This is a deliberate scope, not a compromise — glass signals "you are actively commanding a trip right now"; flat signals "you are reviewing or configuring."
+Flat throughout. Panels separate from the canvas by hairline border first, shadow second.
 
 ### Shadow Vocabulary
-- **Elevation 1** (`0 1px 2px rgba(0,0,0,0.04)`): flat cards at rest, outside the cockpit.
-- **Elevation 2** (`0 4px 12px rgba(0,0,0,0.06)`): flat cards on hover/lift.
-- **Elevation 3** (`0 -2px 16px rgba(0,0,0,0.08)`): bottom sheets rising from the edge, outside the cockpit.
-- **Glass Shadow** (`0 4px 24px rgba(0,0,0,0.06)` + `inset 0 1px 0 rgba(255,255,255,0.7)`): the frosted tiles' soft interior highlight + drop, cockpit only.
-- **Brand Glow** (`0 4px 24px rgba(0,64,224,0.3)`): reserved for the active brand-gradient element itself (CTA, selected chip) — never applied to a flat, non-gradient surface.
+- **Elevation 1** (`0 1px 2px rgba(0,0,0,0.04)`): panels/cards at rest.
+- **Elevation 2** (`0 4px 12px rgba(0,0,0,0.06)`): hover/lift.
+- **Elevation 3** (`0 -2px 16px rgba(0,0,0,0.08)`): bottom sheets rising from the edge.
+- **Sheet shadow** (`0 -8px 32px rgba(17,24,39,0.08)`): the booking surface over the map.
 
 ### Named Rules
-**The Cockpit-Only Glass Rule.** `.glass-tile` / `.glass-panel` / `.glass-sheet` render only inside the booking flow (home map overlay, the booking sheet and its child tiles, the trip-review sheet). A settings row or a trip-history card that reaches for glass is reaching for the wrong material — it should be a flat `.card`.
+**The No-Glass Rule.** The legacy `.glass-tile` / `.glass-panel` / `.glass-sheet` class names survive in markup but render flat white panels with hairline borders. No backdrop blur, no translucent white fills, no white-on-white borders. New components use flat panels directly.
 
 ## 5. Components
 
 ### Buttons
-- **Shape:** pill radius (999px) for the primary CTA and all selectable chips/tabs; 8px radius for the flat secondary button used outside the cockpit.
-- **Primary (cockpit CTA):** brand gradient background, `content-inverse` text (#FAFAFA, never charcoal — see the Inverse-Text Rule), Brand Glow shadow, a slow one-pass sheen sweep. 64px tall, full-width.
-- **Secondary (flat, app-wide):** charcoal background (`--interactive-primary`), off-white text, no gradient, no glow. This is the default button everywhere outside the booking cockpit.
-- **Hover / Focus:** `focus-visible` ring in steel-blue accent (2px, offset). Press feedback via `--ease-spring` scale-down (0.97–0.98), not a color change.
+- **Primary CTA:** lime fill, ink text, pill radius, 56–64px tall. Hover shifts to #A9DE3D; press feedback via spring scale-down (0.97–0.98).
+- **Focus:** `focus-visible` ring in indigo (2px, offset 2px).
 
-### Chips (trip-type pills, transmission/car-class/payment selectors)
-- **Style:** unselected = glass-tile (cockpit) or flat neutral (elsewhere) with secondary ink; selected = brand-gradient fill with inverse text and Brand Glow, driven by a shared `layoutId` spring so the active indicator glides between options rather than jump-cutting.
-- **Disabled (e.g. Monthly):** glass-tile at reduced opacity with a small warning-toned "Soon" badge (11px minimum, warning-600 text — never the earlier 9px).
+### Chips & selectors (trip type, transmission, car class, payment)
+- **Unselected:** flat white tile, hairline border, secondary ink.
+- **Selected:** lime pill/fill with ink text for large chips; lime-tint background + 2px Lime Strong border for cards; shared `layoutId` spring glides the indicator between options.
 
-### Cards / Containers (flat, app-wide default)
-- **Corner Style:** 12px (`--radius-md`).
-- **Background:** Canvas or Canvas Secondary.
-- **Shadow Strategy:** Elevation 1 at rest, Elevation 2 on hover/lift.
-- **Border:** 1px hairline, `--border-opaque`.
-- **Internal Padding:** 16px (`--space-500`).
+### Panels / Cards
+- **Corner:** 8px (`--radius-md`). **Background:** white or canvas-secondary. **Border:** 1px hairline. **Padding:** 16–24px.
 
-### Inputs / Fields
-- **Style:** 8px radius, 1px hairline border, Canvas Secondary background, 48px height minimum.
-- **Focus:** border shifts to steel-blue accent + 2px focus ring.
-- **Placeholder:** Ink Tertiary on flat canvas; Ink Tertiary On Glass (one step darker) inside the cockpit.
-- **Progressive disclosure:** rare-use fields (promo code) start collapsed behind a small text-link toggle rather than permanently occupying cockpit real estate at the same visual weight as pickup/drop-off.
+### Inputs
+- **Style:** canvas-secondary fill, hairline border, 8px radius, ≥48px tall. **Focus:** indigo border + ring. **Placeholder:** Ink Tertiary.
 
-### Navigation (bottom tubelight tab bar)
-- **Style:** floating pill bar, frosted (glass-solid), fixed to viewport bottom above the safe-area inset.
-- **Active indicator:** a `layoutId`-animated glow pill in brand blue (never charcoal — a charcoal blur reads as a smudge, not a glow) beneath the active tab's icon+label; the label itself stays charcoal ink for on-white legibility.
-- **Touch targets:** every tab ≥44×44px; icon-only affordances elsewhere in the cockpit (swap button, stepper, info button) hit the same floor via either direct sizing or the `.touch-target` invisible-hit-area utility.
+### Navigation (bottom tab bar)
+- Floating white pill bar, hairline border, above the safe-area inset.
+- **Active indicator:** a `layoutId`-animated lime pill filling the active tab area, ink label on top; inactive tabs are secondary ink.
+- **Touch targets:** every tab ≥44×44px.
 
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** reserve the brand gradient (#0040E0 → #2563EB → #4F46E5) for exactly two roles: the primary CTA and active-state indicators. Everywhere else, charcoal or steel-blue.
-- **Do** map every inverse-text use through `--color-content-inverse` and verify 4.5:1 before shipping a gradient-backed button or chip.
-- **Do** keep frosted glass (`.glass-tile`/`.glass-panel`/`.glass-sheet`) scoped to the booking cockpit only; flat + hairline everywhere else.
-- **Do** render fares, ETAs, distances, and IDs in `--font-mono`; everything else in Inter.
-- **Do** collapse rare-use controls (promo codes, secondary toggles) behind progressive disclosure instead of giving them equal permanent weight next to the primary task.
-- **Do** keep every interactive control ≥44×44px, using the `.touch-target` invisible-hit-area technique for visually-small icon buttons that can't grow without breaking layout.
+- **Do** reserve raw lime for exactly two roles: the primary CTA fill and active-state fills/tints. Everywhere else, ink, gray, Lime Strong, or indigo.
+- **Do** pair every lime fill with ink text/icons via the pre-paired interactive tokens.
+- **Do** use Lime Strong (#5F821F) for any lime that must read against white: text, 2px selected borders, dots, thin indicators.
+- **Do** render fares, ETAs, distances, and IDs in `--font-mono`.
+- **Do** keep panels flat: white fill, hairline border, 8px radius.
+- **Do** keep every interactive control ≥44×44px.
 
 ### Don't:
-- **Don't** use gradient text (`background-clip: text`) — the gradient lives on surfaces and buttons, never behind text.
-- **Don't** apply glassmorphism outside the booking cockpit — a settings row or trip-history card reaching for `.glass-tile` is using the wrong material.
-- **Don't** hardcode brand-gradient hex values in component JSX (e.g. `colorFrom="#1a5cff"`) — always reference `var(--color-secondary)` and its siblings so the palette has exactly one source of truth in `tokens.css`.
-- **Don't** ship a gradient-backed element with unmapped or assumed-inverse text — verify the token resolves and the contrast clears 4.5:1.
-- **Don't** run more than one infinite decorative motion loop competing for attention on a single screen at default (non-reduced) motion; each one needs to earn its place.
-- **Don't** use all-caps display headlines, or introduce a brand color outside charcoal / steel-blue / the brand gradient.
+- **Don't** put white text or white icons on lime — ink only.
+- **Don't** use raw lime (#B7EC4B) as text, thin strokes, or small indicators on white.
+- **Don't** use gradient text or brand gradients — the gradient era is over; fills are solid.
+- **Don't** reintroduce frosted glass or translucent white borders (`border-white/60` on white panels is invisible).
+- **Don't** hardcode palette hexes in component JSX where a token exists — `tokens.css` is the single source of truth.
+- **Don't** use all-caps display headlines, or introduce a brand color outside lime / Lime Strong / indigo / the status set.

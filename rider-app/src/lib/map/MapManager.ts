@@ -174,7 +174,7 @@ export class MapManager {
       source: ROUTE_SOURCE_ID,
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
-        "line-color": "#1a5cff",
+        "line-color": "#A5B4FC",
         "line-width": 10,
         "line-opacity": 0.22,
         "line-blur": 4,
@@ -186,7 +186,7 @@ export class MapManager {
       source: ROUTE_SOURCE_ID,
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
-        "line-color": "#4A6FA5",
+        "line-color": "#4F46E5",
         "line-width": 4,
         "line-opacity": 0.95,
       },

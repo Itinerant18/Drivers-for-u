@@ -86,7 +86,7 @@ export default function ReferPage() {
           <p className="text-xs text-white/80">Your referral code</p>
           <HyperText
             as="span"
-            className="my-2 text-3xl font-bold tracking-[0.3em] text-content-primary"
+            className="my-2 text-3xl font-bold tracking-[0.3em] text-white"
             duration={1000}
             delay={300}
             animateOnHover={false}
@@ -100,7 +100,7 @@ export default function ReferPage() {
             shimmerColor="rgba(255,255,255,0.4)"
             background="rgba(255,255,255,0.2)"
             borderRadius="12px"
-            className="px-4 py-2 text-sm font-semibold"
+            className="px-4 py-2 text-sm font-semibold text-white"
           >
             {copied ? "Copied!" : "Copy Code"}
           </ShimmerButton>
@@ -175,7 +175,7 @@ function ReferralItem({
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      {hover && <ShineBorder borderWidth={1} duration={6} shineColor="#4A6FA5" />}
+      {hover && <ShineBorder borderWidth={1} duration={6} shineColor="#4F46E5" />}
       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-accent text-sm font-bold text-content-accent">
         {code.slice(0, 2)}
       </div>

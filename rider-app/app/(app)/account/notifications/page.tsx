@@ -88,7 +88,7 @@ export default function NotificationsPage() {
                             n.is_read ? "bg-background-secondary" : "bg-background-tertiary ring-1 ring-border-accent"
                           }`}
                         >
-                          <ShineBorder borderWidth={1} duration={8} shineColor="#4A6FA5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           <div className="flex items-start gap-2">
                             {!n.is_read && <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-accent-400" />}
                             <div className="min-w-0 flex-1">

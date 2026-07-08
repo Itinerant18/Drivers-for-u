@@ -39,10 +39,10 @@ export default function WebGLShaderBackground() {
           float t = u_time * 0.15;
           
           // Light Theme Palette
-          vec3 color1 = vec3(0.973, 0.976, 1.0);   // surface (#f8f9ff)
-          vec3 color2 = vec3(0.796, 0.859, 0.961); // surface-dim (#cbdbf5)
+          vec3 color1 = vec3(0.976, 0.984, 0.957); // surface (#f9fbf4 — faint lime-white)
+          vec3 color2 = vec3(0.894, 0.949, 0.784); // surface-dim (#e4f2c8 — soft lime wash)
           vec3 color3 = vec3(1.0, 1.0, 1.0);       // surface-bright (#ffffff)
-          vec3 accent = vec3(0.0, 0.329, 0.925);   // primary (#0054ec)
+          vec3 accent = vec3(0.718, 0.925, 0.294); // brand lime (#B7EC4B)
           
           // Fluid silk-like movement
           float noise = sin(uv.x * 2.0 + t) * cos(uv.y * 1.5 - t * 0.4);

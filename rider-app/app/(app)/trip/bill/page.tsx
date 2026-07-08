@@ -258,7 +258,7 @@ export default function BillPage() {
           disabled={paying}
           onClick={handlePay}
           shimmerColor="rgba(255,255,255,0.3)"
-          background="#1a5cff"
+          background="var(--color-secondary)"
           borderRadius="16px"
           className="w-full py-4 text-base font-bold shadow-elevation-2 disabled:opacity-60"
         >

@@ -191,9 +191,9 @@ export default function RatePage() {
           onClick={handleSubmit}
           disabled={submitting || stars === 0}
           shimmerColor="rgba(255,255,255,0.3)"
-          background="#1a1a1a"
+          background="#111827"
           borderRadius="16px"
-          className="w-full py-4 text-base font-bold shadow-elevation-2 disabled:opacity-40"
+          className="w-full py-4 text-base font-bold text-white shadow-elevation-2 disabled:opacity-40"
         >
           {submitting ? "Submitting…" : "Submit Rating"}
         </ShimmerButton>

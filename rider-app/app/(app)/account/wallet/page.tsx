@@ -95,7 +95,7 @@ export default function WalletPage() {
           type="button"
           onClick={() => setShowAdd(true)}
           shimmerColor="rgba(255,255,255,0.3)"
-          background="#1a5cff"
+          background="var(--color-secondary)"
           borderRadius="16px"
           className="mt-3 py-3.5 text-sm font-bold"
         >
@@ -218,7 +218,7 @@ function AddMoneySheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
               disabled={paise <= 0}
               onClick={pay}
               shimmerColor="rgba(255,255,255,0.3)"
-              background="#1a5cff"
+              background="var(--color-secondary)"
               borderRadius="16px"
               className="py-4 text-base font-bold disabled:opacity-40"
             >

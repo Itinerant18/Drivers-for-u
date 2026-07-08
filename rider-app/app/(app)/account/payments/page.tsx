@@ -236,7 +236,7 @@ export default function PaymentsPage() {
             <div className="mb-3 space-y-2">
               {cards.map((c) => (
                 <div key={c.id} className="group relative rounded-xl bg-background-secondary px-4 py-3 overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]">
-                  <ShineBorder borderWidth={1} duration={8} shineColor="#4A6FA5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <CardIcon size={20} className="text-content-secondary" />
@@ -282,11 +282,11 @@ export default function PaymentsPage() {
                 toRef={cardExpiryRef}
                 curvature={-20}
                 duration={5}
-                pathColor="#4A6FA5"
+                pathColor="#4F46E5"
                 pathWidth={1.5}
                 pathOpacity={0.12}
-                gradientStartColor="#4A6FA5"
-                gradientStopColor="#1a5cff"
+                gradientStartColor="#4F46E5"
+                gradientStopColor="#4F46E5"
               />
               <AnimatedBeam
                 containerRef={cardFormRef}
@@ -294,11 +294,11 @@ export default function PaymentsPage() {
                 toRef={cardNameRef}
                 curvature={-20}
                 duration={5}
-                pathColor="#4A6FA5"
+                pathColor="#4F46E5"
                 pathWidth={1.5}
                 pathOpacity={0.12}
-                gradientStartColor="#4A6FA5"
-                gradientStopColor="#1a5cff"
+                gradientStartColor="#4F46E5"
+                gradientStopColor="#4F46E5"
                 reverse
               />
               <div className="rounded-xl bg-background-tertiary px-3 py-2 text-xs text-content-secondary">
@@ -377,7 +377,7 @@ export default function PaymentsPage() {
                   key={u.id}
                   className="group relative flex items-center justify-between rounded-xl bg-background-secondary px-4 py-3 overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]"
                 >
-                  <ShineBorder borderWidth={1} duration={8} shineColor="#4A6FA5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="flex items-center gap-2">
                     <PaymentIcon size={20} className="text-content-secondary" />
                     <span className="text-sm text-content-primary">{u.vpa}</span>

@@ -389,7 +389,7 @@ function SupportBody() {
             disabled={!canSubmit || submitting}
             onClick={submit}
             shimmerColor="rgba(255,255,255,0.3)"
-            background="#1a5cff"
+            background="var(--color-secondary)"
             borderRadius="16px"
             className="mt-3 py-3.5 text-sm font-bold disabled:opacity-40"
           >
@@ -463,7 +463,7 @@ function SupportBody() {
                   ▾
                 </span>
               </button>
-              {faqOpen === i && <p className="px-4 pb-4 text-xs text-content-secondary"><Highlighter color="#4A6FA5" action="underline" animationDuration={800}>{f.a}</Highlighter></p>}
+              {faqOpen === i && <p className="px-4 pb-4 text-xs text-content-secondary"><Highlighter color="#4F46E5" action="underline" animationDuration={800}>{f.a}</Highlighter></p>}
             </div>
           ))}
         </div>
@@ -485,7 +485,7 @@ function SupportBody() {
                 onClick={() => openThread(t)}
                 className="group relative flex w-full items-center justify-between rounded-2xl bg-background-secondary p-4 overflow-hidden text-left active:scale-[0.99] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
               >
-                <ShineBorder borderWidth={1} duration={8} shineColor="#4A6FA5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div>
                   <p className="text-sm text-content-primary">{t.subject}</p>
                   <p className="font-mono text-xs text-content-tertiary">{t.id.slice(0, 12)}</p>

@@ -45,7 +45,7 @@ function Progress({ step }: { step: number }) {
           <div
             key={i}
             className={`h-1.5 flex-1 rounded-full transition-colors ${
-              i < step ? "bg-interactive-primary" : "bg-background-tertiary"
+              i < step ? "bg-secondary-strong" : "bg-background-tertiary"
             }`}
           />
         ))}

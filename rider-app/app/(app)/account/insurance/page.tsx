@@ -381,7 +381,7 @@ export default function InsurancePage() {
                 type="button"
                 onClick={() => setSheetOpen(true)}
                 shimmerColor="rgba(255,255,255,0.3)"
-                background="#1a5cff"
+                background="var(--color-secondary)"
                 borderRadius="12px"
                 className="px-4 py-2 text-sm font-bold"
               >

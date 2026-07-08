@@ -86,7 +86,7 @@ export default function AccountPage() {
         {/* Profile card */}
         <BlurFade delay={0.15}>
           <div className="relative flex items-center gap-4 rounded-2xl bg-background-secondary p-4 overflow-hidden">
-            <BorderBeam size={80} duration={8} colorFrom="#1a5cff" colorTo="rgba(26,92,255,0.1)" borderWidth={1.5} />
+            <BorderBeam size={80} duration={8} colorFrom="#4F46E5" colorTo="rgba(79,70,229,0.1)" borderWidth={1.5} />
             <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-accent text-2xl font-bold text-content-accent">
               {rider?.profile_photo_url ? (
                 // eslint-disable-next-line @next/next/no-img-element

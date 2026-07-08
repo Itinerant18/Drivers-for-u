@@ -27,8 +27,6 @@ import {
   driverArriveAtPickup,
   addOrderEvent,
   driverEndTrip,
-  driverConfirmPayment,
-  FinalBill,
   getDriverOrder,
   getFatigueCheck,
   FatigueCheckResponse,
@@ -195,9 +193,6 @@ export default function DriverTerminalPage() {
   const [parkingCharges, setParkingCharges] = useState(0);
   
   // Post-trip ratings
-  const [riderRating, setRiderRating] = useState(5);
-  const [riderCommentTags, setRiderCommentTags] = useState<string[]>([]);
-  const [finalBill, setFinalBill] = useState<FinalBill | null>(null);
 
   // Wait timer reference time and Cancel picker overlay states
   const [arrivedTime, setArrivedTime] = useState<Date | null>(null);
@@ -840,7 +835,6 @@ export default function DriverTerminalPage() {
         fuel_level: endFuel,
         photo_url: endOdoPhoto || '',
       });
-      setFinalBill(bill);
       logAudit('TRIP_END_SYNCED', { orderId: activeTrip.order_id, total: bill.total_fare_paise });
       try {
         sessionStorage.setItem(`final_bill_${activeTrip.order_id}`, JSON.stringify(bill));
@@ -855,67 +849,6 @@ export default function DriverTerminalPage() {
     }
   };
 
-  const handlePaymentConfirmationSubmit = async (method: string) => {
-    logAudit('PAYMENT_CONFIRMED', {
-      orderId: activeTrip?.order_id,
-      method,
-      riderRatingGiven: riderRating,
-      tags: riderCommentTags
-    });
-
-    if (activeTrip?.order_id && token) {
-      try {
-        await driverConfirmPayment(token, activeTrip.order_id, {
-          payment_method: method as 'UPI' | 'CASH',
-          rider_rating: riderRating,
-          tags: riderCommentTags,
-        });
-      } catch (err) {
-        console.warn('Payment confirmation sync failed:', err);
-      }
-    }
-
-    useToastStore.getState().show(
-      `Payment of ₹${(finalBill ? finalBill.total_fare_paise / 100 : calculateTotalBill()).toFixed(2)} settled via ${method}.`,
-      'success',
-    );
-    
-    // Clear trip states
-    setActiveTrip(null);
-    setStartOdometer('');
-    setEndOdometer('');
-    setTollCharges(0);
-    setParkingCharges(0);
-    setRiderCommentTags([]);
-    setFinalBill(null);
-    setDutyState('ONLINE');
-  };
-
-  // Payout breakdown values
-  const calculateTotalBill = () => {
-    if (finalBill) return finalBill.total_fare_paise / 100;
-    if (!activeTrip) return 0;
-    const baseFare = activeTrip.quoted_fare_paise / 100;
-    const startNum = parseFloat(startOdometer) || 0;
-    const endNum = parseFloat(endOdometer) || startNum;
-    const distanceExtra = Math.max(0, (endNum - startNum) - 15) * 18; // charge ₹18 per km after 15 km free
-    const waitCharge = Math.round(waitingCharges);
-    const nightSurge = 50; // Night fee
-    const careFee = 15; // D4M Care
-    
-    return baseFare + distanceExtra + waitCharge + nightSurge + tollCharges + parkingCharges + careFee;
-  };
-
-  const toggleRiderCommentTag = (tag: string) => {
-    setRiderCommentTags((prev) => {
-      const idx = prev.indexOf(tag);
-      if (idx > -1) {
-        return prev.filter((t) => t !== tag);
-      } else {
-        return [...prev, tag];
-      }
-    });
-  };
   if (kycPending) {
     return (
       <div className="min-h-screen bg-background-primary text-content-primary p-6 sm:p-12 font-body flex flex-col justify-between">

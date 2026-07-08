@@ -2,10 +2,10 @@ import React from 'react';
 import Link from 'next/link';
 import { DutyState, useDriverDutyStore } from '../store/useDriverDutyStore';
 import { OfferPopup } from './OfferPopup';
-import { FinalBill, DriverProfile } from '../api/client';
+import { DriverProfile } from '../api/client';
 import { ArrivedVerificationPane } from '../app/driver/trip/live/ArrivedVerificationPane';
 import { TripInProgressPane } from '../app/driver/trip/live/TripInProgressPane';
-import { FareDisplay, ETADisplay, StatusBadge, PhoneIcon, ChatIcon, NavigateIcon, CheckIcon, CashIcon, CardIcon } from './ds';
+import { FareDisplay, ETADisplay, StatusBadge, PhoneIcon, ChatIcon, NavigateIcon, CheckIcon } from './ds';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DashboardHome — Duty toggle + stats
@@ -303,157 +303,6 @@ export const NavigationPane: React.FC<NavigationPaneProps> = ({
       >
         Cancel Allocation
       </button>
-    </div>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// CompletedPane — Receipt & Rating
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface CompletedPaneProps {
-  activeTrip: any;
-  startOdometer: string;
-  endOdometer: string;
-  waitingCharges: number;
-  tollCharges: number;
-  parkingCharges: number;
-  riderRating: number;
-  setRiderRating: (r: number) => void;
-  riderCommentTags: string[];
-  toggleRiderCommentTag: (t: string) => void;
-  handlePaymentConfirmationSubmit: (m: string) => void;
-  calculateTotalBill: () => number;
-  finalBill?: FinalBill | null;
-}
-
-export const CompletedPane: React.FC<CompletedPaneProps> = ({
-  activeTrip,
-  startOdometer,
-  endOdometer,
-  waitingCharges,
-  tollCharges,
-  parkingCharges,
-  riderRating,
-  setRiderRating,
-  riderCommentTags,
-  toggleRiderCommentTag,
-  handlePaymentConfirmationSubmit,
-  calculateTotalBill,
-  finalBill,
-}) => {
-  const displayTotal = finalBill ? finalBill.total_fare_paise / 100 : calculateTotalBill();
-  const baseFare = finalBill ? finalBill.base_fare_paise / 100 : activeTrip.quoted_fare_paise / 100;
-  const distanceCharge = finalBill
-    ? finalBill.distance_charge_paise / 100
-    : Math.max(0, (parseFloat(endOdometer) - parseFloat(startOdometer) - 15) * 18);
-  const waitCharge = finalBill ? finalBill.wait_charge_paise / 100 : waitingCharges;
-  const tolls = finalBill ? finalBill.tolls_paise / 100 : tollCharges;
-  const parking = finalBill ? finalBill.parking_charges_paise / 100 : parkingCharges;
-  const surge = finalBill ? finalBill.night_surge_paise / 100 : 50;
-  const care = finalBill ? finalBill.care_surcharge_paise / 100 : 15;
-  const waitMinutes = finalBill ? finalBill.wait_minutes : Math.round(waitingCharges / 2);
-
-  return (
-    <div className="space-y-4 text-left animate-enter">
-
-      {/* ── Title row ── */}
-      <div className="flex items-center justify-between border-b border-border-opaque pb-3">
-        <h3 className="text-heading-medium text-content-primary">Receipt & Settlement</h3>
-        <FareDisplay amount={displayTotal * 100} size="lg" className="text-content-positive" />
-      </div>
-
-      {/* ── Fare breakdown ── */}
-      <div className="bg-background-secondary rounded-md p-4 space-y-2 border border-border-opaque">
-        {[
-          { label: 'Base Package', value: baseFare },
-          distanceCharge > 0 && { label: 'Extra Mileage', value: distanceCharge },
-          waitCharge > 0 && { label: `Waiting (${waitMinutes} min)`, value: waitCharge },
-          tolls > 0 && { label: 'Tolls/Gate Fee', value: tolls },
-          parking > 0 && { label: 'Parking Fee', value: parking },
-          { label: 'Night/Surge', value: surge },
-          { label: 'D4M Care', value: care },
-        ].filter(Boolean).map((row: any) => (
-          <div key={row.label} className="flex justify-between items-center">
-            <span className="text-paragraph-small text-content-secondary">{row.label}</span>
-            <FareDisplay amount={row.value * 100} size="sm" />
-          </div>
-        ))}
-        <div className="border-t border-border-opaque pt-2 flex justify-between items-center">
-          <span className="text-label-large text-content-primary font-medium">Grand Total</span>
-          <FareDisplay amount={displayTotal * 100} size="md" className="text-content-positive font-bold" />
-        </div>
-      </div>
-
-      {/* ── Rider rating ── */}
-      <div className="space-y-2">
-        <span className="text-label-small text-content-tertiary uppercase tracking-wider block">
-          Rate Rider
-        </span>
-        <div className="flex items-center justify-between bg-background-secondary rounded-sm p-3 border border-border-opaque">
-          <div className="flex gap-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => setRiderRating(star)}
-                aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-                className={`text-2xl min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer transition-base ${
-                  star <= riderRating ? 'text-content-warning' : 'text-border-opaque'
-                }`}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-          <span className="text-label-small text-content-secondary font-mono">{riderRating} / 5</span>
-        </div>
-
-        <div className="flex flex-wrap gap-2 pt-1">
-          {['Polite', 'Punctual', 'Clean Car', 'Low Noise', 'Cooperative'].map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => toggleRiderCommentTag(tag)}
-              className={[
-                'text-label-small py-2 px-3 rounded-pill border transition-base cursor-pointer min-h-[36px]',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400',
-                riderCommentTags.includes(tag)
-                  ? 'bg-interactive-primary border-interactive-primary text-interactive-primary-text'
-                  : 'bg-background-secondary border-border-opaque text-content-secondary hover:text-content-primary',
-              ].join(' ')}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Payment CTAs ── */}
-      <div className="grid grid-cols-2 gap-3 pt-2">
-        <button
-          onClick={() => handlePaymentConfirmationSubmit('CASH')}
-          className="h-14 rounded-sm bg-background-secondary border border-border-opaque
-            text-label-large text-content-primary font-medium
-            cursor-pointer transition-base hover:bg-background-tertiary active:scale-95
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
-        >
-          <span className="inline-flex items-center justify-center gap-2">
-            <CashIcon size={18} /> Cash
-          </span>
-        </button>
-        <button
-          onClick={() => handlePaymentConfirmationSubmit('UPI')}
-          className="h-14 rounded-sm bg-interactive-primary
-            text-interactive-primary-text text-label-large font-medium
-            cursor-pointer transition-base hover:opacity-90 active:scale-95
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"
-        >
-          <span className="inline-flex items-center justify-center gap-2">
-            <CardIcon size={18} /> UPI
-          </span>
-        </button>
-      </div>
     </div>
   );
 };

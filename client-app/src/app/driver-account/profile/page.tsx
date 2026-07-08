@@ -318,8 +318,9 @@ export default function DriverProfilePage() {
       {/* Serviced Cities and Vehicles */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5">
-          <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Serviced Cities</span>
-          <p className="text-xs text-white leading-relaxed">Kolkata Metro (Salt Lake, New Town, Alipore, Howrah, Park Street, Tollygunge)</p>
+          <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Serviced City</span>
+          {/* ponytail: profile only carries the city prefix; render the city name when an API exposes it */}
+          <p className="text-xs text-white leading-relaxed">Regional hub: {cityPrefix}</p>
         </div>
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5">
           <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Registered Vehicles</span>

@@ -14,7 +14,9 @@ const DriverMap = dynamic(() => import('@/components/map/DriverMap'), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-background-secondary" />,
 });
-import { DriverDrawer } from '../../components/DriverDrawer';
+import { TabBar } from '@/components/TabBar';
+import { UserIcon } from '@/components/ds/Icon';
+import Link from 'next/link';
 import { DevLocationSpoof } from '../../components/DevLocationSpoof';
 import { SosModal } from '../../components/SosModal';
 import { useSafetyStore } from '../../store/useSafetyStore';
@@ -43,7 +45,7 @@ import { connectDispatchStream } from '@/services/dispatchStream';
 import { connectHeatmapStream, HeatmapData } from '@/services/heatmapStream';
 import { startTelemetryStream, TelemetryStreamHandle } from '@/services/telemetryStream';
 import { OfferPopup } from '@/components/OfferPopup';
-import { RefreshIcon, MenuIcon, SirenIcon, NavigateIcon, SignalIcon, FlameIcon, PauseIcon, ChatIcon, OctagonAlertIcon, ClockIcon } from '@/components/ds';
+import { RefreshIcon, SirenIcon, NavigateIcon, SignalIcon, FlameIcon, PauseIcon, ChatIcon, OctagonAlertIcon, ClockIcon } from '@/components/ds';
 import { useOfferStore } from '@/store/useOfferStore';
 import { openGoogleMapsNavigation } from '@/lib/map/navigation';
 import { useToastStore } from '@/store/useToastStore';
@@ -166,8 +168,6 @@ export default function DriverTerminalPage() {
   const [activeVehicle, setActiveVehicle] = useState('');
   const [preferredTripFilter, setPreferredTripFilter] = useState<'ALL' | 'CITY' | 'OUTSTATION'>('ALL');
   
-  // Navigation states
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
 
   
@@ -944,18 +944,7 @@ export default function DriverTerminalPage() {
   return (
     <div className="min-h-screen bg-background-primary text-content-primary p-0 font-sans flex flex-col justify-between selection:bg-forest-400 selection:text-white overflow-x-hidden relative">
       
-      {/* 1. HAMBURGER SLIDE DRAWER MENU OVERLAY */}
-      <DriverDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        driverProfile={{
-          name: driverName || "Driver Partner",
-          photo: "",
-          rating: 4.92,
-        }}
-      />
-
-      {/* 2. SOS EMERGENCY PULSE TRIGGER MODAL */}
+      {/* 1. SOS EMERGENCY PULSE TRIGGER MODAL */}
       <SosModal />
 
       {/* DEV-ONLY: GPS location spoof (tree-shaken out of prod) */}
@@ -1078,15 +1067,15 @@ export default function DriverTerminalPage() {
       {/* TOP HEADER */}
       <header className="bg-background-primary border-b border-border-opaque px-4 py-3 sticky top-0 z-50 flex justify-between items-center w-full">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsDrawerOpen(true)}
+          <Link
+            href="/driver-account/profile"
             className="h-11 w-11 bg-background-secondary hover:bg-background-tertiary rounded-sm border border-border-opaque
               flex items-center justify-center text-content-primary cursor-pointer transition-base active:scale-95
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
-            aria-label="Open Navigation Drawer"
+            aria-label="Account"
           >
-            <MenuIcon size={20} />
-          </button>
+            <UserIcon size={20} />
+          </Link>
           <div>
             <h1 className="text-label-large font-mono tracking-tight uppercase text-content-primary">VAHNLY</h1>
             <div className="flex items-center gap-1.5 mt-0.5 font-mono text-label-small text-content-tertiary">
@@ -1244,8 +1233,11 @@ export default function DriverTerminalPage() {
           )}
         </div>
 
-        {/* BOTTOM CONTROL SHEET */}
-        <div className="mt-auto w-full z-10 bg-background-primary/95 border-t border-border-opaque p-4 sm:p-6 space-y-4 max-w-xl mx-auto rounded-t-lg shadow-elevation-3 backdrop-blur-sm">
+        {/* BOTTOM CONTROL SHEET — leaves room for the tab bar while browsing
+            offline; during duty/trips the trip flow owns the bottom edge. */}
+        <div className={`mt-auto w-full z-10 bg-background-primary/95 border-t border-border-opaque p-4 sm:p-6 space-y-4 max-w-xl mx-auto rounded-t-lg shadow-elevation-3 backdrop-blur-sm ${
+          dutyState === 'OFFLINE' ? 'mb-[calc(3.5rem+env(safe-area-inset-bottom))]' : ''
+        }`}>
           {/* Mid-trip wait toggle (round-trip destination wait, billed) */}
           {dutyState === 'DELIVERING' && activeTrip && (
             <button
@@ -1369,6 +1361,10 @@ export default function DriverTerminalPage() {
           </SentryErrorBoundary>
         </div>
       </main>
+
+      {/* PRIMARY TAB BAR — browsing mode only; the trip flow owns the bottom
+          edge once the driver is on duty. */}
+      {dutyState === 'OFFLINE' && <TabBar />}
 
       {/* TELEMETRY LOG CONSOLE */}
       {auditLogs.length > 0 && (

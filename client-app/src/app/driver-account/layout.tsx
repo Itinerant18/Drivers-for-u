@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import AuthGuard from '../../components/AuthGuard';
+import { TabBar } from '@/components/TabBar';
 import { useAuthStore } from '@/store/useAuthStore';
 
 import {
@@ -166,9 +167,14 @@ export default function DriverAccountLayout({ children }: { children: React.Reac
         )}
 
         {/* 4. MAIN CENTRAL CONTENT AREA PANEL */}
-        <main className="flex-1 p-4 sm:p-8 overflow-y-auto h-screen max-w-4xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-8 pb-24 md:pb-8 overflow-y-auto h-screen max-w-4xl mx-auto w-full">
           {children}
         </main>
+
+        {/* Primary tab bar on phones; the md+ sidebar covers navigation above. */}
+        <div className="md:hidden">
+          <TabBar />
+        </div>
 
       </div>
     </AuthGuard>

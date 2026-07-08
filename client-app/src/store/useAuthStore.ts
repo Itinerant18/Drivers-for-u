@@ -14,10 +14,16 @@ interface AuthState {
   refreshToken: string | null;
   user: User | null;
   isAuthenticated: boolean;
+  // False until the persist middleware has finished reading localStorage on
+  // the client. Guards must wait for this — checking isAuthenticated before
+  // rehydration completes always reads the default (false) and bounces an
+  // already-logged-in user back to the login screen.
+  hasHydrated: boolean;
   login: (token: string, user: User, refreshToken?: string) => void;
   updateTokens: (token: string, refreshToken?: string) => void;
   logout: () => void;
   setPhoneVerified: (verified: boolean) => void;
+  setHasHydrated: (hydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,6 +33,7 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       user: null,
       isAuthenticated: false,
+      hasHydrated: false,
       login: (token, user, refreshToken) =>
         set({ token, user, refreshToken: refreshToken ?? null, isAuthenticated: true }),
       // Swap in a freshly-refreshed access token (and rotated refresh token) without disturbing
@@ -55,9 +62,13 @@ export const useAuthStore = create<AuthState>()(
           };
         });
       },
+      setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
     }),
     {
       name: 'platform-auth-storage', // Persists to localStorage automatically
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

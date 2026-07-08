@@ -6,13 +6,20 @@ import { useRouter, usePathname } from 'next/navigation';
 import PhoneVerificationGate from './PhoneVerificationGate';
 
 export default function AuthGuard({ children, allowedRole }: { children: React.ReactNode, allowedRole: 'RIDER' | 'DRIVER' }) {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, hasHydrated } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     // Bypass auth gates if the user is already loading the login, onboarding or public share screens
     if (pathname === '/login' || pathname === '/driver-onboarding' || pathname === '/share' || pathname === '/driver/login') {
+      return;
+    }
+
+    // Wait for the persisted session to load from localStorage before judging
+    // auth state — otherwise every fresh page load reads the pre-hydration
+    // default (isAuthenticated: false) and bounces a logged-in user to /login.
+    if (!hasHydrated) {
       return;
     }
 
@@ -28,7 +35,7 @@ export default function AuthGuard({ children, allowedRole }: { children: React.R
       const fallbackRoute = allowedRole === 'DRIVER' ? '/login?role=driver' : '/login?role=rider';
       router.push(fallbackRoute);
     }
-  }, [isAuthenticated, user, router, allowedRole, pathname]);
+  }, [isAuthenticated, user, router, allowedRole, pathname, hasHydrated]);
 
   // Bypass visual overlay for login, onboarding, and share screens
   if (pathname === '/login' || pathname === '/driver-onboarding' || pathname === '/share' || pathname === '/driver/login') {

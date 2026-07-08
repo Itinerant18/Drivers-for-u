@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { DutyState, useDriverDutyStore } from '../store/useDriverDutyStore';
 import { OfferPopup } from './OfferPopup';
 import { FinalBill, DriverProfile } from '../api/client';
@@ -506,13 +507,6 @@ interface DriverTripManagerProps {
   // Expands the rider-chat panel in the bottom sheet on /driver.
   onOpenChat?: () => void;
   triggerSOS?: () => void;
-  riderRating: number;
-  setRiderRating: (r: number) => void;
-  riderCommentTags: string[];
-  toggleRiderCommentTag: (t: string) => void;
-  handlePaymentConfirmationSubmit: (m: string) => void;
-  calculateTotalBill: () => number;
-  finalBill?: FinalBill | null;
 }
 
 export const DriverTripManager: React.FC<DriverTripManagerProps> = (props) => {
@@ -586,22 +580,27 @@ export const DriverTripManager: React.FC<DriverTripManagerProps> = (props) => {
 
     case 'COMPLETED':
       if (!props.activeTrip) return <DashboardHome {...props} dutyState={state} />;
+      // Settlement lives on /driver/trip/bill → /rate. Landing back here
+      // mid-settlement (back button, reload) resumes that flow instead of
+      // presenting a second, different payment UI.
       return (
-        <CompletedPane
-          activeTrip={props.activeTrip}
-          startOdometer={props.startOdometer}
-          endOdometer={props.endOdometer}
-          waitingCharges={props.waitingCharges}
-          tollCharges={props.tollCharges}
-          parkingCharges={props.parkingCharges}
-          riderRating={props.riderRating}
-          setRiderRating={props.setRiderRating}
-          riderCommentTags={props.riderCommentTags}
-          toggleRiderCommentTag={props.toggleRiderCommentTag}
-          handlePaymentConfirmationSubmit={props.handlePaymentConfirmationSubmit}
-          calculateTotalBill={props.calculateTotalBill}
-          finalBill={props.finalBill}
-        />
+        <div className="space-y-4 text-left animate-enter">
+          <div className="flex items-center justify-between border-b border-border-opaque pb-3">
+            <h3 className="text-heading-medium text-content-primary">Trip completed</h3>
+            <StatusBadge status="active" label="Settlement pending" />
+          </div>
+          <p className="text-paragraph-small text-content-secondary">
+            Confirm the payment and rate the rider to finish this trip.
+          </p>
+          <Link
+            href={`/driver/trip/bill?order_id=${props.activeTrip.order_id}`}
+            className="block w-full h-14 rounded-sm bg-interactive-primary text-interactive-primary-text
+              text-label-large font-medium text-center leading-[56px] transition-base hover:opacity-90
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
+          >
+            Resume settlement
+          </Link>
+        </div>
       );
 
     default:

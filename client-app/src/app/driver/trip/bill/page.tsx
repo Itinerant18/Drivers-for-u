@@ -45,7 +45,7 @@ export default function FinalBillPage() {
       setShowIssueForm(false);
       setIssueDesc('');
     } catch {
-      alert('Failed to report car issue. Please try again.');
+      useToastStore.getState().show('Failed to report the car issue. Try again.', 'error');
     } finally {
       setIssueSubmitting(false);
     }

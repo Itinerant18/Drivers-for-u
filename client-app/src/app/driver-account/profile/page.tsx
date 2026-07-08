@@ -8,6 +8,8 @@ import {
   DriverKycDocument,
   updateDriverProfile,
   uploadDocument,
+  getVehicles,
+  DriverVehicleFull,
 } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
 import { UserIcon, EditIcon, StarIcon, SettingsIcon, VehicleIcon } from '@/components/ds/Icon';
@@ -25,14 +27,10 @@ export default function DriverProfilePage() {
   const [savingBio, setSavingBio] = useState(false);
   const [bioMessage, setBioMessage] = useState<string | null>(null);
 
-  const [kycDocs, setKycDocs] = useState<DriverKycDocument[]>([
-    { name: 'Driving License', status: 'Verified', date: '2026-01-10' },
-    { name: 'Aadhaar Card (National ID)', status: 'Verified', date: '2026-01-10' },
-    { name: 'PAN Card (Tax Registration)', status: 'Verified', date: '2026-01-11' },
-    { name: 'Police Verification Clearance', status: 'Pending Review', date: '2026-05-24' },
-    { name: 'Address Proof (Utility Bill)', status: 'Verified', date: '2026-01-10' }
-  ]);
+  // Live-only: never show fabricated "Verified" statuses while the API loads.
+  const [kycDocs, setKycDocs] = useState<DriverKycDocument[]>([]);
   const [docsError, setDocsError] = useState<string | null>(null);
+  const [vehicles, setVehicles] = useState<DriverVehicleFull[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,6 +69,12 @@ export default function DriverProfilePage() {
           setDocsError('Live document statuses are unavailable.');
         }
       });
+
+    getVehicles(token)
+      .then((data) => {
+        if (!cancelled) setVehicles(data?.vehicles ?? []);
+      })
+      .catch(() => { /* section renders a fallback line */ });
 
     return () => {
       cancelled = true;
@@ -318,8 +322,12 @@ export default function DriverProfilePage() {
           <p className="text-xs text-white leading-relaxed">Kolkata Metro (Salt Lake, New Town, Alipore, Howrah, Park Street, Tollygunge)</p>
         </div>
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5">
-          <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Assigned Fleet Vehicles</span>
-          <p className="text-xs text-white leading-relaxed">WB-02-AK-9988 (Luxury Audi A6 SUV), KA-03-MD-4561 (Hatchback Swift Manual)</p>
+          <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Registered Vehicles</span>
+          <p className="text-xs text-white leading-relaxed">
+            {vehicles.length
+              ? vehicles.map((v) => `${v.plate} (${v.make} ${v.model}, ${v.transmission})`).join(', ')
+              : 'No vehicles on file — add one under Vehicles.'}
+          </p>
         </div>
       </div>
 

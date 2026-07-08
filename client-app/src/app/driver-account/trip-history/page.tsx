@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { TripItem } from './tripData';
 import { DriverTrip, getTripHistory, createSupportTicket } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useToastStore } from '@/store/useToastStore';
 import { FareDisplay } from '@/components/ds';
 import { LocationIcon, FlagIcon, StarIcon } from '@/components/ds/Icon';
 
@@ -111,9 +112,9 @@ export default function DriverTripHistoryPage() {
         description: reason,
         order_id: id,
       });
-      alert(`Dispute ticket ${res.ticket_number} registered. Support will verify the GPS trail and odometer uploads.`);
+      useToastStore.getState().show(`Dispute ticket ${res.ticket_number} registered — support will verify the GPS trail.`, 'success');
     } catch (err) {
-      alert('Failed to register the dispute. Please try again or contact support.');
+      useToastStore.getState().show('Failed to register the dispute. Try again or contact support.', 'error');
       console.warn('Dispute ticket failed:', err);
     }
   };

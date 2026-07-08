@@ -12,7 +12,7 @@ type DispatchState = 'ARMING' | 'DISPATCHED' | 'CANCELLED';
 
 function SosConsole() {
   const { user } = useAuthStore();
-  const driverID = user?.id || 'drv-aniket-7602';
+  const driverID = user?.id || '';
 
   const [state, setState] = useState<DispatchState>('ARMING');
   const [countdown, setCountdown] = useState(AUTO_DISPATCH_SECONDS);

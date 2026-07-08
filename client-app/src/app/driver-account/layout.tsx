@@ -29,8 +29,8 @@ import {
 export default function DriverAccountLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const driverName = user?.name || 'Aniket Karmakar';
-  const driverID = user?.id || 'drv-aniket-7602';
+  const driverName = user?.name || 'Driver';
+  const driverID = user?.id || '';
 
   const menuItems: { label: string; href: string; icon: React.ReactNode }[] = [
     { label: 'Dashboard Home', href: '/driver', icon: <DeviceMobileIcon size={18} /> },

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SlideToConfirm } from '../../../../components/SlideToConfirm';
 import { addOrderEvent } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useToastStore } from '@/store/useToastStore';
 import { FareDisplay, StatusBadge, PhoneIcon, ChatIcon, PlusIcon, ParkingIcon, SirenIcon, RouteIcon } from '../../../../components/ds';
 import { StarIcon } from '@/components/ds/Icon';
 
@@ -117,7 +118,7 @@ export const TripInProgressPane: React.FC<TripInProgressPaneProps> = ({
       setShowChargeModal(false);
       setChargeAmount('');
     } catch {
-      alert('Failed to add charge. Please try again.');
+      useToastStore.getState().show('Failed to add the charge. Try again.', 'error');
     } finally {
       setChargeSubmitting(false);
     }
@@ -174,12 +175,12 @@ export const TripInProgressPane: React.FC<TripInProgressPaneProps> = ({
           description: issueText,
         });
         logAudit?.('MID_TRIP_ISSUE_REPORTED', { orderId: activeTrip.order_id, description: issueText });
-        alert('Report filed. Support team is monitoring.');
+        useToastStore.getState().show('Report filed — support team is monitoring.', 'success');
         setIssueText('');
         setIsReportingIssue(false);
       }
     } catch {
-      alert('Failed to report. Try again.');
+      useToastStore.getState().show('Failed to file the report. Try again.', 'error');
     } finally {
       setIsSubmittingIssue(false);
     }

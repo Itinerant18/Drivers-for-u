@@ -8,6 +8,7 @@ import {
   type DriverEarningsResponse, type EarningsPeriod,
 } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useToastStore } from '@/store/useToastStore';
 import { formatCompactDate } from '@/lib/format';
 import { useCountUp } from '@/lib/useCountUp';
 import { saveAndShareCsv } from '@/lib/saveStatement';
@@ -84,7 +85,7 @@ export default function DriverEarningsPage() {
       await saveAndShareCsv(`earnings-statement-${year}-${String(month).padStart(2, '0')}.csv`, csv);
     } catch (err) {
       console.warn('[DriverEarnings] statement download failed:', err);
-      alert('Could not generate the statement. Please try again.');
+      useToastStore.getState().show('Could not generate the statement. Try again.', 'error');
     } finally {
       setDownloading(false);
     }

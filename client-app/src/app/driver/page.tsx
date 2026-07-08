@@ -39,6 +39,7 @@ import {
   resumeTrip,
   abandonTrip,
   getDriverRoute,
+  getVehicles,
 } from '@/api/client';
 import { connectDispatchStream } from '@/services/dispatchStream';
 import { connectHeatmapStream, HeatmapData } from '@/services/heatmapStream';
@@ -164,7 +165,7 @@ export default function DriverTerminalPage() {
   
   // Map settings and overlay triggers
   const [showHeatmap, setShowHeatmap] = useState(true);
-  const [activeVehicle, setActiveVehicle] = useState('WB-02-AK-9988 (Premium SUV)');
+  const [activeVehicle, setActiveVehicle] = useState('');
   const [preferredTripFilter, setPreferredTripFilter] = useState<'ALL' | 'CITY' | 'OUTSTATION'>('ALL');
   
   // Navigation states
@@ -430,6 +431,24 @@ export default function DriverTerminalPage() {
     return () => navigator.geolocation.clearWatch(watchId);
   }, [dutyState, driverID]);
 
+  // Registered vehicle for audit/trip metadata — from the vehicles API, not a
+  // hardcoded plate.
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    getVehicles(token)
+      .then(({ vehicles }) => {
+        if (!cancelled && vehicles?.length) {
+          const v = vehicles[0];
+          setActiveVehicle(`${v.plate} (${v.make} ${v.model})`);
+        }
+      })
+      .catch(() => { /* metadata only — leave blank on failure */ });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
   // Road-following route polyline for the in-trip map. Refetched when the trip
   // leg changes or the driver moves >250m from the last routed origin; the
   // backend caches identical origins so this stays cheap.
@@ -532,9 +551,7 @@ export default function DriverTerminalPage() {
               logAudit('ORDER_CANCELLED_BY_RIDER', { orderId: frame.order_id, source: 'WEBSOCKET' });
               useOfferStore.getState().clearOffer();
               useDriverDutyStore.getState().setDutyState('ONLINE');
-              if (typeof window !== 'undefined') {
-                window.alert('Trip cancelled by the rider.');
-              }
+              useToastStore.getState().show('Trip cancelled by the rider. Back to searching.', 'info');
               return;
             }
             void getPendingOffer(token)
@@ -764,7 +781,7 @@ export default function DriverTerminalPage() {
         setTollCharges((prev) => prev + 50);
         logAudit('BILLING_MODIFIER_ADDED', { type: 'TOLL', amount: 50 });
       } catch {
-        alert('Failed to record toll event on server. Please try again.');
+        useToastStore.getState().show('Failed to record the toll on the server. Try again.', 'error');
       }
     } else {
       setTollCharges((prev) => prev + 50);
@@ -782,7 +799,7 @@ export default function DriverTerminalPage() {
         setParkingCharges((prev) => prev + 30);
         logAudit('BILLING_MODIFIER_ADDED', { type: 'PARKING', amount: 30 });
       } catch {
-        alert('Failed to record parking event on server. Please try again.');
+        useToastStore.getState().show('Failed to record the parking charge on the server. Try again.', 'error');
       }
     } else {
       setParkingCharges((prev) => prev + 30);
@@ -791,14 +808,14 @@ export default function DriverTerminalPage() {
 
   const handleSlideToEndTrip = async () => {
     if (!endOdometer) {
-      alert('End Odometer KM input is required before finalizing payments.');
+      useToastStore.getState().show('Enter the end odometer reading before finalizing.', 'error');
       return;
     }
     const startNum = parseFloat(startOdometer);
     const endNum = parseFloat(endOdometer);
-    
+
     if (isNaN(startNum) || isNaN(endNum) || endNum <= startNum) {
-      alert(`Invalid End Odometer value. End Odometer must be greater than start value (${startOdometer} KM).`);
+      useToastStore.getState().show(`End odometer must be greater than the start value (${startOdometer} KM).`, 'error');
       return;
     }
 
@@ -858,7 +875,10 @@ export default function DriverTerminalPage() {
       }
     }
 
-    alert(`Payment of ₹${(finalBill ? finalBill.total_fare_paise / 100 : calculateTotalBill()).toFixed(2)} settled via ${method}. Feedback synced.`);
+    useToastStore.getState().show(
+      `Payment of ₹${(finalBill ? finalBill.total_fare_paise / 100 : calculateTotalBill()).toFixed(2)} settled via ${method}.`,
+      'success',
+    );
     
     // Clear trip states
     setActiveTrip(null);
@@ -927,10 +947,10 @@ export default function DriverTerminalPage() {
                         setKycPending(false);
                         window.location.reload();
                       } else {
-                        alert('Your application is still under review. Please wait or contact support.');
+                        useToastStore.getState().show('Application still under review. Check back later or contact support.', 'info');
                       }
                     })
-                    .catch(() => alert('Failed to check status. Try again later.'));
+                    .catch(() => useToastStore.getState().show('Failed to check status. Try again later.', 'error'));
                 }
               }}
               className="w-full h-14 rounded-sm bg-interactive-primary text-interactive-primary-text
@@ -1101,7 +1121,7 @@ export default function DriverTerminalPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!selectedCancelReason) { alert('Please select a reason.'); return; }
+                  if (!selectedCancelReason) { useToastStore.getState().show('Select a cancellation reason first.', 'error'); return; }
                   logAudit('TRIP_CANCELLED_BY_DRIVER', { orderId: activeTrip.order_id, reason: selectedCancelReason });
                   // Tell the backend so the order re-queues and the no-show penalty applies
                   // (only meaningful once the driver has accepted, i.e. EN_ROUTE/ARRIVED).
@@ -1412,13 +1432,6 @@ export default function DriverTerminalPage() {
             endOdoPhoto={endOdoPhoto}
             setEndOdoPhoto={setEndOdoPhoto}
             handleSlideToEndTrip={handleSlideToEndTrip}
-            riderRating={riderRating}
-            setRiderRating={setRiderRating}
-            riderCommentTags={riderCommentTags}
-            toggleRiderCommentTag={toggleRiderCommentTag}
-            handlePaymentConfirmationSubmit={handlePaymentConfirmationSubmit}
-            calculateTotalBill={calculateTotalBill}
-            finalBill={finalBill}
           />
           </SentryErrorBoundary>
         </div>

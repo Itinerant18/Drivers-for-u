@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { FareDisplay } from '@/components/ds';
 import { getDriverReferrals } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useToastStore } from '@/store/useToastStore';
 
 export default function DriverReferPage() {
   const t = useTranslations('driverRefer');
@@ -12,11 +13,12 @@ export default function DriverReferPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [code, setCode] = useState('DRV-ANIKET-998');
+  // No fake defaults — the card renders from live data only.
+  const [code, setCode] = useState('');
   const [stats, setStats] = useState({
-    joined: 3,
-    pending: 1,
-    earnings: 1500.00
+    joined: 0,
+    pending: 0,
+    earnings: 0
   });
 
   const load = useCallback(async () => {
@@ -46,7 +48,7 @@ export default function DriverReferPage() {
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(t('shareTextWithLink', { code, link: window.location.origin }));
-      alert(t('copySuccess'));
+      useToastStore.getState().show(t('copySuccess'), 'success');
     }
   };
 

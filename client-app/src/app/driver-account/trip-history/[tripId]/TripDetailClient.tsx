@@ -55,7 +55,7 @@ export default function TripDetailClient({ tripId }: { tripId: string }) {
     return (
       <div className="space-y-6 text-left animate-fadeIn">
         <div className="pb-4 border-b border-border-opaque">
-          <h2 className="text-xl font-bold tracking-tight text-white font-move">Trip not found</h2>
+          <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">Trip not found</h2>
           <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">No audit record for ID: {tripId}</p>
         </div>
         <Link
@@ -73,7 +73,7 @@ export default function TripDetailClient({ tripId }: { tripId: string }) {
       {/* Header */}
       <div className="flex justify-between items-center pb-4 border-b border-border-opaque">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-white font-move">Trip Audit Summary</h2>
+          <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">Trip Audit Summary</h2>
           <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">ID: {trip.id.toUpperCase()} ({trip.date})</p>
         </div>
         <Link
@@ -114,7 +114,7 @@ export default function TripDetailClient({ tripId }: { tripId: string }) {
           </span>
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className="bg-white text-black font-mono font-bold text-[8px] uppercase px-3 py-1 rounded-full cursor-pointer hover:bg-background-tertiary"
+            className="bg-interactive-primary text-interactive-primary-text font-mono font-bold text-[8px] uppercase px-3 py-1 rounded-full cursor-pointer hover:bg-background-tertiary"
           >
             {isPlaying ? 'Pause' : 'Play'}
           </button>
@@ -128,7 +128,7 @@ export default function TripDetailClient({ tripId }: { tripId: string }) {
       {/* Details split grids */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-          <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+          <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
             Trip Specifications
           </h4>
           <div className="space-y-3 text-xs font-mono text-content-secondary">
@@ -143,21 +143,21 @@ export default function TripDetailClient({ tripId }: { tripId: string }) {
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border-opaque text-[10px] font-mono">
               <div>
                 <span className="text-content-tertiary block text-[8px] uppercase font-bold">Driving Distance</span>
-                <span className="text-white block mt-0.5 font-bold">{trip.distance} KM</span>
+                <span className="text-content-primary block mt-0.5 font-bold">{trip.distance} KM</span>
               </div>
               <div>
                 <span className="text-content-tertiary block text-[8px] uppercase font-bold">Transit Time</span>
-                <span className="text-white block mt-0.5 font-bold">{trip.duration} Mins</span>
+                <span className="text-content-primary block mt-0.5 font-bold">{trip.duration} Mins</span>
               </div>
               {driverOrder && (
                 <>
                   <div>
                     <span className="text-content-tertiary block text-[8px] uppercase font-bold">Order Status</span>
-                    <span className="text-white block mt-0.5 font-bold">{driverOrder.status}</span>
+                    <span className="text-content-primary block mt-0.5 font-bold">{driverOrder.status}</span>
                   </div>
                   <div>
                     <span className="text-content-tertiary block text-[8px] uppercase font-bold">Last Odometer</span>
-                    <span className="text-white block mt-0.5 font-bold">{driverOrder.last_odometer} KM</span>
+                    <span className="text-content-primary block mt-0.5 font-bold">{driverOrder.last_odometer} KM</span>
                   </div>
                 </>
               )}
@@ -168,7 +168,7 @@ export default function TripDetailClient({ tripId }: { tripId: string }) {
         {/* Bill Receipt Itemized */}
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
           <div className="flex justify-between items-center border-b border-border-opaque pb-2">
-            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">Itemized Payout</h4>
+            <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider">Itemized Payout</h4>
             <button
               onClick={handleDispute}
               className="text-content-negative hover:text-content-negative font-mono font-bold text-[8px] uppercase tracking-wider cursor-pointer"
@@ -179,37 +179,37 @@ export default function TripDetailClient({ tripId }: { tripId: string }) {
           <div className="space-y-2 font-mono text-[10px] text-content-secondary">
             <div className="flex justify-between">
               <span>Base Package Quoted:</span>
-              <FareDisplay amount={trip.bill.base * 100} size="md" className="text-white" />
+              <FareDisplay amount={trip.bill.base * 100} size="md" className="text-content-primary" />
             </div>
             {trip.bill.tolls > 0 && (
               <div className="flex justify-between">
                 <span>Toll Additions:</span>
-                <FareDisplay amount={trip.bill.tolls * 100} size="md" className="text-white" />
+                <FareDisplay amount={trip.bill.tolls * 100} size="md" className="text-content-primary" />
               </div>
             )}
             {trip.bill.parking > 0 && (
               <div className="flex justify-between">
                 <span>Parking Additions:</span>
-                <FareDisplay amount={trip.bill.parking * 100} size="md" className="text-white" />
+                <FareDisplay amount={trip.bill.parking * 100} size="md" className="text-content-primary" />
               </div>
             )}
             {trip.bill.waiting > 0 && (
               <div className="flex justify-between">
                 <span>Waiting Charges:</span>
-                <FareDisplay amount={trip.bill.waiting * 100} size="md" className="text-white" />
+                <FareDisplay amount={trip.bill.waiting * 100} size="md" className="text-content-primary" />
               </div>
             )}
             {trip.bill.surge > 0 && (
               <div className="flex justify-between">
                 <span>Night Surge Surcharge:</span>
-                <FareDisplay amount={trip.bill.surge * 100} size="md" className="text-white" />
+                <FareDisplay amount={trip.bill.surge * 100} size="md" className="text-content-primary" />
               </div>
             )}
             <div className="flex justify-between border-t border-border-opaque pt-2 text-content-tertiary">
               <span>Platform Commission (10%):</span>
               <span className="text-content-negative">-<FareDisplay amount={trip.bill.deductions * 100} size="md" /></span>
             </div>
-            <div className="flex justify-between font-bold text-xs text-white border-t border-border-opaque pt-2">
+            <div className="flex justify-between font-bold text-xs text-content-primary border-t border-border-opaque pt-2">
               <span>Net Settled payout:</span>
               <FareDisplay amount={trip.bill.net * 100} size="md" className="text-content-positive" />
             </div>
@@ -219,7 +219,7 @@ export default function TripDetailClient({ tripId }: { tripId: string }) {
 
       {/* Feedback details */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
           Feedback Exchange Ratings
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center font-mono">

@@ -46,15 +46,22 @@ function toLngLat(point: { lat: number; lng: number }): [number, number] {
   return [point.lng, point.lat];
 }
 
+// Map cartography colors — MapLibre paints onto canvas, so CSS variables can't
+// reach them; these literals mirror tokens.css (forest-400 / accent-500 /
+// negative-400).
+const MAP_DRIVER_COLOR = '#2C3B31';
+const MAP_PICKUP_COLOR = '#5C7F61';
+const MAP_DROP_COLOR = '#C94030';
+
 function markerElement(kind: 'driver' | 'pickup' | 'drop'): HTMLElement {
   const element = document.createElement('div');
   element.innerHTML =
     kind === 'driver'
       ? `<div style="position:relative;width:28px;height:28px">
-          <div style="position:absolute;inset:0;border-radius:999px;background:#1a5cff;opacity:.24;animation:dfu-map-pulse 1.8s ease-out infinite"></div>
-          <div style="position:absolute;inset:8px;border-radius:999px;background:#1a5cff;border:2px solid white;box-shadow:0 0 18px rgba(26,92,255,.65)"></div>
+          <div style="position:absolute;inset:0;border-radius:999px;background:${MAP_DRIVER_COLOR};opacity:.24;animation:dfu-map-pulse 1.8s ease-out infinite"></div>
+          <div style="position:absolute;inset:8px;border-radius:999px;background:${MAP_DRIVER_COLOR};border:2px solid white;box-shadow:0 0 18px rgba(44,59,49,.55)"></div>
         </div>`
-      : `<div style="width:26px;height:34px;display:grid;place-items:center;border-radius:999px 999px 999px 4px;transform:rotate(-45deg);background:${kind === 'pickup' ? '#12a150' : '#e23b3b'};box-shadow:0 8px 24px rgba(0,0,0,.28)">
+      : `<div style="width:26px;height:34px;display:grid;place-items:center;border-radius:999px 999px 999px 4px;transform:rotate(-45deg);background:${kind === 'pickup' ? MAP_PICKUP_COLOR : MAP_DROP_COLOR};box-shadow:0 8px 24px rgba(0,0,0,.28)">
           <span style="transform:rotate(45deg);color:white;font-size:11px;font-weight:800">${kind === 'pickup' ? 'P' : 'D'}</span>
         </div>`;
   return element;
@@ -228,7 +235,7 @@ export default function DriverMap({
           type: 'line',
           source: ROUTE_SOURCE_ID,
           layout: { 'line-cap': 'round', 'line-join': 'round' },
-          paint: { 'line-color': '#1a5cff', 'line-width': 4, 'line-opacity': 0.9 },
+          paint: { 'line-color': MAP_DRIVER_COLOR, 'line-width': 4, 'line-opacity': 0.9 },
         });
       }
     };

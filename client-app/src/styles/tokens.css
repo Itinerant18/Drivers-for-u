@@ -18,28 +18,36 @@
    NOT use these directly — use semantic aliases below.
    ───────────────────────────────────────────── */
 :root {
-  /* Gray ramp (0 = warm off-white canvas, 1000 = deep charcoal ink) */
-  --gray-0:    #FAFAFA;
-  --gray-50:   #F4F4F1;
-  --gray-100:  #EAEAE5;
-  --gray-200:  #E0E0DA;
-  --gray-300:  #C9C9C2;
-  --gray-400:  #ADADA5;
-  --gray-500:  #7E7E77;
-  --gray-600:  #60605B;
-  --gray-700:  #454541;
-  --gray-800:  #30302E;
-  --gray-900:  #222221;
-  --gray-1000: #1A1A1A;
+  /* Gray ramp — Aura neutrals: pure-white canvas, forest-tinted grays,
+     ink #111827 (aura text-primary). Tint stays ≤0.01 chroma toward forest. */
+  --gray-0:    #FFFFFF;
+  --gray-50:   #F4F7F5;
+  --gray-100:  #E9EEEA;
+  --gray-200:  #DCE3DD;
+  --gray-300:  #C3CDC5;
+  --gray-400:  #A3AFA6;
+  --gray-500:  #737F76;
+  --gray-600:  #56615A;
+  --gray-700:  #3E4842;
+  --gray-800:  #2C352F;
+  --gray-900:  #202823;
+  --gray-1000: #111827;
 
-  /* Accent (muted steel-blue) ramp */
-  --accent-50:  #F0F4F8;
-  --accent-100: #D9E2EC;
-  --accent-200: #BCCCDC;
-  --accent-300: #9FB3C8;
-  --accent-400: #4A6FA5;
-  --accent-500: #3B5A84;
-  --accent-600: #2D4566;
+  /* Forest ramp — Aura primary #2C3B31. Drenched hero tiles, primary CTAs. */
+  --forest-50:  #EDF2EE;
+  --forest-300: #46584C;
+  --forest-400: #2C3B31;
+  --forest-500: #212D25;
+
+  /* Accent (sage) ramp — Aura accent #7A9E7E. 400 is fill-only on white;
+     text on white uses 600 (≥4.5:1). */
+  --accent-50:  #F1F6F2;
+  --accent-100: #DEEAE0;
+  --accent-200: #C2D6C5;
+  --accent-300: #9FBDA4;
+  --accent-400: #7A9E7E;
+  --accent-500: #5C7F61;
+  --accent-600: #435F48;
 
   /* Positive (green) ramp */
   --positive-50:  #EAF6EC;
@@ -89,7 +97,7 @@
      ───────────────────────────────────────────── */
   --radius-none: 0px;
   --radius-sm:   8px;   /* buttons, inputs, tags */
-  --radius-md:   12px;  /* cards */
+  --radius-md:   8px;   /* cards — Aura single radius language */
   --radius-lg:   16px;  /* bottom sheets (top corners) */
   --radius-pill: 999px; /* chips, avatars */
 
@@ -118,6 +126,8 @@
   --font-display: var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
   --font-body:    var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
   --font-mono:    var(--font-jetbrains-mono), "JetBrains Mono", "Fira Code", monospace;
+  /* Playfair — display moments ONLY (greeting, hero figure). Never labels/data. */
+  --font-serif:   var(--font-playfair), "Playfair Display", Georgia, serif;
 
   /* ─────────────────────────────────────────────
      SEMANTIC ALIASES — MINIMALIST SINGLE MODE
@@ -129,24 +139,24 @@
   --background-tertiary:  var(--gray-100);     /* #EAEAE5 */
 
   /* Content (text) */
-  --content-primary:   var(--gray-1000);  /* #1A1A1A */
-  --content-secondary: var(--gray-600);   /* #60605B */
-  --content-tertiary:  var(--gray-500);   /* #7E7E77 */
-  --content-accent:    var(--accent-400); /* #4A6FA5 */
+  --content-primary:   var(--gray-1000);  /* ink #111827 */
+  --content-secondary: var(--gray-600);
+  --content-tertiary:  var(--gray-500);
+  --content-accent:    var(--accent-600); /* text-safe dark sage */
   --content-positive:  var(--positive-400);
   --content-warning:   var(--warning-600);
   --content-negative:  var(--negative-400);
 
   /* Border */
-  --border-opaque:   var(--gray-200);   /* #E0E0DA */
-  --border-selected: var(--gray-1000);  /* #1A1A1A */
+  --border-opaque:   var(--gray-200);
+  --border-selected: var(--forest-400);
   --border-accent:   var(--accent-400);
 
-  /* Interactive */
-  --interactive-primary:      var(--gray-1000);  /* charcoal button bg */
-  --interactive-primary-text: var(--gray-0);     /* off-white button text */
+  /* Interactive — Aura forest carries the primary action */
+  --interactive-primary:      var(--forest-400);
+  --interactive-primary-text: var(--gray-0);
   --interactive-secondary:    var(--gray-100);
-  --interactive-hover:        var(--gray-900);
+  --interactive-hover:        var(--forest-500);
   --interactive-focus:        var(--accent-400);
 
   /* Status surfaces (for badge/pill backgrounds) */
@@ -158,12 +168,12 @@
 
   /* Driver status colors */
   --status-online:   var(--positive-400);
-  --status-active:   var(--accent-400);
+  --status-active:   var(--accent-500);
   --status-pending:  var(--warning-400);
   --status-offline:  var(--gray-500);
   --status-negative: var(--negative-400);
 
-  /* Inverse */
-  --background-inverse: var(--gray-1000);
+  /* Inverse — forest-drenched surfaces (hero tiles, chat bubbles) */
+  --background-inverse: var(--forest-400);
   --content-inverse:    var(--gray-0);
 }

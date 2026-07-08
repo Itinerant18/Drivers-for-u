@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
 import { ThemeProvider } from "@/lib/providers/ThemeProvider";
@@ -23,6 +23,15 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+// ── Playfair Display — display moments ONLY (greeting, hero figures) ───────
+// RULE: never in labels, buttons, data rows, or body copy.
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["500", "600"],
+});
+
 export const metadata: Metadata = {
   title: "Vahnly | Unified Dispatch Platform",
   description:
@@ -41,7 +50,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background-primary text-content-primary">
         <LocaleProvider>

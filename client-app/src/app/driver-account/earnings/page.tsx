@@ -96,7 +96,7 @@ export default function DriverEarningsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-white font-move">Earnings</h2>
+          <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">Earnings</h2>
           <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">Ledger-backed payout summary</p>
           {error && <p className="text-content-negative text-[10px] font-mono mt-2">{error}</p>}
         </div>
@@ -117,7 +117,7 @@ export default function DriverEarningsPage() {
             type="button"
             onClick={() => setPeriod(p)}
             className={`flex-1 py-2 font-bold uppercase rounded-lg transition-all ${
-              period === p ? 'bg-white text-black' : 'text-content-secondary hover:text-white'
+              period === p ? 'bg-interactive-primary text-interactive-primary-text' : 'text-content-secondary hover:text-content-primary'
             }`}
           >
             {p}
@@ -128,9 +128,9 @@ export default function DriverEarningsPage() {
       {period === 'CUSTOM' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-sm">
           <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)}
-            className="bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-white font-mono" />
+            className="bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-content-primary font-mono" />
           <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)}
-            className="bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-white font-mono" />
+            className="bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-content-primary font-mono" />
         </div>
       )}
 
@@ -142,21 +142,21 @@ export default function DriverEarningsPage() {
         </div>
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-1">
           <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Trips</span>
-          <CountInt value={s?.trip_count ?? 0} className="text-2xl font-mono font-bold text-white block" />
+          <CountInt value={s?.trip_count ?? 0} className="text-2xl font-mono font-bold text-content-primary block" />
         </div>
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-1">
           <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Tips</span>
-          <KpiValue paise={s?.tips_paise ?? 0} className="text-2xl font-mono font-bold text-white block" />
+          <KpiValue paise={s?.tips_paise ?? 0} className="text-2xl font-mono font-bold text-content-primary block" />
         </div>
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-1">
           <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Online</span>
-          <span className="text-2xl font-mono font-bold text-white block">{onlineHours.toFixed(1)} hrs</span>
+          <span className="text-2xl font-mono font-bold text-content-primary block">{onlineHours.toFixed(1)} hrs</span>
         </div>
       </div>
 
       {/* Daily earnings bar chart */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Daily Earnings (last 7 days)</h4>
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Daily Earnings (last 7 days)</h4>
         <div className="h-48">
           {mounted && chartData.length > 0 ? (
             <EarningsChart data={chartData} />
@@ -170,7 +170,7 @@ export default function DriverEarningsPage() {
 
       {/* Recent trips */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Recent Trips</h4>
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Recent Trips</h4>
         <div className="divide-y divide-border-opaque">
           {(data?.recent_trips ?? []).length === 0 && (
             <p className="py-3 text-[10px] font-mono text-content-tertiary text-center">No trips in this period.</p>
@@ -182,7 +182,7 @@ export default function DriverEarningsPage() {
               className="w-full py-3 flex justify-between items-center text-xs font-mono text-left hover:bg-background-secondary/30 transition rounded-lg px-1"
             >
               <div>
-                <span className="text-white block font-sans font-medium">
+                <span className="text-content-primary block font-sans font-medium">
                   {t.pickup_short || 'Ride'} {t.drop_short ? `➔ ${t.drop_short}` : ''}
                 </span>
                 <span className="text-content-tertiary text-[8px] block mt-0.5">{formatCompactDate(t.completed_at)} • fare <FareDisplay amount={t.fare_paise} size="sm" /></span>

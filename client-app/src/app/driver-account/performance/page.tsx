@@ -67,7 +67,7 @@ export default function DriverPerformancePage() {
     <div className="space-y-6 text-left">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white font-move">{t('title')}</h2>
+        <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">{t('title')}</h2>
         <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">{t('subtitle')}</p>
         {error && <p className="text-content-negative text-[10px] font-mono mt-2">{error}</p>}
         {loading && <p className="text-content-tertiary text-[10px] font-mono mt-2 animate-pulse uppercase tracking-wider">Loading performance…</p>}
@@ -81,7 +81,7 @@ export default function DriverPerformancePage() {
         </div>
         <div className="bg-background-primary border border-border-opaque p-4 rounded-2xl">
           <span className="text-content-tertiary block text-[8px] uppercase">{t('acceptIndex')}</span>
-          <span className="text-xl font-bold text-white block mt-1">{metrics.acceptance}%</span>
+          <span className="text-xl font-bold text-content-primary block mt-1">{metrics.acceptance}%</span>
         </div>
         <div className="bg-background-primary border border-border-opaque p-4 rounded-2xl">
           <span className="text-content-tertiary block text-[8px] uppercase">{t('cancelRate')}</span>
@@ -95,7 +95,7 @@ export default function DriverPerformancePage() {
 
       {/* Tier benefits */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
           {t('tierBenefitsTitle')}
         </h4>
 
@@ -106,7 +106,7 @@ export default function DriverPerformancePage() {
                 ? 'bg-surface-positive/20 border-positive-400/60 text-content-positive'
                 : 'bg-background-secondary/40 border-border-opaque text-content-secondary'
             }`}>
-              <span className="block font-bold text-white font-mono text-[10px] uppercase">{tier.name}</span>
+              <span className="block font-bold text-content-primary font-mono text-[10px] uppercase">{tier.name}</span>
               <span className="block mt-0.5">{tier.perks}</span>
             </div>
           ))}
@@ -115,7 +115,7 @@ export default function DriverPerformancePage() {
 
       {/* Compliments counts */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
           {t('complimentsTitle')}
         </h4>
 
@@ -123,7 +123,7 @@ export default function DriverPerformancePage() {
           {compliments.map((c, i) => (
             <div key={i} className="flex justify-between border-b border-border-opaque pb-1.5 text-content-secondary">
               <span>{c.label}:</span>
-              <span className="text-white font-bold">{c.count}</span>
+              <span className="text-content-primary font-bold">{c.count}</span>
             </div>
           ))}
         </div>
@@ -131,7 +131,7 @@ export default function DriverPerformancePage() {
 
       {/* Reviews logs */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
           {t('reviewsTitle')}
         </h4>
 
@@ -140,7 +140,7 @@ export default function DriverPerformancePage() {
             <div key={i} className="py-3.5 space-y-1.5 text-xs">
               <div className="flex justify-between items-center font-mono">
                 <div>
-                  <span className="text-white font-sans font-semibold">{r.name}</span>
+                  <span className="text-content-primary font-sans font-semibold">{r.name}</span>
                   <span className="text-content-tertiary text-[8px] ml-2">{r.date}</span>
                 </div>
                 <span className="text-content-warning font-bold"><StarIcon size={14} className="text-content-warning fill-current" /> {r.rating}</span>

@@ -38,7 +38,7 @@ export default function DriverWalletPage() {
   return (
     <div className="space-y-6 text-left">
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white font-move">Wallet</h2>
+        <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">Wallet</h2>
         <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">Toll &amp; parking reimbursements, referral bonuses</p>
       </div>
 
@@ -56,7 +56,7 @@ export default function DriverWalletPage() {
 
       {/* Transactions */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Transactions</h4>
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Transactions</h4>
         <div className="divide-y divide-border-opaque">
           {!loading && history.length === 0 && (
             <p className="py-3 text-[10px] font-mono text-content-tertiary text-center">No wallet transactions yet.</p>
@@ -66,7 +66,7 @@ export default function DriverWalletPage() {
               <div className="flex items-center gap-3">
                 <span className="text-base leading-none">{txnIcon(txn.description, txn.entry_type)}</span>
                 <div>
-                  <span className="text-white block font-sans font-medium">{txn.description}</span>
+                  <span className="text-content-primary block font-sans font-medium">{txn.description}</span>
                   <span className="text-content-tertiary text-[8px] block mt-0.5">{formatCompactDate(txn.created_at)}</span>
                 </div>
               </div>

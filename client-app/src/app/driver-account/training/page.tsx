@@ -36,13 +36,13 @@ export default function DriverTrainingPage() {
     <div className="space-y-6 text-left">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white font-move">{t('title')}</h2>
+        <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">{t('title')}</h2>
         <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">{t('subtitle')}</p>
       </div>
 
       {/* Progress overview */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
           {t('certificationProgress')}
         </h4>
         <p className="font-mono text-[11px] text-content-secondary">
@@ -52,7 +52,7 @@ export default function DriverTrainingPage() {
 
       {/* Modules listing */}
       <div className="space-y-4">
-        <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+        <h3 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
           {t('academyModules')}
         </h3>
 
@@ -71,7 +71,7 @@ export default function DriverTrainingPage() {
                     </span>
                     <span className="text-[8px] text-content-tertiary font-bold uppercase">{m.duration_label}</span>
                   </div>
-                  <h4 className="text-sm font-bold text-white truncate font-sans tracking-tight">{m.title}</h4>
+                  <h4 className="text-sm font-bold text-content-primary truncate font-sans tracking-tight">{m.title}</h4>
                 </div>
 
                 <span className={`px-2.5 py-1 rounded text-[9px] font-bold uppercase tracking-wider shrink-0 border ${
@@ -85,7 +85,7 @@ export default function DriverTrainingPage() {
 
               <div className="border-t border-border-opaque pt-3 text-[10px] font-mono text-content-secondary flex justify-between">
                 <span>{t('quizScore')}</span>
-                <span className="text-white font-bold">{m.score != null ? `${m.score}%` : '—'}</span>
+                <span className="text-content-primary font-bold">{m.score != null ? `${m.score}%` : '—'}</span>
               </div>
             </div>
           ))}

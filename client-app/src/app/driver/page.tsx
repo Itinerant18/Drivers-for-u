@@ -942,7 +942,7 @@ export default function DriverTerminalPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-0 font-sans flex flex-col justify-between selection:bg-white selection:text-black overflow-x-hidden relative">
+    <div className="min-h-screen bg-background-primary text-content-primary p-0 font-sans flex flex-col justify-between selection:bg-forest-400 selection:text-white overflow-x-hidden relative">
       
       {/* 1. HAMBURGER SLIDE DRAWER MENU OVERLAY */}
       <DriverDrawer
@@ -1251,7 +1251,7 @@ export default function DriverTerminalPage() {
             <button
               onClick={handleToggleWait}
               className={`w-full h-12 rounded-md text-label-medium font-semibold transition-base ${
-                isWaiting ? 'bg-white text-black' : 'bg-background-secondary border border-border-opaque text-content-primary'
+                isWaiting ? 'bg-interactive-primary text-interactive-primary-text' : 'bg-background-secondary border border-border-opaque text-content-primary'
               }`}
             >
               <span className="inline-flex items-center justify-center gap-2">

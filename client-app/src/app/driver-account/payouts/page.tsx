@@ -87,7 +87,7 @@ export default function DriverPayoutsPage() {
   return (
     <div className="space-y-6 text-left">
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white font-move">Payouts</h2>
+        <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">Payouts</h2>
         <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">Withdraw your earnings to your bank</p>
       </div>
 
@@ -102,7 +102,7 @@ export default function DriverPayoutsPage() {
 
           {/* Withdraw form */}
           <form onSubmit={handleRequest} className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Request Payout</h4>
+            <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Request Payout</h4>
             <div className="space-y-2">
               <label className="block text-[8px] font-bold text-content-tertiary uppercase font-mono tracking-wider">Amount (min ₹100)</label>
               <div className="flex gap-2">
@@ -111,7 +111,7 @@ export default function DriverPayoutsPage() {
                   <input
                     type="number" value={amount} onChange={(e) => setAmount(e.target.value)}
                     placeholder="Enter amount" min="100" step="0.01"
-                    className="w-full bg-background-secondary border border-border-opaque rounded-xl p-3.5 pl-7 text-white focus:outline-none focus:border-border-opaque text-xs font-mono"
+                    className="w-full bg-background-secondary border border-border-opaque rounded-xl p-3.5 pl-7 text-content-primary focus:outline-none focus:border-border-opaque text-xs font-mono"
                     required
                   />
                 </div>
@@ -129,7 +129,7 @@ export default function DriverPayoutsPage() {
             )}
 
             <button type="submit" disabled={submitting || loading || availablePaise < MIN_PAYOUT_PAISE}
-              className="w-full bg-white hover:bg-background-tertiary text-black py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer active:scale-95 font-sans disabled:opacity-50 disabled:cursor-not-allowed">
+              className="w-full bg-interactive-primary hover:bg-interactive-hover text-interactive-primary-text py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer active:scale-95 font-sans disabled:opacity-50 disabled:cursor-not-allowed">
               {submitting ? 'Requesting…' : 'Request Payout'}
             </button>
           </form>
@@ -139,7 +139,7 @@ export default function DriverPayoutsPage() {
         <div className="space-y-6">
           <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
             <div className="flex justify-between items-center border-b border-border-opaque pb-2">
-              <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">Linked Bank</h4>
+              <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider">Linked Bank</h4>
               {bank?.verified
                 ? <span className="text-[8px] font-mono text-content-positive uppercase">● Verified</span>
                 : <span className="text-[8px] font-mono text-content-warning uppercase">● Unverified</span>}
@@ -147,15 +147,15 @@ export default function DriverPayoutsPage() {
             <div className="space-y-3 font-mono text-xs text-content-secondary leading-relaxed">
               <div>
                 <span className="text-content-tertiary block text-[8px] uppercase">Bank</span>
-                <span className="font-bold text-white">{bank?.bank_name || '—'}</span>
+                <span className="font-bold text-content-primary">{bank?.bank_name || '—'}</span>
               </div>
               <div>
                 <span className="text-content-tertiary block text-[8px] uppercase">Account</span>
-                <span className="font-bold text-white">{bank?.account_masked || '—'}</span>
+                <span className="font-bold text-content-primary">{bank?.account_masked || '—'}</span>
               </div>
               <div>
                 <span className="text-content-tertiary block text-[8px] uppercase">IFSC</span>
-                <span className="font-bold text-white">{bank?.ifsc || '—'}</span>
+                <span className="font-bold text-content-primary">{bank?.ifsc || '—'}</span>
               </div>
             </div>
             <p className="text-[8px] font-mono text-content-tertiary leading-relaxed">Bank details are managed during onboarding / KYC. Contact support to change them.</p>
@@ -165,7 +165,7 @@ export default function DriverPayoutsPage() {
 
       {/* History */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-        <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Payout History</h4>
+        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">Payout History</h4>
         <div className="divide-y divide-border-opaque">
           {(data?.payout_history ?? []).length === 0 && (
             <p className="py-3 text-[10px] font-mono text-content-tertiary text-center">No payouts yet.</p>
@@ -173,7 +173,7 @@ export default function DriverPayoutsPage() {
           {(data?.payout_history ?? []).map((p) => (
             <div key={p.id} className="py-3 flex justify-between items-center text-xs font-mono">
               <div>
-                <FareDisplay amount={p.amount_paise} size="md" className="text-white block font-medium" />
+                <FareDisplay amount={p.amount_paise} size="md" className="text-content-primary block font-medium" />
                 <span className="text-content-tertiary text-[8px] block mt-0.5">
                   Requested {formatCompactDate(p.requested_at)}
                   {p.status === 'PAID' ? ` • Paid ${formatCompactDate(p.updated_at)}` : ''}

@@ -168,7 +168,7 @@ export default function DriverProfilePage() {
 
       {/* Page Header */}
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-white font-move">My Partner Profile</h2>
+        <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">My Partner Profile</h2>
         <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">Manage credentials, bio, and KYC document uploads</p>
         {profileError && <p className="text-content-negative text-[10px] font-mono mt-2">{profileError}</p>}
       </div>
@@ -180,15 +180,15 @@ export default function DriverProfilePage() {
           onClick={() => photoInputRef.current?.click()}
           disabled={photoUploading}
           aria-label="Edit profile photo"
-          className="h-20 w-20 bg-background-secondary border border-border-opaque rounded-2xl flex items-center justify-center text-3xl shrink-0 cursor-pointer hover:border-white transition disabled:opacity-50 relative"
+          className="h-20 w-20 bg-background-secondary border border-border-opaque rounded-2xl flex items-center justify-center text-3xl shrink-0 cursor-pointer hover:border-forest-400 transition disabled:opacity-50 relative"
         >
           {photoUploading ? <span className="text-xs font-mono animate-pulse">…</span> : <UserIcon size={32} />}
-          <span className="absolute -bottom-1 -right-1 bg-white text-black text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full"><EditIcon size={12} /></span>
+          <span className="absolute -bottom-1 -right-1 bg-interactive-primary text-interactive-primary-text text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full"><EditIcon size={12} /></span>
         </button>
 
         <div className="space-y-2 text-center sm:text-left flex-grow">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <h3 className="text-base font-bold text-white">{driverName}</h3>
+            <h3 className="text-base font-bold text-content-primary">{driverName}</h3>
             <span className="bg-positive-400/20 text-content-positive border border-positive-400 px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-wider w-max mx-auto sm:mx-0">
               {profile?.is_verified === false ? 'KYC Pending' : 'KYC Active'}
             </span>
@@ -203,7 +203,7 @@ export default function DriverProfilePage() {
             <div className="border-r border-border-opaque h-6"></div>
             <div>
               <span className="text-content-tertiary block text-[9px] uppercase">TOTAL TRIPS</span>
-              <span className="font-bold text-white">{profile?.total_trips ?? 0} Jobs</span>
+              <span className="font-bold text-content-primary">{profile?.total_trips ?? 0} Jobs</span>
             </div>
             <div className="border-r border-border-opaque h-6"></div>
             <div>
@@ -219,11 +219,11 @@ export default function DriverProfilePage() {
       {/* Bio Editor */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3">
         <div className="flex justify-between items-center border-b border-border-opaque pb-2">
-          <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">Pilot Bio Statement</h4>
+          <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider">Pilot Bio Statement</h4>
           <button
             onClick={() => (isEditingBio ? handleSaveBio() : setIsEditingBio(true))}
             disabled={savingBio}
-            className="text-[9px] font-mono font-bold text-content-secondary hover:text-white uppercase tracking-wider cursor-pointer disabled:opacity-50"
+            className="text-[9px] font-mono font-bold text-content-secondary hover:text-content-primary uppercase tracking-wider cursor-pointer disabled:opacity-50"
           >
             {savingBio ? 'Saving…' : isEditingBio ? 'Save Statement' : 'Edit Bio'}
           </button>
@@ -233,7 +233,7 @@ export default function DriverProfilePage() {
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className="w-full bg-background-secondary border border-border-opaque rounded-xl p-3 text-xs text-white focus:outline-none focus:border-border-opaque font-sans"
+            className="w-full bg-background-secondary border border-border-opaque rounded-xl p-3 text-xs text-content-primary focus:outline-none focus:border-border-opaque font-sans"
             rows={3}
           />
         ) : (
@@ -249,21 +249,21 @@ export default function DriverProfilePage() {
       {/* Technical Badges and Languages */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3">
-          <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+          <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
             Transmission Licenses
           </h4>
           <div className="flex gap-2">
-            <span className="bg-background-secondary text-white border border-border-opaque px-3 py-1.5 rounded-xl text-[9px] font-mono font-bold uppercase tracking-wider">
+            <span className="bg-background-secondary text-content-primary border border-border-opaque px-3 py-1.5 rounded-xl text-[9px] font-mono font-bold uppercase tracking-wider">
               <SettingsIcon size={14} /> Stick Shift Manual
             </span>
-            <span className="bg-background-secondary text-white border border-border-opaque px-3 py-1.5 rounded-xl text-[9px] font-mono font-bold uppercase tracking-wider">
+            <span className="bg-background-secondary text-content-primary border border-border-opaque px-3 py-1.5 rounded-xl text-[9px] font-mono font-bold uppercase tracking-wider">
               <VehicleIcon size={14} /> Automatic / EV
             </span>
           </div>
         </div>
 
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3">
-          <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+          <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
             Verified Languages
           </h4>
           <div className="flex flex-wrap gap-1.5">
@@ -279,11 +279,11 @@ export default function DriverProfilePage() {
       {/* KYC Documents Section */}
       <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
         <div className="flex justify-between items-center border-b border-border-opaque pb-2">
-          <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">KYC Compliance Documents</h4>
+          <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider">KYC Compliance Documents</h4>
           <button
             onClick={handleUploadDoc}
             disabled={uploading}
-            className="bg-white hover:bg-background-tertiary text-black text-[9px] font-mono font-bold uppercase px-3 py-1.5 rounded-full cursor-pointer disabled:opacity-50"
+            className="bg-interactive-primary hover:bg-interactive-hover text-interactive-primary-text text-[9px] font-mono font-bold uppercase px-3 py-1.5 rounded-full cursor-pointer disabled:opacity-50"
           >
             {uploading ? 'Uploading…' : 'Upload New Doc'}
           </button>
@@ -300,7 +300,7 @@ export default function DriverProfilePage() {
           {kycDocs.map((doc, idx) => (
             <div key={idx} className="py-3 flex justify-between items-center text-xs font-mono">
               <div>
-                <span className="text-white block font-medium font-sans">{doc.name}</span>
+                <span className="text-content-primary block font-medium font-sans">{doc.name}</span>
                 <span className="text-content-tertiary text-[8px] block mt-0.5">Uploaded on: {doc.date}</span>
               </div>
               <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${
@@ -320,11 +320,11 @@ export default function DriverProfilePage() {
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5">
           <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Serviced City</span>
           {/* ponytail: profile only carries the city prefix; render the city name when an API exposes it */}
-          <p className="text-xs text-white leading-relaxed">Regional hub: {cityPrefix}</p>
+          <p className="text-xs text-content-primary leading-relaxed">Regional hub: {cityPrefix}</p>
         </div>
         <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5">
           <span className="text-content-tertiary block text-[9px] uppercase font-mono tracking-wider font-bold">Registered Vehicles</span>
-          <p className="text-xs text-white leading-relaxed">
+          <p className="text-xs text-content-primary leading-relaxed">
             {vehicles.length
               ? vehicles.map((v) => `${v.plate} (${v.make} ${v.model}, ${v.transmission})`).join(', ')
               : 'No vehicles on file — add one under Vehicles.'}

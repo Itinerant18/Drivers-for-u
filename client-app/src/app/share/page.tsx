@@ -94,10 +94,10 @@ function PublicShareContent() {
 
   if (error && !view) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 font-mono">
+      <div className="min-h-screen bg-background-primary text-content-primary flex items-center justify-center p-6 font-sans">
         <div className="text-center space-y-2 max-w-xs">
-          <p className="text-xs font-bold uppercase text-content-negative">Live tracking unavailable</p>
-          <p className="text-[10px] text-content-tertiary">{error}</p>
+          <p className="text-heading-small text-content-negative">Live tracking unavailable</p>
+          <p className="text-paragraph-small text-content-secondary">{error}</p>
         </div>
       </div>
     );
@@ -105,7 +105,7 @@ function PublicShareContent() {
 
   if (!view) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center font-mono text-content-tertiary text-xs uppercase animate-pulse">
+      <div className="min-h-screen bg-background-primary flex items-center justify-center font-sans text-paragraph-small text-content-tertiary animate-pulse">
         {t('loadingFallback')}
       </div>
     );
@@ -118,24 +118,24 @@ function PublicShareContent() {
   const driver = view.driver_location ? project(view, view.driver_location.lat, view.driver_location.lng) : null;
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 sm:p-8 font-sans flex flex-col justify-between selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-background-primary text-content-primary p-4 sm:p-8 font-sans flex flex-col justify-between">
 
       {/* Header */}
-      <header className="border-b border-border-opaque pb-4 flex justify-between items-center w-full max-w-xl mx-auto text-left">
+      <header className="border-b border-border-opaque pb-4 flex justify-between items-end w-full max-w-xl mx-auto text-left">
         <div>
-          <span className="bg-surface-positive/20 text-content-positive border border-positive-400 px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-wider block w-max mb-1">
+          <span className={`badge ${completed ? 'badge-neutral' : 'badge-positive'} mb-1.5`}>
             {completed ? 'Trip completed' : t('liveBadge')}
           </span>
-          <h1 className="text-sm font-bold tracking-tight text-white font-mono uppercase">{t('journeyTracker')}</h1>
+          <h1 className="text-display-serif text-[24px]">{t('journeyTracker')}</h1>
         </div>
-        <span className="text-[9px] font-mono text-content-tertiary uppercase font-bold">{view.status.replaceAll('_', ' ')}</span>
+        <span className="text-label-small text-content-tertiary pb-1">{view.status.replaceAll('_', ' ')}</span>
       </header>
 
       {/* Live map */}
       <main className="w-full max-w-xl mx-auto flex-grow my-6 flex flex-col gap-4 text-left">
-        <div className="bg-background-primary border border-border-opaque rounded-2xl overflow-hidden relative min-h-[300px] flex flex-col justify-between">
-          <div className="absolute inset-0 bg-black/60 z-0">
-            <svg className="w-full h-full opacity-60" xmlns="http://www.w3.org/2000/svg">
+        <div className="card p-0 overflow-hidden relative min-h-[300px] flex flex-col justify-between">
+          <div className="absolute inset-0 bg-background-secondary z-0">
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="shareGrid" width="30" height="30" patternUnits="userSpaceOnUse">
                   <path d="M 30 0 L 0 0 0 30" fill="none" stroke="var(--border-opaque)" strokeWidth="1" />
@@ -146,41 +146,39 @@ function PublicShareContent() {
               <line
                 x1={`${pickup.x}%`} y1={`${pickup.y}%`}
                 x2={`${drop.x}%`} y2={`${drop.y}%`}
-                stroke="var(--accent-400)" strokeWidth="3" strokeDasharray="5,5"
+                stroke="var(--forest-400)" strokeWidth="3" strokeDasharray="5,5"
               />
-              <circle cx={`${pickup.x}%`} cy={`${pickup.y}%`} r="6" fill="var(--positive-400)" />
+              <circle cx={`${pickup.x}%`} cy={`${pickup.y}%`} r="6" fill="var(--accent-500)" />
               <circle cx={`${drop.x}%`} cy={`${drop.y}%`} r="6" fill="var(--negative-400)" />
               {driver && (
                 <circle
                   cx={`${driver.x}%`} cy={`${driver.y}%`} r="7"
-                  fill="var(--content-primary)" stroke="var(--accent-400)" strokeWidth="2"
+                  fill="var(--forest-400)" stroke="var(--gray-0)" strokeWidth="2"
                 />
               )}
             </svg>
           </div>
 
-          <div className="relative z-10 p-4 bg-gradient-to-b from-black to-transparent flex justify-between items-center text-[9px] font-mono font-bold text-content-tertiary">
+          <div className="relative z-10 p-4 flex justify-between items-center text-label-small text-content-secondary">
             <span>{completed ? '—' : t('driverEta', { mins: Math.max(1, view.eta_minutes) })}</span>
-            <span className="bg-surface-positive/20 text-content-positive border border-positive-400 px-2 py-0.5 rounded uppercase">
-              {view.status.replaceAll('_', ' ')}
-            </span>
+            <span className="badge badge-positive">{view.status.replaceAll('_', ' ')}</span>
           </div>
 
-          <div className="relative z-10 p-4 bg-gradient-to-t from-black to-transparent text-[9px] font-mono text-content-tertiary">
+          <div className="relative z-10 p-4 text-label-small text-content-tertiary">
             <span>{driver ? t('telemetrySync') : 'Waiting for driver location…'}</span>
           </div>
         </div>
 
         {/* Driver card */}
         {view.driver_name && (
-          <div className="bg-background-primary border border-border-opaque rounded-2xl p-5">
+          <div className="card">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-background-secondary rounded-xl flex items-center justify-center text-lg">
+              <div className="h-10 w-10 bg-accent-50 rounded-pill flex items-center justify-center text-content-accent">
                 <UserIcon size={20} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white">{view.driver_name}</h4>
-                <span className="text-[9px] font-mono text-content-tertiary uppercase tracking-wider block mt-0.5">
+                <h4 className="text-label-large">{view.driver_name}</h4>
+                <span className="text-label-small text-content-secondary block mt-0.5">
                   Vahnly verified driver
                 </span>
               </div>
@@ -189,31 +187,45 @@ function PublicShareContent() {
         )}
 
         {/* Route summary — sanitized view only exposes coordinates, no addresses */}
-        <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5 text-xs font-mono text-content-secondary">
-          <div>
-            <LocationIcon size={20} />{' '}
-            <span className="text-content-tertiary font-bold uppercase text-[8px] block mb-0.5">{t('pickupNode')}</span>
-            {view.pickup_lat.toFixed(5)}, {view.pickup_lng.toFixed(5)}
+        <div className="card space-y-3 text-paragraph-medium text-content-secondary">
+          <div className="flex items-start gap-2.5">
+            <LocationIcon size={18} />
+            <div>
+              <span className="text-label-small text-content-tertiary block mb-0.5">{t('pickupNode')}</span>
+              <span className="font-mono text-mono-small text-content-primary">
+                {view.pickup_lat.toFixed(5)}, {view.pickup_lng.toFixed(5)}
+              </span>
+            </div>
           </div>
-          <div>
-            <FlagIcon size={20} />{' '}
-            <span className="text-content-tertiary font-bold uppercase text-[8px] block mb-0.5">{t('destination')}</span>
-            {view.dropoff_lat.toFixed(5)}, {view.dropoff_lng.toFixed(5)}
+          <div className="flex items-start gap-2.5">
+            <FlagIcon size={18} />
+            <div>
+              <span className="text-label-small text-content-tertiary block mb-0.5">{t('destination')}</span>
+              <span className="font-mono text-mono-small text-content-primary">
+                {view.dropoff_lat.toFixed(5)}, {view.dropoff_lng.toFixed(5)}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Timeline */}
-        <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3 font-mono text-[9px]">
-          <h4 className="text-[10px] font-bold text-white uppercase tracking-wider border-b border-border-opaque pb-2">
+        <div className="card space-y-3">
+          <h4 className="text-label-medium text-content-secondary border-b border-border-opaque pb-2">
             {t('timelineTitle')}
           </h4>
-          <div className="space-y-2 text-content-secondary">
+          <div className="space-y-2.5">
             {STAGES.map((s, i) => (
               <div
                 key={s.key}
-                className={`flex items-center gap-2 ${i === activeStage && !completed ? 'text-white font-bold' : i <= activeStage ? 'text-content-secondary' : 'text-content-tertiary'}`}
+                className={`flex items-center gap-2.5 text-paragraph-small ${
+                  i === activeStage && !completed
+                    ? 'text-content-primary font-semibold'
+                    : i <= activeStage
+                      ? 'text-content-secondary'
+                      : 'text-content-tertiary'
+                }`}
               >
-                <span>●</span>
+                <span className={`status-dot ${i <= activeStage ? 'status-dot-active' : 'status-dot-offline'}`} />
                 <span>{t(s.key)}</span>
               </div>
             ))}
@@ -221,7 +233,7 @@ function PublicShareContent() {
         </div>
       </main>
 
-      <footer className="w-full max-w-xl mx-auto text-center text-[8px] font-mono text-content-tertiary select-none pt-4 border-t border-border-opaque">
+      <footer className="w-full max-w-xl mx-auto text-center text-label-small text-content-tertiary select-none pt-4 border-t border-border-opaque">
         {t('footer')}
       </footer>
     </div>
@@ -232,7 +244,7 @@ export default function PublicSharePage() {
   const t = useTranslations('share');
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black flex items-center justify-center font-sans text-content-tertiary font-mono text-xs uppercase animate-pulse">
+      <div className="min-h-screen bg-background-primary flex items-center justify-center font-sans text-paragraph-small text-content-tertiary animate-pulse">
         {t('loadingFallback')}
       </div>
     }>

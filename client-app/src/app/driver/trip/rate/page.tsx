@@ -82,24 +82,26 @@ export default function RateRiderPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-black text-white p-4 sm:p-6 font-mono flex flex-col justify-center selection:bg-white selection:text-black">
-        <main className="max-w-md mx-auto w-full space-y-6 text-center">
-          <div className="space-y-2">
-            <span className="flex justify-center text-content-positive"><CheckIcon size={40} /></span>
-            <h1 className="text-sm font-bold text-white uppercase tracking-wider">{t('thanksTitle')}</h1>
-            <p className="text-[10px] text-content-tertiary">{t('nextPrompt')}</p>
+      <div className="min-h-screen bg-background-primary text-content-primary p-4 sm:p-6 font-sans flex flex-col justify-center">
+        <main className="max-w-md mx-auto w-full space-y-8 text-center">
+          <div className="space-y-3">
+            <span className="mx-auto h-14 w-14 rounded-pill bg-accent-50 text-content-positive flex items-center justify-center">
+              <CheckIcon size={28} />
+            </span>
+            <h1 className="text-display-serif text-[26px]">{t('thanksTitle')}</h1>
+            <p className="text-paragraph-medium text-content-secondary">{t('nextPrompt')}</p>
           </div>
 
           <div className="space-y-2.5">
-            <button
-              onClick={goOnline}
-              className="w-full bg-white hover:bg-background-tertiary text-black font-extrabold py-3.5 rounded-xl text-[10px] uppercase tracking-wider transition cursor-pointer border border-white active:scale-[0.98]"
-            >
+            <button onClick={goOnline} className="btn-primary">
               {t('goOnline')}
             </button>
             <button
               onClick={takeBreak}
-              className="w-full bg-background-primary hover:bg-background-secondary text-content-secondary hover:text-white border border-border-opaque font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-wider transition cursor-pointer active:scale-[0.98]"
+              className="w-full h-14 rounded-sm bg-background-primary border border-border-opaque
+                text-label-large text-content-secondary hover:text-content-primary
+                transition-base cursor-pointer active:scale-[0.98]
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
             >
               {t('takeBreak')}
             </button>
@@ -110,34 +112,36 @@ export default function RateRiderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 sm:p-6 font-mono flex flex-col justify-between selection:bg-white selection:text-black">
-      <header className="border-b border-border-opaque pb-4 mb-4">
-        <span className="text-[8px] text-content-tertiary uppercase tracking-widest font-bold">{t('panelLabel')}</span>
-        <h1 className="text-sm font-bold text-white mt-1 uppercase">{t('title')}</h1>
-        <p className="text-[8px] text-content-tertiary mt-0.5">{t('orderId', { id: orderID.substring(0, 18) })}</p>
+    <div className="min-h-screen bg-background-primary text-content-primary p-4 sm:p-6 font-sans flex flex-col">
+      <header className="pb-5 mb-5 border-b border-border-opaque">
+        <h1 className="text-display-serif text-[28px]">{t('title')}</h1>
+        <p className="font-mono text-mono-small text-content-tertiary mt-1">
+          {t('orderId', { id: orderID.substring(0, 18) })}
+        </p>
       </header>
 
-      <main className="flex-grow max-w-md mx-auto w-full space-y-6 flex flex-col justify-center py-4">
-        {/* Star Rating Component */}
-        <div className="bg-background-primary border border-border-opaque rounded-2xl p-6 text-center space-y-4 shadow-xl">
-          <span className="text-[9px] font-bold text-content-secondary uppercase tracking-wider block">
+      <main className="flex-grow max-w-md mx-auto w-full space-y-4">
+        {/* Star rating */}
+        <div className="card text-center space-y-4">
+          <span className="text-label-medium text-content-secondary block">
             {t('riderScoreRating')}
           </span>
-          <div className="flex justify-center gap-3 text-3xl select-none">
+          <div className="flex justify-center gap-2 select-none">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 type="button"
                 onClick={() => setRating(star)}
-                className={`transition-all hover:scale-110 active:scale-95 cursor-pointer ${
-                  star <= rating ? 'text-content-warning' : 'text-content-tertiary'
+                aria-label={`${star} star${star > 1 ? 's' : ''}`}
+                className={`min-w-[44px] min-h-[44px] flex items-center justify-center transition-base hover:scale-110 active:scale-95 cursor-pointer ${
+                  star <= rating ? 'text-warning-400' : 'text-gray-300'
                 }`}
               >
-                <StarIcon size={30} className="fill-current" />
+                <StarIcon size={32} className="fill-current" />
               </button>
             ))}
           </div>
-          <span className="text-[10px] text-content-tertiary block font-bold">
+          <span className="text-paragraph-small text-content-secondary block">
             {rating === 5 && t('rating5')}
             {rating === 4 && t('rating4')}
             {rating === 3 && t('rating3')}
@@ -146,12 +150,12 @@ export default function RateRiderPage() {
           </span>
         </div>
 
-        {/* Quick-Tap Feedback Tags */}
-        <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3.5 shadow-xl text-left">
-          <span className="text-[9px] font-bold text-content-secondary uppercase tracking-wider block border-b border-border-opaque pb-2">
+        {/* Quick-tap feedback tags */}
+        <div className="card space-y-3">
+          <span className="text-label-medium text-content-secondary block border-b border-border-opaque pb-2">
             {t('addQuickFeedbackTags')}
           </span>
-          <div className="flex flex-wrap gap-2 pt-1.5">
+          <div className="flex flex-wrap gap-2 pt-1">
             {activeTagSet.map((tag) => {
               const active = selectedTags.includes(tag.value);
               return (
@@ -159,10 +163,10 @@ export default function RateRiderPage() {
                   key={tag.value}
                   type="button"
                   onClick={() => toggleTag(tag.value)}
-                  className={`px-3 py-1.5 rounded-full border text-[9px] font-bold uppercase tracking-wider transition cursor-pointer ${
+                  className={`px-4 py-2 rounded-pill border text-label-medium transition-base cursor-pointer min-h-[36px] ${
                     active
-                      ? 'bg-white border-white text-black'
-                      : 'bg-black border-border-opaque text-content-tertiary hover:text-content-secondary'
+                      ? 'bg-interactive-primary border-interactive-primary text-interactive-primary-text'
+                      : 'bg-background-secondary border-border-opaque text-content-secondary hover:text-content-primary'
                   }`}
                 >
                   {t(tag.labelKey)}
@@ -173,8 +177,8 @@ export default function RateRiderPage() {
         </div>
 
         {/* Free-text comment */}
-        <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2.5 shadow-xl text-left">
-          <span className="text-[9px] font-bold text-content-secondary uppercase tracking-wider block">
+        <div className="card space-y-2.5">
+          <span className="text-label-medium text-content-secondary block">
             {t('commentLabel')}
           </span>
           <textarea
@@ -183,17 +187,13 @@ export default function RateRiderPage() {
             maxLength={500}
             rows={3}
             placeholder={t('commentPlaceholder')}
-            className="w-full bg-black border border-border-opaque rounded-xl p-3 text-[11px] text-content-primary placeholder:text-content-tertiary focus:outline-none focus:border-border-opaque resize-none font-sans"
+            className="input h-auto py-3 resize-none"
           />
         </div>
       </main>
 
-      <footer className="mt-8 max-w-md mx-auto w-full">
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full bg-white hover:bg-background-tertiary text-black font-extrabold py-3.5 rounded-xl text-[10px] uppercase tracking-wider transition cursor-pointer font-mono border border-white active:scale-[0.98] disabled:opacity-60"
-        >
+      <footer className="mt-6 max-w-md mx-auto w-full pb-[env(safe-area-inset-bottom)]">
+        <button onClick={handleSubmit} disabled={isSubmitting} className="btn-primary">
           {isSubmitting ? t('submitting') : t('submitButton')}
         </button>
       </footer>

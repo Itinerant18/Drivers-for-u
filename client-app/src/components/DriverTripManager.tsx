@@ -30,6 +30,12 @@ interface DashboardHomeProps {
   logAudit: (e: string, m: any) => void;
 }
 
+function greetingForHour(h: number): string {
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export const DashboardHome: React.FC<DashboardHomeProps> = ({
   dutyState,
   profile,
@@ -40,23 +46,72 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
   logAudit,
 }) => {
   const isOffline = dutyState === 'OFFLINE';
+  const firstName = (profile?.name || 'Driver').split(' ')[0];
 
   return (
     <div className="space-y-4 text-left">
 
-      {/* ── Driver Capability + trip-type filter row ── */}
-      <div className="flex justify-between items-start bg-background-secondary rounded-md p-4 border border-border-opaque">
+      {/* ── Greeting — the one serif display moment on this screen ── */}
+      <div className="flex items-end justify-between gap-3">
+        {/* suppressHydrationWarning: greeting depends on client clock; static
+            export prerenders at build-time hour. */}
+        <h2 className="text-display-serif text-[26px] text-content-primary" suppressHydrationWarning>
+          {greetingForHour(new Date().getHours())}, {firstName}
+        </h2>
+        {!isOffline && (
+          <span className="flex items-center gap-1.5 pb-1 flex-shrink-0" role="status">
+            <span className="status-dot status-dot-online animate-ping" />
+            <span className="text-label-small text-content-secondary">Seeking matches</span>
+          </span>
+        )}
+      </div>
+
+      {/* ── Bento: forest hero earnings tile + sage stat tiles ── */}
+      <div className="grid grid-cols-2 gap-2.5">
+        {/* Hero — today's earnings, forest-drenched */}
+        <div className="col-span-2 rounded-md bg-forest-400 text-white p-5 flex items-end justify-between">
+          <div>
+            <span className="text-label-small text-accent-200 block mb-1.5">Today&apos;s earnings</span>
+            <span className="font-mono text-[32px] leading-none font-medium tabular-nums">
+              ₹{stats.earnings_rupees.toLocaleString('en-IN')}
+            </span>
+          </div>
+          <div className="text-right">
+            <span className="font-mono text-mono-large tabular-nums block">{stats.trips_count}</span>
+            <span className="text-label-small text-accent-200">trips</span>
+          </div>
+        </div>
+
+        {/* Hours online */}
+        <div className="rounded-md bg-accent-50 p-4">
+          <span className="font-mono text-mono-large text-content-primary tabular-nums block">
+            {stats.online_hours.toFixed(1)}h
+          </span>
+          <span className="text-label-small text-content-secondary">online today</span>
+        </div>
+
+        {/* Acceptance */}
+        <div className="rounded-md bg-background-secondary border border-border-opaque p-4">
+          <span className="font-mono text-mono-large text-content-primary tabular-nums block">
+            {stats.acceptance_rate}%
+          </span>
+          <span className="text-label-small text-content-secondary">acceptance</span>
+        </div>
+      </div>
+
+      {/* ── Capability + trip-type filter ── */}
+      <div className="flex justify-between items-start rounded-md p-4 border border-border-opaque">
         <div className="min-w-0 flex-1">
-          <span className="text-label-small text-content-tertiary uppercase tracking-wider block mb-1">
-            Allowed Cars
+          <span className="text-label-small text-content-tertiary block mb-1">
+            Allowed cars
           </span>
           <span className="text-label-large text-content-primary font-medium">
             {profile?.can_drive_manual ? 'Manual & Automatic' : 'Automatic Only'}
           </span>
         </div>
         <div className="text-right flex-shrink-0">
-          <span className="text-label-small text-content-tertiary uppercase tracking-wider block mb-1">
-            Job Type
+          <span className="text-label-small text-content-tertiary block mb-1">
+            Job type
           </span>
           <select
             value={preferredTripFilter}
@@ -70,84 +125,32 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         </div>
       </div>
 
-      {/* ── Go Online / Go Offline toggle ── */}
+      {/* ── Duty toggle — full-width thumb-zone anchor ── */}
       {isOffline ? (
-        /* OFFLINE → Go Online */
         <button
           onClick={handleToggleDutySwitch}
           type="button"
           className="w-full h-14 rounded-sm bg-interactive-primary text-interactive-primary-text
             text-label-large font-medium
-            transition-base cursor-pointer
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2
-            animate-[subtlePulse_2s_ease-in-out_infinite]"
+            transition-base cursor-pointer animate-cta-pulse
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           Go Online
         </button>
       ) : (
-        /* ONLINE → Go Offline */
         <button
           onClick={handleToggleDutySwitch}
           type="button"
           className="w-full h-14 rounded-sm bg-background-primary
             border-2 border-status-online
             text-label-large font-medium text-content-negative
-            transition-base cursor-pointer
+            transition-base cursor-pointer animate-go-online-glow
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"
-          style={{
-            boxShadow: '0 0 16px rgba(58,167,109,0.25)',
-            WebkitTapHighlightColor: 'transparent',
-          }}
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           Go Offline
         </button>
-      )}
-
-      {/* ── Today's stats row (online only) ── */}
-      {!isOffline && (
-        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1">
-          {/* Trips */}
-          <div className="flex-shrink-0 bg-background-secondary rounded-sm px-3 py-2 flex flex-col items-center min-w-[72px]">
-            <span className="font-mono text-mono-large text-content-primary tabular-nums">
-              {stats.trips_count}
-            </span>
-            <span className="text-label-small text-content-secondary">trips</span>
-          </div>
-
-          {/* Earnings */}
-          <div className="flex-shrink-0 bg-background-secondary rounded-sm px-3 py-2 flex flex-col items-center min-w-[88px]">
-            <FareDisplay amount={stats.earnings_rupees * 100} size="md" />
-            <span className="text-label-small text-content-secondary">earned</span>
-          </div>
-
-          {/* Hours */}
-          <div className="flex-shrink-0 bg-background-secondary rounded-sm px-3 py-2 flex flex-col items-center min-w-[72px]">
-            <span className="font-mono text-mono-large text-content-primary tabular-nums">
-              {stats.online_hours.toFixed(1)}h
-            </span>
-            <span className="text-label-small text-content-secondary">online</span>
-          </div>
-
-          {/* Acceptance */}
-          <div className="flex-shrink-0 bg-background-secondary rounded-sm px-3 py-2 flex flex-col items-center min-w-[72px]">
-            <span className="font-mono text-mono-large text-content-primary tabular-nums">
-              {stats.acceptance_rate}%
-            </span>
-            <span className="text-label-small text-content-secondary">rate</span>
-          </div>
-        </div>
-      )}
-
-      {/* ── Status / seeking indicator ── */}
-      {!isOffline && (
-        <div className="flex items-center justify-between border-t border-border-opaque pt-3">
-          <div className="flex items-center gap-2">
-            <span className="status-dot status-dot-online animate-ping" />
-            <span className="text-label-medium text-content-primary">Seeking matches…</span>
-          </div>
-          <StatusBadge status="online" size="sm" />
-        </div>
       )}
 
     </div>

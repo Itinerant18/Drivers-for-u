@@ -132,7 +132,7 @@ export default function DriverTripHistoryPage() {
       {!selectedTrip ? (
         <div className="space-y-6 animate-fadeIn">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white font-move">Ride Trip History</h2>
+            <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">Ride Trip History</h2>
             <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">Filter past completed matches or inspect audit log details</p>
             {historyError && <p className="text-content-negative text-[10px] font-mono mt-2">{historyError}</p>}
           </div>
@@ -145,7 +145,7 @@ export default function DriverTripHistoryPage() {
                 type="button"
                 onClick={() => setFilterType(tab)}
                 className={`flex-1 py-1.5 font-bold uppercase rounded-lg transition-all ${
-                  filterType === tab ? 'bg-white text-black' : 'text-content-secondary hover:text-white'
+                  filterType === tab ? 'bg-interactive-primary text-interactive-primary-text' : 'text-content-secondary hover:text-content-primary'
                 }`}
               >
                 {tab}
@@ -175,7 +175,7 @@ export default function DriverTripHistoryPage() {
                       <span className="text-[9px] text-content-tertiary font-bold uppercase">{item.date.split(' ')[0]} • ID: {item.id}</span>
                     </div>
                     
-                    <h4 className="text-sm font-bold text-white truncate font-sans tracking-tight">
+                    <h4 className="text-sm font-bold text-content-primary truncate font-sans tracking-tight">
                       {item.route}
                     </h4>
                     <p className="text-[10px] text-content-tertiary font-mono">Vehicle Asset: {item.car.split(' • ')[0]}</p>
@@ -201,7 +201,7 @@ export default function DriverTripHistoryPage() {
           {/* Header */}
           <div className="flex justify-between items-center pb-4 border-b border-border-opaque">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white font-move">Trip Audit Summary</h2>
+              <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">Trip Audit Summary</h2>
               <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">ID: {selectedTrip.id.toUpperCase()} ({selectedTrip.date})</p>
             </div>
 
@@ -261,7 +261,7 @@ export default function DriverTripHistoryPage() {
 
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="bg-white text-black font-mono font-bold text-[8px] uppercase px-3 py-1 rounded-full cursor-pointer hover:bg-background-tertiary"
+                className="bg-interactive-primary text-interactive-primary-text font-mono font-bold text-[8px] uppercase px-3 py-1 rounded-full cursor-pointer hover:bg-background-tertiary"
               >
                 {isPlaying ? '⏸️ Pause' : '▶️ Play'}
               </button>
@@ -276,7 +276,7 @@ export default function DriverTripHistoryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
             
             <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-              <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+              <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
                 Trip Specifications
               </h4>
 
@@ -287,11 +287,11 @@ export default function DriverTripHistoryPage() {
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border-opaque text-[10px] font-mono">
                   <div>
                     <span className="text-content-tertiary block text-[8px] uppercase font-bold">Driving Distance</span>
-                    <span className="text-white block mt-0.5 font-bold">{selectedTrip.distance} KM</span>
+                    <span className="text-content-primary block mt-0.5 font-bold">{selectedTrip.distance} KM</span>
                   </div>
                   <div>
                     <span className="text-content-tertiary block text-[8px] uppercase font-bold">Transit Time</span>
-                    <span className="text-white block mt-0.5 font-bold">{selectedTrip.duration} Mins</span>
+                    <span className="text-content-primary block mt-0.5 font-bold">{selectedTrip.duration} Mins</span>
                   </div>
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function DriverTripHistoryPage() {
             {/* Bill Receipt Itemized */}
             <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
               <div className="flex justify-between items-center border-b border-border-opaque pb-2">
-                <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider">
                   Itemized Payout
                 </h4>
                 
@@ -315,37 +315,37 @@ export default function DriverTripHistoryPage() {
               <div className="space-y-2 font-mono text-[10px] text-content-secondary">
                 <div className="flex justify-between">
                   <span>Base Package Quoted:</span>
-                  <FareDisplay amount={selectedTrip.bill.base * 100} size="md" className="text-white" />
+                  <FareDisplay amount={selectedTrip.bill.base * 100} size="md" className="text-content-primary" />
                 </div>
                 {selectedTrip.bill.tolls > 0 && (
                   <div className="flex justify-between">
                     <span>Toll Additions:</span>
-                    <FareDisplay amount={selectedTrip.bill.tolls * 100} size="md" className="text-white" />
+                    <FareDisplay amount={selectedTrip.bill.tolls * 100} size="md" className="text-content-primary" />
                   </div>
                 )}
                 {selectedTrip.bill.parking > 0 && (
                   <div className="flex justify-between">
                     <span>Parking Additions:</span>
-                    <FareDisplay amount={selectedTrip.bill.parking * 100} size="md" className="text-white" />
+                    <FareDisplay amount={selectedTrip.bill.parking * 100} size="md" className="text-content-primary" />
                   </div>
                 )}
                 {selectedTrip.bill.waiting > 0 && (
                   <div className="flex justify-between">
                     <span>Waiting Charges:</span>
-                    <FareDisplay amount={selectedTrip.bill.waiting * 100} size="md" className="text-white" />
+                    <FareDisplay amount={selectedTrip.bill.waiting * 100} size="md" className="text-content-primary" />
                   </div>
                 )}
                 {selectedTrip.bill.surge > 0 && (
                   <div className="flex justify-between">
                     <span>Night Surge Surcharge:</span>
-                    <FareDisplay amount={selectedTrip.bill.surge * 100} size="md" className="text-white" />
+                    <FareDisplay amount={selectedTrip.bill.surge * 100} size="md" className="text-content-primary" />
                   </div>
                 )}
                 <div className="flex justify-between border-t border-border-opaque pt-2 text-content-tertiary">
                   <span>Platform Commission (10%):</span>
                   <span className="text-content-negative">-<FareDisplay amount={selectedTrip.bill.deductions * 100} size="md" /></span>
                 </div>
-                <div className="flex justify-between font-bold text-xs text-white border-t border-border-opaque pt-2">
+                <div className="flex justify-between font-bold text-xs text-content-primary border-t border-border-opaque pt-2">
                   <span>Net Settled payout:</span>
                   <FareDisplay amount={selectedTrip.bill.net * 100} size="md" className="text-content-positive" />
                 </div>
@@ -356,7 +356,7 @@ export default function DriverTripHistoryPage() {
 
           {/* Feedback details */}
           <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-4">
-            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
+            <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
               Feedback Exchange Ratings
             </h4>
 

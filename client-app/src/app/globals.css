@@ -16,6 +16,7 @@
   --font-body:    var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
   --font-sans:    var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
   --font-mono:    var(--font-jetbrains-mono), "JetBrains Mono", "Fira Code", monospace;
+  --font-serif:   var(--font-playfair), "Playfair Display", Georgia, serif;
 
   /* ── Semantic Background Colors ── */
   --color-background-primary:   var(--background-primary);
@@ -69,6 +70,12 @@
   --color-gray-800:  var(--gray-800);
   --color-gray-900:  var(--gray-900);
   --color-gray-1000: var(--gray-1000);
+
+  /* ── Forest Ramp (Aura primary) ── */
+  --color-forest-50:  var(--forest-50);
+  --color-forest-300: var(--forest-300);
+  --color-forest-400: var(--forest-400);
+  --color-forest-500: var(--forest-500);
 
   /* ── Accent Ramp ── */
   --color-accent-50:  var(--accent-50);
@@ -150,6 +157,15 @@ body {
    font-mono ONLY for: fares, ETAs, distances, IDs
    NEVER for: addresses, phone numbers, prose
    ───────────────────────────────────────────── */
+/* Serif display — Aura display moments ONLY (greeting, hero figure).
+   Never labels, buttons, data rows, or body copy. */
+.text-display-serif {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.04;
+}
+
 .text-display-large  { font-size: 36px; line-height: 44px; font-weight: 700; font-family: var(--font-display); letter-spacing: -0.02em; }
 .text-display-medium { font-size: 28px; line-height: 36px; font-weight: 700; font-family: var(--font-display); letter-spacing: -0.01em; }
 .text-display-small  { font-size: 24px; line-height: 32px; font-weight: 700; font-family: var(--font-display); }

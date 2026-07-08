@@ -108,15 +108,15 @@ export default function DriverSupportPage() {
       </a>
 
       <div className="flex gap-2 font-mono text-[10px]">
-        <button onClick={() => { setView('new'); setCreatedNumber(null); }} className={`flex-1 py-2 rounded-lg font-bold uppercase ${view === 'new' ? 'bg-white text-black' : 'bg-background-secondary text-content-secondary'}`}>{t('newTicket')}</button>
-        <button onClick={() => setView('list')} className={`flex-1 py-2 rounded-lg font-bold uppercase ${view === 'list' || view === 'thread' ? 'bg-white text-black' : 'bg-background-secondary text-content-secondary'}`}>{t('myTickets')}</button>
+        <button onClick={() => { setView('new'); setCreatedNumber(null); }} className={`flex-1 py-2 rounded-lg font-bold uppercase ${view === 'new' ? 'bg-interactive-primary text-interactive-primary-text' : 'bg-background-secondary text-content-secondary'}`}>{t('newTicket')}</button>
+        <button onClick={() => setView('list')} className={`flex-1 py-2 rounded-lg font-bold uppercase ${view === 'list' || view === 'thread' ? 'bg-interactive-primary text-interactive-primary-text' : 'bg-background-secondary text-content-secondary'}`}>{t('myTickets')}</button>
       </div>
 
       {/* NEW TICKET */}
       {view === 'new' && (createdNumber ? (
         <div className="bg-background-primary border border-positive-400/30 rounded-2xl p-8 text-center space-y-3">
           <div className="text-4xl"><SuccessIcon size={36} /></div>
-          <p className="text-white font-bold">{t('ticketCreated')}</p>
+          <p className="text-content-primary font-bold">{t('ticketCreated')}</p>
           <p className="text-content-positive font-mono text-lg">{createdNumber}</p>
           <button onClick={() => { setCreatedNumber(null); setView('list'); }} className="text-[10px] font-mono text-content-secondary underline">{t('myTickets')}</button>
         </div>
@@ -127,7 +127,7 @@ export default function DriverSupportPage() {
             <div className="grid grid-cols-3 gap-2">
               {cats.map((c, i) => (
                 <button key={i} type="button" onClick={() => setCategory(c.key)}
-                  className={`rounded-xl border p-3 text-center transition ${category === c.key ? 'border-white bg-background-secondary' : 'border-border-opaque bg-background-primary'}`}>
+                  className={`rounded-xl border p-3 text-center transition ${category === c.key ? 'border-forest-400 bg-accent-50' : 'border-border-opaque bg-background-primary'}`}>
                   <div className="text-xl">{c.icon}</div>
                   <div className="text-[9px] font-mono text-content-secondary mt-1">{c.label}</div>
                 </button>
@@ -150,9 +150,9 @@ export default function DriverSupportPage() {
           )}
 
           <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder={t('subject')}
-            className="w-full bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-white font-mono" />
+            className="w-full bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-content-primary font-mono" />
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('description')} rows={4} required
-            className="w-full bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-white font-mono" />
+            className="w-full bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-content-primary font-mono" />
 
           <div className="flex items-center gap-2">
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleAttach(e.target.files[0])} />
@@ -161,7 +161,7 @@ export default function DriverSupportPage() {
           </div>
 
           <button type="submit" disabled={!category || submitting}
-            className="w-full bg-white text-black rounded-xl py-3.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50">
+            className="w-full bg-interactive-primary text-interactive-primary-text rounded-xl py-3.5 text-xs font-bold uppercase tracking-wider disabled:opacity-50">
             {submitting ? '…' : t('submit')}
           </button>
         </form>
@@ -175,7 +175,7 @@ export default function DriverSupportPage() {
             <button key={tk.ticket_number} onClick={() => openThread(tk.ticket_number)}
               className="w-full bg-background-primary border border-border-opaque rounded-xl p-4 flex justify-between items-center text-left">
               <div>
-                <span className="text-white font-mono text-xs font-bold">{tk.ticket_number}</span>
+                <span className="text-content-primary font-mono text-xs font-bold">{tk.ticket_number}</span>
                 <span className="block text-content-tertiary text-[9px] font-mono mt-0.5">{tk.category} · {formatCompactDate(tk.updated_at)}</span>
               </div>
               <span className={`text-[8px] font-mono uppercase font-bold px-2 py-1 rounded-full border ${STATUS_STYLE[tk.status] ?? STATUS_STYLE.OPEN}`}>{tk.status}</span>
@@ -192,12 +192,12 @@ export default function DriverSupportPage() {
           {thread && (
             <>
               <div className="bg-background-primary border border-border-opaque rounded-xl p-3">
-                <span className="text-white font-mono text-xs font-bold">{thread.ticket.ticket_number}</span>
+                <span className="text-content-primary font-mono text-xs font-bold">{thread.ticket.ticket_number}</span>
                 <span className="block text-content-tertiary text-[9px] font-mono">{thread.ticket.subject}</span>
               </div>
               <div className="space-y-2">
                 {thread.messages.map((m, i) => (
-                  <div key={i} className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs ${m.sender_type === 'DRIVER' ? 'ml-auto bg-white text-black' : 'bg-background-secondary text-content-primary'}`}>
+                  <div key={i} className={`max-w-[80%] rounded-2xl px-3 py-2 text-xs ${m.sender_type === 'DRIVER' ? 'ml-auto bg-interactive-primary text-interactive-primary-text' : 'bg-background-secondary text-content-primary'}`}>
                     <p>{m.content}</p>
                     <span className="block text-[8px] opacity-60 mt-1 font-mono">{m.sender_name} · {formatCompactDate(m.created_at)}</span>
                   </div>
@@ -206,8 +206,8 @@ export default function DriverSupportPage() {
               <div className="flex gap-2 sticky bottom-0">
                 <input value={replyMsg} onChange={(e) => setReplyMsg(e.target.value)} placeholder={t('reply')}
                   onKeyDown={(e) => e.key === 'Enter' && handleReply()}
-                  className="flex-1 bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-white font-mono" />
-                <button onClick={handleReply} className="bg-white text-black rounded-xl px-4 text-[10px] font-bold uppercase">{t('send')}</button>
+                  className="flex-1 bg-background-primary border border-border-opaque rounded-xl p-3 text-xs text-content-primary font-mono" />
+                <button onClick={handleReply} className="bg-interactive-primary text-interactive-primary-text rounded-xl px-4 text-[10px] font-bold uppercase">{t('send')}</button>
               </div>
             </>
           )}

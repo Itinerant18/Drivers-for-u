@@ -11,8 +11,6 @@ import type { InsuranceClaim, InsuranceCoverage, Order } from "@/lib/api/types";
 import { formatRupeesWhole } from "@/lib/utils/formatCurrency";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { WordRotate } from "@/components/ui/word-rotate";
-import { HyperText } from "@/components/ui/hyper-text";
 
 type ClaimType = FileClaimInput["claim_type"];
 
@@ -57,7 +55,7 @@ function StatusChip({ status }: { status: InsuranceClaim["status"] }) {
 
 function ClaimCard({ claim }: { claim: InsuranceClaim }) {
   return (
-    <div className="rounded-2xl bg-background-secondary p-4">
+    <div className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-content-primary">{formatDate(claim.created_at)}</p>
@@ -169,8 +167,8 @@ function FileClaimSheet({
         onClick={onClose}
         className="absolute inset-0 bg-black/60"
       />
-      <div className="relative max-h-[90vh] overflow-y-auto rounded-t-3xl bg-background-secondary p-5">
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/15" />
+      <div className="relative max-h-[90vh] overflow-y-auto rounded-t-3xl bg-background-primary p-5">
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border-opaque" />
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-bold text-content-primary">File a Claim</h2>
           <button onClick={onClose} className="text-sm font-semibold text-content-secondary">
@@ -194,8 +192,8 @@ function FileClaimSheet({
                   key={t.id}
                   type="button"
                   onClick={() => setOrderId(t.id)}
-                  className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left ${
-                    selected ? "bg-surface-accent ring-1 ring-border-accent" : "bg-background-tertiary"
+                  className={`flex w-full items-center justify-between rounded-xl border-2 px-4 py-3 text-left ${
+                    selected ? "bg-secondary-tint border-secondary-strong" : "bg-background-tertiary border-transparent"
                   }`}
                 >
                   <span className="text-sm font-medium text-content-primary">#{t.id.slice(0, 8)}</span>
@@ -225,7 +223,7 @@ function FileClaimSheet({
                     : ""}
                 </span>
               ) : (
-                <span className="font-semibold">This trip isn&apos;t covered by D4M Care.</span>
+                <span className="font-semibold">This trip isn&apos;t covered by Vahnly Care.</span>
               )}
             </div>
           ) : null)}
@@ -241,7 +239,7 @@ function FileClaimSheet({
                 onClick={() => setClaimType(opt.value)}
                 className={`rounded-xl px-4 py-2 text-sm font-medium ${
                   selected
-                    ? "bg-accent-400 text-content-primary"
+                    ? "bg-secondary text-content-primary"
                     : "bg-background-tertiary text-content-secondary"
                 }`}
               >
@@ -346,25 +344,18 @@ export default function InsurancePage() {
   const showEmpty = !loading && (failed || claims.length === 0);
 
   return (
-    <AccountScaffold title={<WordRotate words={["D4M Care", "Insurance", "Protection"]} duration={3000} />}>
+    <AccountScaffold title="Vahnly Care">
       <div className="space-y-6">
         <BlurFade delay={0.1}>
           <section>
-            <h2 className="text-sm font-bold text-content-primary mb-3">D4M Care</h2>
-            <div className="rounded-2xl bg-background-secondary p-4">
+            <h2 className="text-sm font-bold text-content-primary mb-3">Vahnly Care</h2>
+            <div className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
               <p className="text-sm text-content-secondary">
                 Per-trip opt-in is <span className="font-semibold text-content-primary">₹49</span> at booking.
               </p>
-              <HyperText
-                as="p"
-                className="mt-3 rounded-xl bg-surface-accent px-4 py-3 text-sm font-semibold text-content-accent"
-                duration={1200}
-                delay={500}
-                animateOnHover={false}
-                startOnView={true}
-              >
-                Your next trip is covered with D4M Care when you toggle it at booking.
-              </HyperText>
+              <p className="mt-3 rounded-xl bg-secondary-tint px-4 py-3 text-sm font-semibold text-secondary-strong">
+                Your next trip is covered with Vahnly Care when you toggle it at booking.
+              </p>
               <div className="mt-3 flex items-center justify-between rounded-xl bg-background-tertiary px-4 py-3 opacity-60">
                 <span className="text-sm font-medium text-content-secondary">Monthly plan</span>
                 <span className="text-xs font-medium text-content-tertiary">Coming soon</span>
@@ -382,7 +373,7 @@ export default function InsurancePage() {
                 onClick={() => setSheetOpen(true)}
                 shimmerColor="rgba(255,255,255,0.3)"
                 background="var(--color-secondary)"
-                borderRadius="12px"
+                borderRadius="999px"
                 className="px-4 py-2 text-sm font-bold"
               >
                 File a Claim

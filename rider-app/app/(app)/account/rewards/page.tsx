@@ -5,10 +5,7 @@ import { AccountScaffold } from "@/components/account/AccountScaffold";
 import { ordersApi } from "@/lib/api/orders";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { HyperText } from "@/components/ui/hyper-text";
-import { ShineBorder } from "@/components/ui/shine-border";
-import { WordRotate } from "@/components/ui/word-rotate";
 import Text3DFlip from "@/components/ui/text-3d-flip";
 import { SparklesText } from "@/components/ui/sparkles-text";
 import { DiaTextReveal } from "@/components/ui/dia-text-reveal";
@@ -31,7 +28,7 @@ const EXPIRED: Offer[] = [
 const TIERS = [
   { name: "Silver", min: 0, perks: ["Standard support", "Basic rewards"] },
   { name: "Gold", min: 5, perks: ["Priority matching", "5% wallet cashback"] },
-  { name: "Platinum", min: 15, perks: ["24/7 concierge", "Free D4M Care", "10% cashback"] },
+  { name: "Platinum", min: 15, perks: ["24/7 concierge", "Free Vahnly Care", "10% cashback"] },
 ];
 
 const PROMO_STORAGE_KEY = "dfu_promo_code";
@@ -41,7 +38,6 @@ export default function RewardsPage() {
   const [savedCode, setSavedCode] = useState<string | null>(null);
   const [trips, setTrips] = useState(0);
   const [showExpired, setShowExpired] = useState(false);
-  const [hoveredCode, setHoveredCode] = useState<string | null>(null);
 
   useEffect(() => {
     ordersApi
@@ -90,7 +86,7 @@ export default function RewardsPage() {
   const progress = next ? Math.min(100, (trips / next.min) * 100) : 100;
 
   return (
-    <AccountScaffold title={<WordRotate words={["Promos & Offers", "Rewards", "Deals"]} duration={3000} />}>
+    <AccountScaffold title="Promos">
       {/* Enter code */}
       <BlurFade delay={0.1}>
         <div className="flex gap-2">
@@ -106,7 +102,7 @@ export default function RewardsPage() {
             onClick={saveCode}
             shimmerColor="rgba(255,255,255,0.3)"
             background="var(--color-secondary)"
-            borderRadius="12px"
+            borderRadius="999px"
             className="px-5 text-sm font-bold disabled:opacity-40"
           >
             Save
@@ -124,7 +120,7 @@ export default function RewardsPage() {
             >
               {`✓ ${savedCode} saved — applied at checkout`}
             </HyperText>
-            <button onClick={clearCode} className="text-xs font-semibold text-content-secondary active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+            <button onClick={clearCode} className="text-xs font-semibold text-content-secondary active:scale-90 press-spring">
               Remove
             </button>
           </div>
@@ -137,7 +133,7 @@ export default function RewardsPage() {
 
       {/* Loyalty */}
       <BlurFade delay={0.15}>
-        <div className="mt-6 rounded-2xl bg-background-secondary p-4">
+        <div className="mt-6 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
           <div className="mb-2 flex items-center justify-between">
             <DiaTextReveal
               text={`${tier.name} Tier`}
@@ -150,7 +146,7 @@ export default function RewardsPage() {
             <span className="text-xs text-content-secondary">{trips} trips</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-background-tertiary">
-            <div className="h-full rounded-full bg-accent-400 transition-all" style={{ width: `${progress}%` }} />
+            <div className="h-full rounded-full bg-secondary transition-all" style={{ width: `${progress}%` }} />
           </div>
           {next ? (
             <p className="mt-2 text-xs text-content-secondary">
@@ -176,14 +172,10 @@ export default function RewardsPage() {
           Active Offers
         </Text3DFlip>
         <div className="space-y-3">
-          {ACTIVE.map((o, idx) => (
+          {ACTIVE.map((o) => (
             <div key={o.code}
-              className="relative rounded-2xl bg-background-secondary p-4 overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]"
-              onMouseEnter={() => setHoveredCode(o.code)}
-              onMouseLeave={() => setHoveredCode(null)}
+              className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4 press-spring hover:scale-[1.01]"
             >
-              <BorderBeam size={60} duration={6} colorFrom="#4F46E5" colorTo="rgba(79,70,229,0.05)" borderWidth={1.5} delay={idx * 0.3} />
-              {hoveredCode === o.code && <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" />}
               <div className="flex items-start justify-between">
                 <div>
                   <SparklesText className="text-sm font-bold text-content-primary" sparklesCount={6} colors={{ first: "#4F46E5", second: "#4F46E5" }}>
@@ -205,7 +197,7 @@ export default function RewardsPage() {
       <BlurFade delay={0.25}>
         <button
           onClick={() => setShowExpired((v) => !v)}
-          className="mt-6 flex w-full items-center justify-between rounded-2xl bg-background-secondary p-4 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          className="mt-6 flex w-full items-center justify-between rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4 active:scale-[0.98] press-spring"
         >
           <span className="text-sm font-bold text-content-primary">Expired Offers</span>
           <span className={`text-content-secondary transition-transform ${showExpired ? "rotate-180" : ""}`}>▾</span>
@@ -214,7 +206,7 @@ export default function RewardsPage() {
       {showExpired && (
         <div className="mt-2 space-y-2">
           {EXPIRED.map((o) => (
-            <div key={o.code} className="rounded-2xl bg-background-secondary p-4 opacity-50">
+            <div key={o.code} className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4 opacity-50">
               <p className="text-sm font-semibold text-content-primary">{o.title}</p>
               <p className="text-xs text-content-secondary">{o.desc} · Expired</p>
             </div>

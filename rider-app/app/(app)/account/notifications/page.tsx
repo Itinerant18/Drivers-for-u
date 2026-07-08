@@ -7,8 +7,6 @@ import { SkeletonList, EmptyState, ErrorState } from "@/components/account/State
 import { useNotificationStore } from "@/lib/store/notificationStore";
 import type { RiderNotificationItem } from "@/lib/api/types";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { WordRotate } from "@/components/ui/word-rotate";
-import { ShineBorder } from "@/components/ui/shine-border";
 
 import { AnimatedIcon } from "@/components/ds/Icon";
 import { AnimBell } from "@/assets/icons/animated";
@@ -56,10 +54,10 @@ export default function NotificationsPage() {
 
   return (
     <AccountScaffold
-      title={<WordRotate words={["Notifications", "Updates", "Alerts"]} duration={3000} />}
+      title="Notifications"
       action={
         unreadCount > 0 ? (
-          <button onClick={markAll} className="text-xs font-semibold text-content-accent active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+          <button onClick={markAll} className="text-xs font-semibold text-content-accent active:scale-95 press-spring">
             Mark all read
           </button>
         ) : undefined
@@ -79,18 +77,17 @@ export default function NotificationsPage() {
                 <BlurFade key={b} delay={0.1}>
                   <div>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-content-tertiary">{b}</p>
-                    <div className="space-y-2">
+                    <div className="divide-y divide-border-opaque overflow-hidden rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1">
                       {groups[b].map((n) => (
                         <button
                           key={n.id}
                           onClick={() => !n.is_read && markRead(n.id)}
-                          className={`group relative block w-full rounded-2xl p-4 overflow-hidden text-left active:scale-[0.99] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                            n.is_read ? "bg-background-secondary" : "bg-background-tertiary ring-1 ring-border-accent"
+                          className={`block w-full p-4 text-left active:scale-[0.99] press-spring ${
+                            n.is_read ? "" : "bg-secondary-tint"
                           }`}
                         >
-                          <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           <div className="flex items-start gap-2">
-                            {!n.is_read && <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-accent-400" />}
+                            {!n.is_read && <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-secondary-strong" />}
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-semibold text-content-primary">{n.title}</p>
                               <p className="mt-0.5 text-xs text-content-secondary">{n.body}</p>
@@ -114,7 +111,7 @@ export default function NotificationsPage() {
           <BlurFade delay={0.2}>
             <Link
               href="/account/settings"
-              className="mt-6 block rounded-2xl bg-background-secondary py-3.5 text-center text-sm font-semibold text-content-accent active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="mt-6 block rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 py-3.5 text-center text-sm font-semibold text-content-accent active:scale-[0.98] press-spring"
             >
               Notification Preferences →
             </Link>

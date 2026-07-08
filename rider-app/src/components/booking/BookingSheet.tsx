@@ -987,7 +987,7 @@ export function BookingSheet() {
             </div>
           </GlassSection>
 
-          {/* [6] More options — Persons / D4M Care / Owner. Collapsed by default: rare-per-booking
+          {/* [6] More options — Persons / Vahnly Care / Owner. Collapsed by default: rare-per-booking
               controls shouldn't share visual weight with route/car/payment. A dot signals an active
               choice even while collapsed, and the review sheet re-surfaces everything before commit. */}
           <GlassSection index={5} span="col-span-6">
@@ -1022,7 +1022,7 @@ export function BookingSheet() {
                   className="overflow-hidden"
                 >
                   <div className="mt-3 grid grid-cols-6 gap-3 border-t border-border-opaque pt-3">
-                    {/* D4M Care */}
+                    {/* Vahnly Care */}
                     <div
                       className={[
                         "col-span-3 rounded-2xl p-3 transition-all duration-300",
@@ -1046,7 +1046,7 @@ export function BookingSheet() {
                             onClick={() => setShowD4mInfo(true)}
                             className="touch-target text-content-tertiary hover:text-content-secondary min-w-[24px] min-h-[24px] flex items-center justify-center
                               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 rounded-pill"
-                            aria-label="D4M Care info"
+                            aria-label="Vahnly Care info"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
@@ -1054,7 +1054,7 @@ export function BookingSheet() {
                             </svg>
                           </button>
                         </div>
-                        <span className="mt-2 text-label-medium font-semibold text-content-primary">D4M Care</span>
+                        <span className="mt-2 text-label-medium font-semibold text-content-primary">Vahnly Care</span>
                         <p className="text-label-small text-content-secondary">₹49 — Insurance + support</p>
                         <div className="mt-auto pt-3">
                           <Toggle on={d4mCare} onToggle={() => setD4mCare(!d4mCare)} />
@@ -1252,7 +1252,7 @@ export function BookingSheet() {
                 { label: "Base fare",        paise: fareBreakdown.base_fare_paise },
                 { label: "Distance charge",  paise: fareBreakdown.distance_charge_paise },
                 { label: "Night charge",     paise: fareBreakdown.night_charge_paise },
-                { label: "D4M Care",         paise: fareBreakdown.d4m_care_paise },
+                { label: "Vahnly Care",         paise: fareBreakdown.d4m_care_paise },
                 { label: "Promo discount",   paise: -fareBreakdown.promo_discount_paise },
               ].map(({ label, paise }) =>
                 Number(paise) !== 0 ? (
@@ -1295,16 +1295,16 @@ export function BookingSheet() {
           onKeyDown={(e) => { if (e.key === "Escape") setShowD4mInfo(false); }}
           role="dialog"
           aria-modal="true"
-          aria-label="D4M Care information"
+          aria-label="Vahnly Care information"
         >
           <div
             className="rounded-t-[2rem] bg-background-primary/95 backdrop-blur-xl p-4 shadow-elevation-3 animate-spring-up"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mx-auto mb-4 h-1 w-10 rounded-pill bg-border-opaque/60" />
-            <h3 className="mb-2 text-heading-small text-content-primary">D4M Care — ₹49/trip</h3>
+            <h3 className="mb-2 text-heading-small text-content-primary">Vahnly Care — ₹49/trip</h3>
             <p className="text-paragraph-medium text-content-secondary">
-              D4M Care provides accident insurance coverage during your trip — up to ₹1 lakh
+              Vahnly Care provides accident insurance coverage during your trip — up to ₹1 lakh
               for medical expenses, ₹5 lakh personal accident cover, and zero-liability protection
               for your vehicle. Highly recommended for outstation trips.
             </p>

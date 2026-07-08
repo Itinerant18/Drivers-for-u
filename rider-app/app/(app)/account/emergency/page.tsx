@@ -7,7 +7,6 @@ import { accountApi, type EmergencyContactInput } from "@/lib/api/account";
 import type { EmergencyContact } from "@/lib/api/types";
 import { InfoIcon, SirenIcon } from "@/components/ds/Icon";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { WordRotate } from "@/components/ui/word-rotate";
 
 const INPUT =
   "w-full rounded-xl bg-background-tertiary px-4 py-3 text-sm text-content-primary outline-none placeholder:text-content-tertiary focus:ring-1 focus:ring-border-accent";
@@ -41,23 +40,23 @@ export default function EmergencyPage() {
   const atMax = (contacts?.length ?? 0) >= 3;
 
   return (
-    <AccountScaffold title={<WordRotate words={["Emergency", "Safety Contacts", "ICE Contacts"]} duration={3000} />}>
+    <AccountScaffold title="Emergency">
       {/* Auto-share toggle */}
       <BlurFade delay={0.1}>
-        <div className="mb-4 rounded-2xl bg-background-secondary p-4">
+        <div className="mb-4 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="text-sm text-content-primary">Auto-share trip</span>
-              <button onClick={() => setShowTip((v) => !v)} aria-label="Auto-share info" className="text-xs text-content-secondary active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+              <button onClick={() => setShowTip((v) => !v)} aria-label="Auto-share info" className="text-xs text-content-secondary active:scale-90 press-spring">
                 <InfoIcon size={16} />
               </button>
             </div>
             <button
               onClick={() => setAutoShare((v) => !v)}
-              className={`relative h-6 w-11 rounded-full transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-90 ${autoShare ? "bg-accent-400" : "bg-background-tertiary"}`}
+              className={`relative h-6 w-11 rounded-full press-spring active:scale-90 ${autoShare ? "bg-secondary" : "bg-background-tertiary"}`}
             >
               <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${autoShare ? "translate-x-5" : "translate-x-0.5"}`}
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white press-spring ${autoShare ? "translate-x-5" : "translate-x-0.5"}`}
               />
             </button>
           </div>
@@ -80,7 +79,7 @@ export default function EmergencyPage() {
           )}
           {contacts.map((c) => (
             <BlurFade key={c.id} delay={0.1}>
-              <div className="flex items-center gap-3 rounded-2xl bg-background-secondary p-4 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]">
+              <div className="flex items-center gap-3 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4 press-spring hover:scale-[1.01]">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-negative text-sm font-bold text-content-negative">
                   {c.name.slice(0, 1).toUpperCase()}
                 </div>
@@ -97,11 +96,11 @@ export default function EmergencyPage() {
                       setEditing(c);
                       setAdding(false);
                     }}
-                    className="text-xs font-semibold text-content-accent active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                    className="text-xs font-semibold text-content-accent active:scale-90 press-spring"
                   >
                     Edit
                   </button>
-                  <button onClick={() => remove(c.id)} className="text-xs font-semibold text-content-negative active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+                  <button onClick={() => remove(c.id)} className="text-xs font-semibold text-content-negative active:scale-90 press-spring">
                     Delete
                   </button>
                 </div>
@@ -138,7 +137,7 @@ export default function EmergencyPage() {
             ) : (
               <button
                 onClick={() => setAdding(true)}
-                className="mt-4 w-full rounded-2xl bg-interactive-primary py-3.5 text-sm font-bold text-interactive-primary-text active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                className="mt-4 w-full rounded-2xl bg-interactive-primary py-3.5 text-sm font-bold text-interactive-primary-text active:scale-[0.98] press-spring"
               >
                 + Add Contact
               </button>
@@ -202,7 +201,7 @@ function AddContactForm({
   };
 
   return (
-    <div className="mt-4 space-y-3 rounded-2xl bg-background-secondary p-4">
+    <div className="mt-4 space-y-3 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
       <div>
         <input
           value={name}

@@ -9,9 +9,7 @@ import { CarIcon, CardIcon, UserIcon, DocumentIcon, ShieldIcon, SuccessIcon, Cha
 import type { Order, SupportTicket, SupportTicketMessage } from "@/lib/api/types";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { WordRotate } from "@/components/ui/word-rotate";
 import { TypingAnimation } from "@/components/ui/typing-animation";
-import { ShineBorder } from "@/components/ui/shine-border";
 import { Highlighter } from "@/components/ui/highlighter";
 
 const CATEGORIES: { key: string; label: string; icon: React.ReactNode; needsTrip: boolean }[] = [
@@ -38,8 +36,8 @@ const FAQS = [
     a: "Fares combine a base fare, distance and time, plus any surge multiplier active in your area. Promo codes and tolls are adjusted at the end.",
   },
   {
-    q: "What is D4M Care?",
-    a: "D4M Care is our trip protection programme that covers every ride. You can review and manage it under Account → D4M Care.",
+    q: "What is Vahnly Care?",
+    a: "Vahnly Care is our trip protection programme that covers every ride. You can review and manage it under Account → Vahnly Care.",
   },
   {
     q: "How do I change my car mid-trip?",
@@ -209,12 +207,12 @@ function SupportBody() {
       <div>
         <button
           onClick={() => setOpenTicket(null)}
-          className="mb-4 flex items-center gap-1 text-sm font-semibold text-content-secondary active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          className="mb-4 flex items-center gap-1 text-sm font-semibold text-content-secondary active:scale-95 press-spring"
         >
           <span>←</span> Back to support
         </button>
 
-        <div className="mb-4 rounded-2xl bg-background-secondary p-4">
+        <div className="mb-4 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-content-primary">{openTicket.subject}</p>
@@ -244,7 +242,7 @@ function SupportBody() {
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
                     m.sender === "RIDER"
-                      ? "bg-accent-400 text-content-primary"
+                      ? "bg-secondary text-content-primary"
                       : "bg-background-tertiary text-content-secondary"
                   }`}
                 >
@@ -331,8 +329,8 @@ function SupportBody() {
                 setCategory(c.key);
                 setSelectedTrip(null);
               }}
-              className={`flex flex-col items-center gap-2 rounded-2xl py-4 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                category === c.key ? "bg-surface-accent ring-1 ring-border-accent" : "bg-background-secondary"
+              className={`flex flex-col items-center gap-2 rounded-xl border py-4 active:scale-95 press-spring ${
+                category === c.key ? "bg-secondary-tint border-secondary-strong" : "bg-background-primary border-border-opaque shadow-elevation-1"
               }`}
             >
               <span className="text-2xl">{c.icon}</span>
@@ -354,8 +352,8 @@ function SupportBody() {
                 <button
                   key={t.id}
                   onClick={() => setSelectedTrip(t.id)}
-                  className={`block w-full rounded-xl p-3 text-left text-xs ${
-                    selectedTrip === t.id ? "bg-surface-accent ring-1 ring-border-accent" : "bg-background-secondary"
+                  className={`block w-full rounded-xl border p-3 text-left text-xs ${
+                    selectedTrip === t.id ? "bg-secondary-tint border-secondary-strong" : "bg-background-primary border-border-opaque shadow-elevation-1"
                   }`}
                 >
                   <span className="font-mono text-content-secondary">{t.id.slice(0, 8)}</span>
@@ -390,7 +388,7 @@ function SupportBody() {
             onClick={submit}
             shimmerColor="rgba(255,255,255,0.3)"
             background="var(--color-secondary)"
-            borderRadius="16px"
+            borderRadius="999px"
             className="mt-3 py-3.5 text-sm font-bold disabled:opacity-40"
           >
             {submitting ? "Submitting…" : "Submit Ticket"}
@@ -405,13 +403,13 @@ function SupportBody() {
           <button
             onClick={chatAvailable ? startChat : undefined}
             disabled={!chatAvailable}
-            className="rounded-2xl bg-background-secondary py-4 text-sm font-semibold text-content-primary disabled:opacity-40 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 py-4 text-sm font-semibold text-content-primary disabled:opacity-40 active:scale-[0.98] press-spring"
           >
             <ChatIcon size={16} className="mr-1.5 inline-block" /> {chatAvailable ? "Start Live Chat" : "Live Chat"}
           </button>
           <a
             href="tel:+918000000000"
-            className="rounded-2xl bg-background-secondary py-4 text-center text-sm font-semibold text-content-primary active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 py-4 text-center text-sm font-semibold text-content-primary active:scale-[0.98] press-spring"
           >
             <PhoneIcon size={16} className="mr-1.5 inline-block" /> Call Support
           </a>
@@ -421,7 +419,7 @@ function SupportBody() {
 
       {/* Live chat stub */}
       {chatOpen && (
-        <div className="mt-3 rounded-2xl bg-background-secondary p-4">
+        <div className="mt-3 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm font-bold text-content-primary">Live Chat</p>
             <button
@@ -429,7 +427,7 @@ function SupportBody() {
                 setChatOpen(false);
                 setChatMessages([]);
               }}
-              className="text-xs font-semibold text-content-secondary active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="text-xs font-semibold text-content-secondary active:scale-90 press-spring"
             >
               Close
             </button>
@@ -449,12 +447,12 @@ function SupportBody() {
       {/* FAQ */}
       <BlurFade delay={0.25}>
         <h2 className="mb-3 mt-6 text-sm font-bold text-content-primary">FAQ</h2>
-        <div className="space-y-2">
+        <div className="divide-y divide-border-opaque overflow-hidden rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1">
           {FAQS.map((f, i) => (
-            <div key={i} className="overflow-hidden rounded-2xl bg-background-secondary">
+            <div key={i}>
               <button
                 onClick={() => setFaqOpen(faqOpen === i ? null : i)}
-                className="flex w-full items-center justify-between p-4 text-left active:scale-[0.99] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                className="flex w-full items-center justify-between p-4 text-left active:scale-[0.99] press-spring"
               >
                 <span className="text-sm text-content-primary">{f.q}</span>
                 <span
@@ -478,14 +476,13 @@ function SupportBody() {
           No tickets yet.
         </TypingAnimation>
       ) : (
-        <div className="space-y-2">
+        <div className="divide-y divide-border-opaque overflow-hidden rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1">
           {tickets.map((t) => (
             <BlurFade key={t.id} delay={0.1}>
               <button
                 onClick={() => openThread(t)}
-                className="group relative flex w-full items-center justify-between rounded-2xl bg-background-secondary p-4 overflow-hidden text-left active:scale-[0.99] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                className="flex w-full items-center justify-between p-4 text-left active:scale-[0.99] press-spring"
               >
-                <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div>
                   <p className="text-sm text-content-primary">{t.subject}</p>
                   <p className="font-mono text-xs text-content-tertiary">{t.id.slice(0, 12)}</p>
@@ -508,7 +505,7 @@ function SupportBody() {
 
 export default function SupportPage() {
   return (
-    <AccountScaffold title={<WordRotate words={["Support", "Help Center", "Contact Us"]} duration={3000} />}>
+    <AccountScaffold title="Support">
       <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-background-tertiary" />}>
         <SupportBody />
       </Suspense>

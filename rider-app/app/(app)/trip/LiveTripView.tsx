@@ -285,7 +285,7 @@ function TripDetailsCard() {
               </div>
             )}
             <div className="flex justify-between gap-3">
-              <dt className="text-content-secondary">D4M Care</dt>
+              <dt className="text-content-secondary">Vahnly Care</dt>
               <dd className={order.d4m_care_opted ? "text-content-positive" : "text-content-secondary"}>
                 {order.d4m_care_opted ? "Active" : "Not added"}
               </dd>

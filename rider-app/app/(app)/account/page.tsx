@@ -49,7 +49,7 @@ const GROUPS: { title: string; links: LinkRow[] }[] = [
     title: "Safety",
     links: [
       { href: "/account/emergency", label: "Emergency", icon: <SirenIcon size={20} /> },
-      { href: "/account/insurance", label: "D4M Care", icon: <ShieldIcon size={20} /> },
+      { href: "/account/insurance", label: "Vahnly Care", icon: <ShieldIcon size={20} /> },
     ],
   },
   {

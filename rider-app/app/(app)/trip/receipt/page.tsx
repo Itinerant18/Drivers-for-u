@@ -119,7 +119,7 @@ function ReceiptContent() {
                 )}
                 {breakdown.d4m_care_paise > 0 && (
                   <div className="flex justify-between py-2.5">
-                    <span className="text-sm text-content-secondary">D4M Care</span>
+                    <span className="text-sm text-content-secondary">Vahnly Care</span>
                     <span className="text-sm font-semibold text-content-primary">{formatCurrency(breakdown.d4m_care_paise)}</span>
                   </div>
                 )}

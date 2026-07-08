@@ -6,7 +6,6 @@ import { cmsApi } from "@/lib/api/cms";
 import type { CMSDocument, CMSDocumentType } from "@/lib/api/types";
 import { Capacitor } from "@capacitor/core";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { WordRotate } from "@/components/ui/word-rotate";
 
 // "LICENSES" is a local, static tab — it has no CMS document behind it.
 type TabKey = CMSDocumentType | "LICENSES";
@@ -165,7 +164,7 @@ export default function LegalPage() {
   const showPlaceholder = !loading && !doc && errored;
 
   return (
-    <AccountScaffold title={<WordRotate words={["Legal", "Policies", "Documents"]} duration={3000} />}>
+    <AccountScaffold title="Legal">
       <div className="space-y-4">
         <BlurFade delay={0.1}>
           <div className="flex flex-wrap gap-2">
@@ -176,9 +175,9 @@ export default function LegalPage() {
                   key={tab.type}
                   onClick={() => setActive(tab.type)}
                   className={
-                    "rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-95 " +
+                    "rounded-xl px-3 py-2 text-sm font-medium press-spring active:scale-95 " +
                     (isActive
-                      ? "bg-accent-400 text-content-primary"
+                      ? "bg-secondary text-content-primary"
                       : "bg-background-tertiary text-content-secondary hover:text-content-primary")
                   }
                 >
@@ -190,7 +189,7 @@ export default function LegalPage() {
         </BlurFade>
 
         <BlurFade delay={0.15}>
-          <div className="rounded-2xl bg-background-secondary p-4">
+          <div className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
             {doc && (
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div>
@@ -202,7 +201,7 @@ export default function LegalPage() {
                 <button
                   onClick={onDownload}
                   disabled={!doc}
-                  className="shrink-0 rounded-xl bg-background-tertiary px-3 py-2 text-xs font-medium text-content-primary disabled:opacity-40 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                  className="shrink-0 rounded-xl bg-background-tertiary px-3 py-2 text-xs font-medium text-content-primary disabled:opacity-40 active:scale-95 press-spring"
                 >
                   Download as PDF
                 </button>
@@ -218,7 +217,7 @@ export default function LegalPage() {
                 <p className="text-sm text-content-secondary">Document loading…</p>
                 <button
                   onClick={() => void loadDoc(active, { force: true })}
-                  className="mt-4 rounded-xl bg-interactive-primary px-4 py-2 text-sm font-medium text-interactive-primary-text active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                  className="mt-4 rounded-xl bg-interactive-primary px-4 py-2 text-sm font-medium text-interactive-primary-text active:scale-95 press-spring"
                 >
                   Retry
                 </button>

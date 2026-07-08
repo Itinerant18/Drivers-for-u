@@ -8,9 +8,7 @@ import type { SavedCard, UpiMethod } from "@/lib/api/types";
 import { AnimatedIcon, CardIcon, PaymentIcon } from "@/components/ds/Icon";
 import { AnimWallet } from "@/assets/icons/animated";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { ShineBorder } from "@/components/ui/shine-border";
 import { AnimatedBeam } from "@/components/ui/animated-beam";
-import { WordRotate } from "@/components/ui/word-rotate";
 
 const INPUT =
   "w-full rounded-xl bg-background-tertiary px-4 py-3 text-sm text-content-primary outline-none placeholder:text-content-tertiary focus:ring-1 focus:ring-border-accent";
@@ -220,7 +218,7 @@ export default function PaymentsPage() {
   };
 
   return (
-    <AccountScaffold title={<WordRotate words={["Payments", "Billing", "Payment Methods"]} duration={3000} />}>
+    <AccountScaffold title="Payments">
       {loadError && (
         <div className="mb-4 rounded-xl bg-surface-negative px-4 py-3 text-sm text-content-negative">
           {loadError}
@@ -235,8 +233,7 @@ export default function PaymentsPage() {
           ) : (
             <div className="mb-3 space-y-2">
               {cards.map((c) => (
-                <div key={c.id} className="group relative rounded-xl bg-background-secondary px-4 py-3 overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]">
-                  <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div key={c.id} className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 px-4 py-3 press-spring hover:scale-[1.01]">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <CardIcon size={20} className="text-content-secondary" />
@@ -251,7 +248,7 @@ export default function PaymentsPage() {
                     </div>
                     <button
                       onClick={() => removeCard(c.id)}
-                      className="text-xs font-semibold text-content-negative active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                      className="text-xs font-semibold text-content-negative active:scale-90 press-spring"
                     >
                       Remove
                     </button>
@@ -263,7 +260,7 @@ export default function PaymentsPage() {
                     {!c.is_default && (
                       <button
                         onClick={() => setDefaultCard(c.id)}
-                        className="text-xs font-semibold text-content-accent active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                        className="text-xs font-semibold text-content-accent active:scale-90 press-spring"
                       >
                         Set default
                       </button>
@@ -275,7 +272,7 @@ export default function PaymentsPage() {
           )}
 
           {showCardForm ? (
-            <div ref={cardFormRef} className="relative space-y-3 rounded-2xl bg-background-secondary p-4">
+            <div ref={cardFormRef} className="relative space-y-3 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
               <AnimatedBeam
                 containerRef={cardFormRef}
                 fromRef={cardNumberRef}
@@ -343,14 +340,14 @@ export default function PaymentsPage() {
               <div className="flex gap-2">
                 <button
                   onClick={resetCardForm}
-                  className="flex-1 rounded-2xl bg-background-tertiary py-3 text-sm font-semibold text-content-secondary ring-1 ring-border-opaque active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                  className="flex-1 rounded-2xl bg-background-tertiary py-3 text-sm font-semibold text-content-secondary ring-1 ring-border-opaque active:scale-[0.98] press-spring"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveCard}
                   disabled={!cardMasked || !expMonth || !expYear || saving}
-                  className="flex-1 rounded-2xl bg-interactive-primary py-3 text-sm font-bold text-interactive-primary-text disabled:opacity-40 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                  className="flex-1 rounded-2xl bg-interactive-primary py-3 text-sm font-bold text-interactive-primary-text disabled:opacity-40 active:scale-[0.98] press-spring"
                 >
                   {saving ? "Saving…" : "Save Card"}
                 </button>
@@ -359,7 +356,7 @@ export default function PaymentsPage() {
           ) : (
             <button
               onClick={() => setShowCardForm(true)}
-              className="w-full rounded-2xl bg-background-tertiary py-3.5 text-sm font-semibold text-content-accent ring-1 ring-border-opaque active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="w-full rounded-2xl bg-background-tertiary py-3.5 text-sm font-semibold text-content-accent ring-1 ring-border-opaque active:scale-[0.98] press-spring"
             >
               + Add Card
             </button>
@@ -375,9 +372,8 @@ export default function PaymentsPage() {
               {upis.map((u) => (
                 <div
                   key={u.id}
-                  className="group relative flex items-center justify-between rounded-xl bg-background-secondary px-4 py-3 overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]"
+                  className="flex items-center justify-between rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 px-4 py-3 press-spring hover:scale-[1.01]"
                 >
-                  <ShineBorder borderWidth={1} duration={8} shineColor="#4F46E5" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="flex items-center gap-2">
                     <PaymentIcon size={20} className="text-content-secondary" />
                     <span className="text-sm text-content-primary">{u.vpa}</span>
@@ -389,7 +385,7 @@ export default function PaymentsPage() {
                   </div>
                   <button
                     onClick={() => removeUpi(u.id)}
-                    className="text-xs font-semibold text-content-negative active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                    className="text-xs font-semibold text-content-negative active:scale-90 press-spring"
                   >
                     Remove
                   </button>
@@ -409,7 +405,7 @@ export default function PaymentsPage() {
             />
             <button
               onClick={addUpi}
-              className="rounded-xl bg-interactive-primary px-4 text-sm font-semibold text-interactive-primary-text active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="rounded-xl bg-interactive-primary px-4 text-sm font-semibold text-interactive-primary-text active:scale-95 press-spring"
             >
               Add
             </button>
@@ -479,7 +475,7 @@ export default function PaymentsPage() {
             />
             <button
               onClick={saveBilling}
-              className="w-full rounded-2xl bg-interactive-primary py-3.5 text-sm font-bold text-interactive-primary-text active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="w-full rounded-2xl bg-interactive-primary py-3.5 text-sm font-bold text-interactive-primary-text active:scale-[0.98] press-spring"
             >
               Save Billing Details
             </button>
@@ -517,7 +513,7 @@ function Toggle({
   onChange: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-background-secondary p-4">
+    <div className="flex items-center justify-between rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
       <div className="mr-3">
         <p className="text-sm text-content-primary">{label}</p>
         {desc && <p className="mt-0.5 text-xs text-content-secondary">{desc}</p>}
@@ -525,10 +521,10 @@ function Toggle({
       <button
         onClick={onChange}
         aria-label={label}
-        className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-90 ${on ? "bg-accent-400" : "bg-background-tertiary"}`}
+        className={`relative h-6 w-11 flex-shrink-0 rounded-full press-spring active:scale-90 ${on ? "bg-secondary" : "bg-background-tertiary"}`}
       >
         <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${on ? "translate-x-5" : "translate-x-0.5"}`}
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white press-spring ${on ? "translate-x-5" : "translate-x-0.5"}`}
         />
       </button>
     </div>

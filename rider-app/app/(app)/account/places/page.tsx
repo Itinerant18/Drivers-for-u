@@ -7,7 +7,6 @@ import { SkeletonList, EmptyState, ErrorState } from "@/components/account/State
 import { accountApi, type SavePlaceInput } from "@/lib/api/account";
 import type { SavedPlace } from "@/lib/api/types";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { WordRotate } from "@/components/ui/word-rotate";
 
 import { HomeAddressIcon, WorkBriefcaseIcon, LocationIcon } from "@/components/ds/Icon";
 
@@ -44,7 +43,7 @@ export default function PlacesPage() {
   const iconFor = (label: string) => LABELS.find((l) => l.value === label)?.icon ?? <LocationIcon size={20} />;
 
   return (
-    <AccountScaffold title={<WordRotate words={["Saved Places", "Addresses", "My Locations"]} duration={3000} />}>
+    <AccountScaffold title="Saved Places">
       <BlurFade delay={0.1}>
         {error ? (
           <ErrorState onRetry={load} />
@@ -57,13 +56,13 @@ export default function PlacesPage() {
             )}
             {places.map((p) => (
               <BlurFade key={p.id} delay={0.1}>
-                <div className="flex items-center gap-3 rounded-2xl bg-background-secondary p-4 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]">
+                <div className="flex items-center gap-3 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4 press-spring hover:scale-[1.01]">
                   <span className="text-2xl">{iconFor(p.label)}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-content-primary">{p.display_name}</p>
                     <p className="truncate text-xs text-content-secondary">{p.address_text}</p>
                   </div>
-                  <button onClick={() => remove(p.id)} className="text-xs font-semibold text-content-negative active:scale-90 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+                  <button onClick={() => remove(p.id)} className="text-xs font-semibold text-content-negative active:scale-90 press-spring">
                     Delete
                   </button>
                 </div>
@@ -76,7 +75,7 @@ export default function PlacesPage() {
       <BlurFade delay={0.2}>
         <button
           onClick={() => setEditing(true)}
-          className="mt-4 w-full rounded-2xl bg-interactive-primary py-3.5 text-sm font-bold text-interactive-primary-text active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          className="mt-4 w-full rounded-2xl bg-interactive-primary py-3.5 text-sm font-bold text-interactive-primary-text active:scale-[0.98] press-spring"
         >
           + Add Place
         </button>
@@ -139,10 +138,10 @@ function AddPlaceSheet({ onClose, onSaved }: { onClose: () => void; onSaved: () 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/60" onClick={onClose}>
       <div
-        className="max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-background-secondary p-5"
+        className="max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-background-primary p-5"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border-opaque" />
         <h3 className="mb-4 text-lg font-bold text-content-primary">Add Place</h3>
 
         <PlacePickerMap lat={coords.lat} lng={coords.lng} onPick={(lat, lng) => setCoords({ lat, lng })} />
@@ -157,7 +156,7 @@ function AddPlaceSheet({ onClose, onSaved }: { onClose: () => void; onSaved: () 
                 key={l.value}
                 onClick={() => setLabel(l.value)}
                 className={`flex-1 rounded-xl py-2.5 text-sm ${
-                  label === l.value ? "bg-accent-400 text-content-primary" : "bg-background-tertiary text-content-secondary"
+                  label === l.value ? "bg-secondary text-content-primary" : "bg-background-tertiary text-content-secondary"
                 }`}
               >
                 {l.icon} {l.name}

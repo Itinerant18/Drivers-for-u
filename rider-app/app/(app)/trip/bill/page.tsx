@@ -186,7 +186,7 @@ export default function BillPage() {
                 <RowItem label="Night charge" value={<FareDisplay amount={breakdown.night_charge_paise} size="sm" />} />
               )}
               {breakdown.d4m_care_paise > 0 && (
-                <RowItem label="D4M Care" value={<FareDisplay amount={breakdown.d4m_care_paise} size="sm" />} />
+                <RowItem label="Vahnly Care" value={<FareDisplay amount={breakdown.d4m_care_paise} size="sm" />} />
               )}
               {breakdown.surge_multiplier > 1 && (
                 <RowItem label={`Surge (${breakdown.surge_multiplier}×)`} value="included" />

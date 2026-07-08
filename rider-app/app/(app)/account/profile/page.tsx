@@ -7,7 +7,6 @@ import { API_BASE_URL, TOKEN_STORAGE_KEY } from "@/lib/api/client";
 import { AccountScaffold } from "@/components/account/AccountScaffold";
 import { compressImage, blobToDataUrl } from "@/lib/utils/imageCompress";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { WordRotate } from "@/components/ui/word-rotate";
 import { AvatarCircles } from "@/components/ui/avatar-circles";
 import { PixelImage } from "@/components/ui/pixel-image";
 
@@ -152,14 +151,14 @@ export default function ProfilePage() {
   const initials = (name || "?").trim().slice(0, 1).toUpperCase();
 
   return (
-    <AccountScaffold title={<WordRotate words={["Profile", "Personal Info", "My Details"]} duration={3000} />}>
+    <AccountScaffold title="Profile">
       {/* Avatar */}
       <BlurFade delay={0.1}>
         <div className="flex flex-col items-center">
           <button
             onClick={() => fileRef.current?.click()}
             aria-label="Change profile photo"
-            className="relative h-24 w-24 overflow-hidden rounded-full bg-surface-accent active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            className="relative h-24 w-24 overflow-hidden rounded-full bg-surface-accent active:scale-95 press-spring"
           >
             {photo ? (
               <PixelImage
@@ -174,7 +173,7 @@ export default function ProfilePage() {
                 {initials}
               </span>
             )}
-            <span className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-accent-400 text-sm ring-2 ring-background-primary">
+            <span className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-sm ring-2 ring-background-primary">
               ✎
             </span>
           </button>
@@ -188,7 +187,7 @@ export default function ProfilePage() {
           />
           {uploadPct !== null && (
             <div className="mt-3 h-1.5 w-32 overflow-hidden rounded-full bg-background-tertiary">
-              <div className="h-full bg-accent-400 transition-all" style={{ width: `${uploadPct}%` }} />
+              <div className="h-full bg-secondary transition-all" style={{ width: `${uploadPct}%` }} />
             </div>
           )}
         </div>
@@ -208,7 +207,7 @@ export default function ProfilePage() {
             <p className="text-xs text-content-secondary">Level: {rider?.kyc_level ?? "NONE"}</p>
           </div>
           {!kycVerified && (
-            <button className="rounded-xl bg-interactive-primary px-4 py-2 text-xs font-semibold text-interactive-primary-text active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+            <button className="rounded-xl bg-interactive-primary px-4 py-2 text-xs font-semibold text-interactive-primary-text active:scale-95 press-spring">
               Get Verified
             </button>
           )}
@@ -217,7 +216,7 @@ export default function ProfilePage() {
 
       {/* Connected accounts */}
       <BlurFade delay={0.25}>
-        <div className="mt-5 flex items-center justify-between rounded-2xl bg-background-secondary p-4">
+        <div className="mt-5 flex items-center justify-between rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
           <div>
             <p className="text-sm font-semibold text-content-primary">Connected Accounts</p>
             <p className="text-xs text-content-secondary">Google, Apple & Email</p>
@@ -260,7 +259,7 @@ export default function ProfilePage() {
               {email && !rider?.email_verified && (
                 <button
                   onClick={() => setEmailOtpSent(true)}
-                  className="whitespace-nowrap rounded-xl bg-background-tertiary px-3 text-xs font-semibold text-content-accent ring-1 ring-border-opaque active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                  className="whitespace-nowrap rounded-xl bg-background-tertiary px-3 text-xs font-semibold text-content-accent ring-1 ring-border-opaque active:scale-95 press-spring"
                 >
                   {emailOtpSent ? "OTP Sent" : "Verify"}
                 </button>
@@ -287,8 +286,8 @@ export default function ProfilePage() {
                 <button
                   key={g}
                   onClick={() => setGender(g)}
-                  className={`rounded-xl px-3.5 py-2 text-sm active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                    gender === g ? "bg-accent-400 text-content-primary" : "bg-background-tertiary text-content-secondary"
+                  className={`rounded-xl px-3.5 py-2 text-sm active:scale-95 press-spring ${
+                    gender === g ? "bg-secondary text-content-primary" : "bg-background-tertiary text-content-secondary"
                   }`}
                 >
                   {g}
@@ -303,8 +302,8 @@ export default function ProfilePage() {
                 <button
                   key={l.code}
                   onClick={() => setLang(l.code)}
-                  className={`flex-1 rounded-xl py-2.5 text-sm active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                    lang === l.code ? "bg-accent-400 text-content-primary" : "bg-background-tertiary text-content-secondary"
+                  className={`flex-1 rounded-xl py-2.5 text-sm active:scale-95 press-spring ${
+                    lang === l.code ? "bg-secondary text-content-primary" : "bg-background-tertiary text-content-secondary"
                   }`}
                 >
                   {l.label}
@@ -318,7 +317,7 @@ export default function ProfilePage() {
               <span className="text-sm text-content-primary">{rider?.phone}</span>
               <button
                 onClick={() => setShowPhoneFlow(true)}
-                className="text-xs font-semibold text-content-accent active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                className="text-xs font-semibold text-content-accent active:scale-95 press-spring"
               >
                 Change
               </button>
@@ -332,7 +331,7 @@ export default function ProfilePage() {
         <button
           onClick={handleSave}
           disabled={!canSave || saving}
-          className="mt-6 w-full rounded-2xl bg-interactive-primary py-4 text-base font-bold text-interactive-primary-text disabled:opacity-40 active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          className="mt-6 w-full rounded-2xl bg-interactive-primary py-4 text-base font-bold text-interactive-primary-text disabled:opacity-40 active:scale-[0.98] press-spring"
         >
           {saving ? "Saving…" : saved ? "Saved ✓" : "Save Changes"}
         </button>
@@ -365,8 +364,8 @@ function PhoneChangeSheet({ phone, onClose }: { phone: string; onClose: () => vo
   const [newPhone, setNewPhone] = useState("");
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/60" onClick={onClose}>
-      <div className="w-full rounded-t-3xl bg-background-secondary p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
+      <div className="w-full rounded-t-3xl bg-background-primary p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border-opaque" />
         {step === "old" && (
           <>
             <h3 className="text-base font-bold text-content-primary">Verify current number</h3>

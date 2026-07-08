@@ -11,11 +11,8 @@ import { FareDisplay } from "@/components/ds";
 import type { RiderReferral } from "@/lib/api/types";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
-import { BorderBeam } from "@/components/ui/border-beam";
-import { WordRotate } from "@/components/ui/word-rotate";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 import { HyperText } from "@/components/ui/hyper-text";
-import { ShineBorder } from "@/components/ui/shine-border";
 import { KineticText } from "@/components/ui/kinetic-text";
 
 export default function ReferPage() {
@@ -78,15 +75,14 @@ export default function ReferPage() {
     .reduce((acc, r) => acc + r.reward_amount_paise, 0);
 
   return (
-    <AccountScaffold title={<WordRotate words={["Refer & Earn", "Invite Friends", "Share & Get Rewarded"]} duration={3000} />}>
+    <AccountScaffold title="Refer & Earn">
       {/* Code chip */}
       <BlurFade delay={0.1}>
-        <div className="relative rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 p-5 text-center overflow-hidden">
-          <BorderBeam size={100} duration={6} colorFrom="#ffffff" colorTo="rgba(255,255,255,0.1)" borderWidth={2} />
-          <p className="text-xs text-white/80">Your referral code</p>
+        <div className="rounded-xl border-2 border-secondary bg-secondary-tint/60 p-5 text-center">
+          <p className="text-xs text-content-secondary">Your referral code</p>
           <HyperText
             as="span"
-            className="my-2 text-3xl font-bold tracking-[0.3em] text-white"
+            className="my-2 text-3xl font-bold tracking-[0.3em] text-content-primary"
             duration={1000}
             delay={300}
             animateOnHover={false}
@@ -98,9 +94,9 @@ export default function ReferPage() {
             type="button"
             onClick={copy}
             shimmerColor="rgba(255,255,255,0.4)"
-            background="rgba(255,255,255,0.2)"
-            borderRadius="12px"
-            className="px-4 py-2 text-sm font-semibold text-white"
+            background="var(--color-secondary)"
+            borderRadius="999px"
+            className="px-4 py-2 text-sm font-semibold"
           >
             {copied ? "Copied!" : "Copy Code"}
           </ShimmerButton>
@@ -128,7 +124,7 @@ export default function ReferPage() {
 
       {/* Earnings */}
       <BlurFade delay={0.25}>
-        <div className="mt-3 rounded-2xl bg-background-secondary p-4 text-center">
+        <div className="mt-3 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4 text-center">
           <p className="text-xs text-content-secondary">Total earned</p>
           <FareDisplay amount={earned} size="lg" className="mt-1 block font-bold text-content-positive" />
         </div>
@@ -168,14 +164,8 @@ function ReferralItem({
   status: string;
   rewardPaise: number;
 }) {
-  const [hover, setHover] = useState(false);
   return (
-    <div
-      className="group relative flex items-center gap-3 rounded-xl bg-background-secondary p-3 overflow-hidden transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.01]"
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-    >
-      {hover && <ShineBorder borderWidth={1} duration={6} shineColor="#4F46E5" />}
+    <div className="flex items-center gap-3 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-3 press-spring hover:scale-[1.01]">
       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-accent text-sm font-bold text-content-accent">
         {code.slice(0, 2)}
       </div>
@@ -194,7 +184,7 @@ function ReferralItem({
 
 function ShareBtn({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-1.5 rounded-2xl bg-background-secondary py-3 active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+    <button onClick={onClick} className="flex flex-col items-center gap-1.5 rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 py-3 active:scale-95 press-spring">
       <span className="text-xl">{icon}</span>
       <span className="text-[10px] text-content-secondary">{label}</span>
     </button>
@@ -203,7 +193,7 @@ function ShareBtn({ icon, label, onClick }: { icon: React.ReactNode; label: stri
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl bg-background-secondary p-3 text-center">
+    <div className="rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-3 text-center">
       <p className="text-lg font-bold text-content-primary">{value}</p>
       <p className="text-xs text-content-secondary">{label}</p>
     </div>

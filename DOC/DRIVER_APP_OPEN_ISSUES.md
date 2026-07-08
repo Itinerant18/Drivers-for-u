@@ -1,5 +1,10 @@
 # Driver App — Open Issues (2026-07-08)
 
+> **Update (2026-07-08, second machine):** #2 and #5 fixed in code (see below).
+> #3, #4, #6 turned out to be per-machine `.env` drift — on this machine the
+> keys are real / the dead vars are already gone. #1 got new evidence: the DNS
+> record exists and points at Firebase Hosting.
+
 Working notes from a login-debugging session. Two real bugs got fixed and
 shipped; this file tracks what's still open so it can be picked up on
 another machine.
@@ -54,67 +59,79 @@ Ruled out so far:
   type: "navigate", referrer: ""` — looks like a fresh top-level nav, not a
   same-page JS redirect the Performance API would normally attribute.
 
-Best guess: DNS/network-level oddity specific to that test environment
-(corporate DNS, VPN, or a stale OS-level HSTS/redirect entry for
-`*.aniket.site` domains), not app code — but **not confirmed**. Needs a
-clean retest from a normal browser on a normal network. If it reproduces for
-real users, check:
-- DNS records for `driver.aniket.site` (does it even resolve to something
-  real, or is it dangling?)
-- Whether the VM's Caddy config (same box that serves `api.aniket.site`) has
-  a `driver.aniket.site` block redirecting or serving something stale.
+**New evidence (2026-07-08, second machine):**
+- `nslookup driver.aniket.site` resolves: it is a **CNAME to
+  `vahnly-driver.web.app`** (Firebase Hosting IP `199.36.158.100`). Not
+  dangling, and NOT the Caddy VM — the record deliberately points this domain
+  at the driver app's Firebase site.
+- The earlier "not a registered custom domain" ruling is unreliable:
+  `firebase hosting:sites:list` lists **sites**, not custom domains attached
+  to a site. Check Firebase Console → Hosting → `vahnly-driver` → custom
+  domains instead.
+- `client-app/.env.local` on this machine sets
+  `NEXT_PUBLIC_APP_URL=https://driver.aniket.site` — unused by any code
+  (grep confirms), but shows the domain is intentional, someone set it up as
+  the app's canonical URL.
 
-### 2. `/api/v1/city-config` 404s on every driver-app page load
-`client-app/src/api/client.ts:51` calls `GET /api/v1/city-config` (no role
-prefix). Backend only has a rider-scoped route
-(`internal/rider/service/trip_spec.go` references it as served "via
-city-config" under the rider API tree — actual registered path is almost
-certainly `/api/v1/rider/city-config`, matching the pattern used everywhere
-else, e.g. `driver/login`, `rider/auth/login`). The driver app is hitting a
-path that was never registered for it, so it 404s on every single page load.
-Not currently blocking login, but:
-- Confirm what city-config data the driver app actually needs (open
-  hours? service area? something else?).
-- Either add a `/api/v1/driver/city-config` backend route, or fix the
-  frontend call to hit whatever the correct existing path is.
+- Fetching `https://driver.aniket.site/` and `/login/` returns the real
+  Vahnly driver app (title "Vahnly | Unified Dispatch Platform", full login
+  form). Firebase serves "Site Not Found" for unregistered hosts, so this
+  **confirms** the domain is a registered custom domain on the
+  `vahnly-driver` Hosting site.
 
-### 3. Google Maps API key is a placeholder — driver app AND admin panel
-```
-client-app/.env.local:  NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here
-frontend/.env:          VITE_GOOGLE_MAPS_API_KEY=your_key_here
-```
-Any map view in either app is broken (rider-app's key is real and working —
-copy whatever pattern it uses, or provision fresh keys scoped to each site's
-domain).
+So the domain itself is explained (deliberate custom-domain setup). Still
+unexplained: what made the **browser navigate** there mid-session with
+`redirectCount: 0`. Needs the clean retest below; if custom-domain
+registration on the Firebase site is confirmed, most likely culprit is
+browser autocomplete/HSTS history rather than app code.
 
-### 4. FCM push notifications are a placeholder — driver app
-```
-client-app/.env.local:  NEXT_PUBLIC_FCM_VAPID_KEY=your_vapid_public_key_here
-```
-`registerDriverPushNotifications()` is called after every successful login
-(`src/app/login/page.tsx`) but will silently no-op or fail with this
-placeholder. Needs a real VAPID key from Firebase Console → Project Settings
-→ Cloud Messaging → Web Push Certificates (project `vahnly-platform`).
+Needs a clean retest from a normal browser on a normal network.
 
-### 5. "Apple Sign-In" on driver login is fake
-`src/app/login/page.tsx:852-855` — the button's entire handler is:
-```ts
-onClick={() => {
-  addAuditLog('OAUTH_APPLE_CLICKED', { timestamp: new Date().toISOString() });
-  alert('Apple Single Sign-On simulation complete.');
-}}
-```
-No real Apple auth, just an audit log entry and a browser `alert()`. Same
-"looks interactive, does nothing" pattern already cleaned up on the rider
-app's profile page — either wire up real Sign in with Apple, or remove the
-button until it's real.
+### 2. ~~`/api/v1/city-config` 404s on every driver-app page load~~ ✅ FIXED
+**Fixed 2026-07-08 by deleting the fetch.** Investigation confirmed the call
+could never return anything useful:
+- The only backend route is `GET /api/v1/rider/city-config`
+  (`cmd/gateway/main.go:816`), behind **rider** auth middleware — the driver
+  app's unauthenticated call would 401 even with the right path.
+- The handler echoes the `?city` query param (default `KOL`) back as
+  `city_prefix`. The driver app sent no param and only wanted a region
+  prefix — the server could only ever tell it "KOL", which is already the
+  client's own fallback.
 
-### 6. Dead legacy env vars in `client-app/.env.local`
-Lines 1–10 (`VITE_API_BASE_URL`, `VITE_FIREBASE_API_KEY`, etc.) are Vite-style
-vars left over from before this app was migrated to Next.js — `client-app` is
-Next.js (`import.meta.env` doesn't exist in this build), so none of these are
-ever read. Harmless but confusing; safe to delete once someone confirms
-nothing external still depends on them.
+Removed `loadRegionFromCityConfig`/`setRegion` from
+`client-app/src/api/client.ts` (region now comes from
+`NEXT_PUBLIC_REGION_PREFIX` env with the same KOL fallback) and the startup
+call in `client-app/src/lib/providers/ThemeProvider.tsx`. Zero behavior
+change, minus one guaranteed-404 request per page load.
+
+### 3. Google Maps API key placeholder — mostly moot
+- **Driver app: moot.** `client-app` never reads a Maps API key — the in-app
+  map is MapLibre GL (`src/components/map/DriverMap.tsx`) and navigation uses
+  Google Maps deep links (`src/lib/map/navigation.ts`), neither needs a key.
+  On this machine `.env.local` has no Maps key line at all.
+- **Admin panel:** `frontend/.env` on this machine has a real-looking
+  `VITE_GOOGLE_MAPS_API_KEY` (used by `ControlRoomDashboard.tsx:131`). The
+  placeholder was machine-local drift. If maps break on another machine,
+  copy the key from a working `.env`.
+
+### 4. FCM VAPID key placeholder — machine-local drift
+On this machine `client-app/.env.local` already carries a real VAPID key
+(`BNCI02Ji…`, same one as rider-app). The placeholder existed only on the
+debugging machine's `.env.local` — copy the real key there (or pull it from
+Firebase Console → Project Settings → Cloud Messaging → Web Push
+Certificates, project `vahnly-platform`). Note `frontend/.env` still has
+`VITE_FCM_VAPID_KEY=your_vapid_key` if admin web push ever matters.
+
+### 5. ~~"Apple Sign-In" on driver login is fake~~ ✅ FIXED
+**Fixed 2026-07-08: button removed** (the "remove until it's real" option).
+The federated sign-in row in `src/app/login/page.tsx` is now a single
+full-width Google Sign-In button. Re-add Apple only with real Sign in with
+Apple wiring.
+
+### 6. Dead legacy env vars in `client-app/.env.local` — machine-local
+On this machine `.env.local` has no Vite-style vars — only `NEXT_PUBLIC_*`.
+The leftovers existed only on the debugging machine's local file; delete
+them there (nothing in `client-app` reads `VITE_*`).
 
 ## Not investigated at all yet
 - Whether the domain-jump issue (#1) also affects `vahnly-rider.web.app` or

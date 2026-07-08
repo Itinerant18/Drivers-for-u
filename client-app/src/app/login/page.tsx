@@ -838,24 +838,14 @@ function UnifiedLoginContent() {
 
         {/* Federated Social Sign-in blocks */}
         {!showOtpVerification && (
-          <div className="pt-6 border-t border-border-opaque mt-6 grid grid-cols-2 gap-3">
+          <div className="pt-6 border-t border-border-opaque mt-6">
             <Button
               variant="secondary"
+              fullWidth
               onClick={handleGoogleSignIn}
               disabled={loading}
             >
               Google Sign-In
-            </Button>
-            
-            <Button
-              variant="secondary"
-              onClick={() => {
-                addAuditLog('OAUTH_APPLE_CLICKED', { timestamp: new Date().toISOString() });
-                alert('Apple Single Sign-On simulation complete.');
-              }}
-              disabled={loading}
-            >
-              Apple Sign-In
             </Button>
           </div>
         )}

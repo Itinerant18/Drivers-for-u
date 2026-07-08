@@ -27,48 +27,14 @@ export const WS_BASE_URL =
   process.env.NEXT_PUBLIC_WS_GATEWAY ||
   BASE_URL.replace(/^http/i, 'ws');
 
+// Region prefix for the X-Region-Prefix header: env-configured, KOL fallback.
+// There is deliberately no /api/v1/city-config fetch here — the only backend
+// route is rider-scoped and auth-gated (GET /api/v1/rider/city-config), and
+// without a ?city param it can only echo the same KOL default back anyway.
 let currentRegion = (process.env.NEXT_PUBLIC_REGION_PREFIX || '').trim().toUpperCase();
-let cityConfigRegionPromise: Promise<string> | null = null;
-
-function normalizeRegion(region: string): string {
-  return region.trim().toUpperCase();
-}
-
-export function setRegion(region: string): void {
-  currentRegion = normalizeRegion(region);
-}
 
 function getRegionPrefix(): string {
   return currentRegion || 'KOL';
-}
-
-export async function loadRegionFromCityConfig(): Promise<string> {
-  if (currentRegion) return currentRegion;
-  if (cityConfigRegionPromise) return cityConfigRegionPromise;
-
-  cityConfigRegionPromise = (async () => {
-    try {
-      const response = await fetch(buildUrl('/api/v1/city-config'), {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-      });
-      if (!response.ok) return getRegionPrefix();
-
-      const payload = await response.json();
-      const data = payload?.data ?? payload;
-      const region = normalizeRegion(data?.region_prefix || data?.city_prefix || '');
-      if (region) setRegion(region);
-    } catch {
-      // Keep the KOL fallback if city config is unavailable during startup.
-    }
-    return getRegionPrefix();
-  })();
-
-  try {
-    return await cityConfigRegionPromise;
-  } finally {
-    cityConfigRegionPromise = null;
-  }
 }
 
 export class ApiClientError extends Error {

@@ -1499,6 +1499,17 @@ export async function changeDriverPassword(token: string, currentPassword: strin
   });
 }
 
+export interface DemandWindow {
+  hour: number;
+  trips: number;
+}
+
+// Busiest booking hours in the driver's city (last 14 days) — offline-state
+// "when to drive" suggestion.
+export async function getDemandForecast(token: string): Promise<{ windows: DemandWindow[] }> {
+  return request<{ windows: DemandWindow[] }>('/api/v1/driver/demand-forecast', { method: 'GET', token });
+}
+
 export interface EmergencyContact {
   name: string;
   relation?: string;

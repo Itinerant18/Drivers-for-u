@@ -2196,6 +2196,52 @@ func (h *GatewayHandler) HandleDriverGetProfile(w http.ResponseWriter, r *http.R
 	})
 }
 
+// HandleDriverDemandForecast returns the busiest booking hours in the
+// driver's city over the last 14 days — the offline-state "when to drive"
+// suggestion. ponytail: citywide hour histogram; per-H3-zone forecast when
+// there's enough volume to make it meaningful.
+func (h *GatewayHandler) HandleDriverDemandForecast(w http.ResponseWriter, r *http.Request) {
+	driverID, ok := requireDriverIdentity(w, r)
+	if !ok {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 1200*time.Millisecond)
+	defer cancel()
+
+	rows, err := h.dbPool.Query(ctx, `
+		SELECT EXTRACT(HOUR FROM o.created_at AT TIME ZONE 'Asia/Kolkata')::int AS hr,
+		       COUNT(*)::int AS trips
+		FROM orders o
+		WHERE o.city_prefix = (SELECT city_prefix FROM drivers WHERE id = $1::uuid)
+		  AND o.created_at > NOW() - INTERVAL '14 days'
+		GROUP BY hr
+		ORDER BY trips DESC, hr
+		LIMIT 3;
+	`, driverID)
+	if err != nil {
+		http.Error(w, "demand_forecast_read_failed", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	windows := make([]map[string]interface{}, 0, 3)
+	for rows.Next() {
+		var hr, trips int
+		if err := rows.Scan(&hr, &trips); err != nil {
+			http.Error(w, "demand_forecast_decode_failed", http.StatusInternalServerError)
+			return
+		}
+		windows = append(windows, map[string]interface{}{"hour": hr, "trips": trips})
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, "demand_forecast_cursor_failed", http.StatusInternalServerError)
+		return
+	}
+
+	writeJSONResponse(w, http.StatusOK, map[string]interface{}{"windows": windows})
+}
+
 // HandleDriverUpdateEmergencyContact edits the emergency contact after
 // onboarding. Writes the same drivers.onboarding_data JSONB keys that
 // onboarding step 6 creates and /driver/me reads.

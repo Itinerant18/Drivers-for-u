@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { DutyState, useDriverDutyStore } from '../store/useDriverDutyStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { OfferPopup } from './OfferPopup';
-import { DriverProfile } from '../api/client';
+import { DriverProfile, getDemandForecast, DemandWindow } from '../api/client';
 import { ArrivedVerificationPane } from '../app/driver/trip/live/ArrivedVerificationPane';
 import { TripInProgressPane } from '../app/driver/trip/live/TripInProgressPane';
 import { FareDisplay, ETADisplay, StatusBadge, PhoneIcon, ChatIcon, NavigateIcon, CheckIcon } from './ds';
@@ -28,6 +29,47 @@ interface DashboardHomeProps {
   };
   setDutyState: (s: DutyState) => void;
   logAudit: (e: string, m: any) => void;
+}
+
+function hourLabel(h: number): string {
+  const start = h % 12 === 0 ? 12 : h % 12;
+  const meridiem = h < 12 ? 'am' : 'pm';
+  return `${start}${meridiem}`;
+}
+
+// "When to drive" tile — busiest booking hours in the driver's city over the
+// last 14 days. Renders nothing until there's real volume to report.
+function DemandTile() {
+  const { token } = useAuthStore();
+  const [windows, setWindows] = useState<DemandWindow[]>([]);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    getDemandForecast(token)
+      .then((res) => {
+        if (!cancelled) setWindows((res.windows ?? []).filter((w) => w.trips > 0));
+      })
+      .catch(() => { /* tile simply doesn't render */ });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  if (!windows.length) return null;
+
+  return (
+    <div className="rounded-md border border-border-opaque p-4 space-y-2">
+      <span className="text-label-small text-content-tertiary block">Busiest hours in your city</span>
+      <div className="flex flex-wrap gap-2">
+        {windows.map((w) => (
+          <span key={w.hour} className="badge badge-accent">
+            {hourLabel(w.hour)}–{hourLabel((w.hour + 1) % 24)} · {w.trips} trips
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function greetingForHour(h: number): string {
@@ -98,6 +140,9 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           <span className="text-label-small text-content-secondary">acceptance</span>
         </div>
       </div>
+
+      {/* ── When to drive (offline browsing only) ── */}
+      {isOffline && <DemandTile />}
 
       {/* ── Capability + trip-type filter ── */}
       <div className="flex justify-between items-start rounded-md p-4 border border-border-opaque">

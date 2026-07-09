@@ -634,6 +634,7 @@ func main() {
 	mux.HandleFunc("GET /api/v1/driver/me", authGuard.AuthenticateJWT(handler.HandleDriverGetProfile))
 	mux.HandleFunc("PATCH /api/v1/driver/profile/emergency-contact", authGuard.AuthenticateJWT(handler.HandleDriverUpdateEmergencyContact))
 	mux.HandleFunc("GET /api/v1/driver/city-config", authGuard.AuthenticateJWT(handler.HandleDriverGetCityConfig))
+	mux.HandleFunc("GET /api/v1/driver/demand-forecast", authGuard.AuthenticateJWT(handler.HandleDriverDemandForecast))
 	mux.HandleFunc("POST /api/v1/driver/status", authGuard.AuthenticateJWT(handler.HandleDriverSetStatus))
 	mux.HandleFunc("GET /api/v1/driver/location/status", authGuard.AuthenticateJWT(handler.HandleDriverLocationStatus))
 	mux.HandleFunc("GET /api/v1/driver/offer", authGuard.AuthenticateJWT(handler.HandleDriverGetOffer))

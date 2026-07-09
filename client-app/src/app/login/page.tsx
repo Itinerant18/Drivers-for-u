@@ -25,6 +25,7 @@ function UnifiedLoginContent() {
   const [driverName, setDriverName] = useState<string>('');
   const [driverEmail, setDriverEmail] = useState<string>('');
   const [driverCityPrefix, setDriverCityPrefix] = useState<string>('KOL');
+  const [driverReferralCode, setDriverReferralCode] = useState<string>('');
   
   // Google registration states
   const [isGoogleRegister, setIsGoogleRegister] = useState<boolean>(false);
@@ -367,6 +368,7 @@ function UnifiedLoginContent() {
       email: driverEmail.trim() || undefined,
       password: password,
       city_prefix: driverCityPrefix,
+      referred_by_code: driverReferralCode.trim().toUpperCase() || undefined,
     };
 
     addAuditLog('REGISTER_ATTEMPT', { phone: cleanPhone, city: driverCityPrefix });
@@ -737,6 +739,15 @@ function UnifiedLoginContent() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              disabled={loading}
+            />
+
+            <Input
+              label="Referral Code (Optional)"
+              type="text"
+              value={driverReferralCode}
+              onChange={(e) => setDriverReferralCode(e.target.value.toUpperCase().slice(0, 12))}
+              placeholder="DRVXXXXX"
               disabled={loading}
             />
 

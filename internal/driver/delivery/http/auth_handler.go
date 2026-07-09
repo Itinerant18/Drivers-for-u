@@ -34,12 +34,13 @@ type DriverLoginRequest struct {
 }
 
 type DriverRegisterRequest struct {
-	Name         string `json:"name"`
-	Phone        string `json:"phone"`
-	Email        string `json:"email"`
-	Password     string `json:"password"`
-	CityPrefix   string `json:"city_prefix"`
-	PhoneToken   string `json:"phone_token,omitempty"`
+	Name           string `json:"name"`
+	Phone          string `json:"phone"`
+	Email          string `json:"email"`
+	Password       string `json:"password"`
+	CityPrefix     string `json:"city_prefix"`
+	PhoneToken     string `json:"phone_token,omitempty"`
+	ReferredByCode string `json:"referred_by_code,omitempty"`
 }
 
 type DriverAuthResponse struct {
@@ -231,9 +232,12 @@ func (h *DriverAuthHandler) HandleDriverRegister(w http.ResponseWriter, r *http.
 	}
 
 	var newDriverID string
+	// referral_code is the driver's OWN shareable code, derived the same way the
+	// engagement handler always displayed it, so pre-migration codes keep working.
 	query := `
-		INSERT INTO drivers (name, phone, email, password_hash, city_prefix, current_state, is_verified, onboarding_step, verification_status, phone_verified)
-		VALUES ($1, $2, $3, $4, $5, 'OFFLINE', false, 1, 'ONBOARDING', true)
+		INSERT INTO drivers (name, phone, email, password_hash, city_prefix, current_state, is_verified, onboarding_step, verification_status, phone_verified, referral_code)
+		VALUES ($1, $2, $3, $4, $5, 'OFFLINE', false, 1, 'ONBOARDING', true,
+		        'DRV' || UPPER(LEFT(REPLACE(gen_random_uuid()::text, '-', ''), 5)))
 		RETURNING id
 	`
 
@@ -247,6 +251,27 @@ func (h *DriverAuthHandler) HandleDriverRegister(w http.ResponseWriter, r *http.
 		// Log or check for duplicate phone
 		http.Error(w, "Driver registration failed, phone or email might be already registered", http.StatusConflict)
 		return
+	}
+
+	// Keep the driver's own code aligned with their real id (the INSERT above
+	// used a placeholder uuid to satisfy the UNIQUE column atomically).
+	_, _ = h.dbPool.Exec(ctx,
+		`UPDATE drivers SET referral_code = 'DRV' || UPPER(LEFT(REPLACE(id::text, '-', ''), 5)) WHERE id = $1::uuid`,
+		newDriverID)
+
+	// Referral attribution: resolve the (optional) code to its owner and record
+	// the join. Best-effort — a bad or self-referencing code never fails signup.
+	if code := strings.ToUpper(strings.TrimSpace(req.ReferredByCode)); code != "" {
+		_, err := h.dbPool.Exec(ctx, `
+			INSERT INTO driver_referrals (referrer_driver_id, referred_driver_id, referral_code, status)
+			SELECT d.id, $1::uuid, d.referral_code, 'JOINED'
+			FROM drivers d
+			WHERE d.referral_code = $2 AND d.id <> $1::uuid
+			ON CONFLICT (referred_driver_id) DO NOTHING;
+		`, newDriverID, code)
+		if err != nil {
+			log.Printf("[DRIVER_REGISTER] referral attribution failed for code %s: %v", code, err)
+		}
 	}
 
 	// Record audit trail

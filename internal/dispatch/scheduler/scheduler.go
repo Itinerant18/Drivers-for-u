@@ -50,6 +50,58 @@ func (s *Scheduler) Run(ctx context.Context) {
 			return
 		case <-t.C:
 			s.dispatchDue(ctx)
+			s.sendCommitReminders(ctx)
+		}
+	}
+}
+
+// sendCommitReminders queues T-60 and T-15 pushes for scheduled orders a
+// driver committed to in advance (Trip Planner). Each reminder fires once —
+// the guarded flag UPDATE is the dedupe, so concurrent scheduler pods are safe.
+func (s *Scheduler) sendCommitReminders(ctx context.Context) {
+	cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	type window struct {
+		flag, interval, title, body string
+	}
+	windows := []window{
+		{"reminder_60_sent", "60 minutes", "Scheduled trip in 1 hour",
+			"Your committed booking starts in about an hour. Plan your route to the pickup."},
+		{"reminder_15_sent", "15 minutes", "Scheduled trip starting soon",
+			"Your committed booking starts in ~15 minutes. Head to the pickup now."},
+	}
+
+	for _, wdw := range windows {
+		rows, err := s.db.Query(cctx, `
+			WITH due AS (
+				UPDATE scheduled_dispatch_queue q
+				SET `+wdw.flag+` = TRUE
+				FROM orders o
+				WHERE o.id = q.order_id
+				  AND q.`+wdw.flag+` = FALSE
+				  AND o.status = 'ASSIGNED'::order_status_enum
+				  AND o.assigned_driver_id IS NOT NULL
+				  AND o.scheduled_at BETWEEN NOW() AND NOW() + $1::interval
+				RETURNING o.id AS order_id, o.assigned_driver_id AS driver_id
+			)
+			INSERT INTO notification_outbox (user_id, title, body, payload)
+			SELECT driver_id, $2, $3,
+			       jsonb_build_object('type','SCHEDULED_TRIP_REMINDER','order_id',order_id::text)
+			FROM due
+			RETURNING user_id;
+		`, wdw.interval, wdw.title, wdw.body)
+		if err != nil {
+			log.Printf("[SCHEDULER] %s reminder sweep failed: %v", wdw.flag, err)
+			continue
+		}
+		n := 0
+		for rows.Next() {
+			n++
+		}
+		rows.Close()
+		if n > 0 {
+			log.Printf("[SCHEDULER] queued %d %s reminders", n, wdw.interval)
 		}
 	}
 }

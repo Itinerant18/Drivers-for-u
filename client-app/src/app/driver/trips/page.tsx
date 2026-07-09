@@ -1,18 +1,123 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AuthGuard from '../../../components/AuthGuard';
 import { TabBar } from '@/components/TabBar';
 import TripHistoryList from '../../driver-account/trip-history/page';
 import { ClockIcon, FareDisplay } from '@/components/ds';
-import { getUpcomingTrips, UpcomingTrip } from '@/api/client';
+import {
+  getUpcomingTrips,
+  UpcomingTrip,
+  getScheduledOffers,
+  acceptScheduledOffer,
+  declineScheduledOffer,
+  respondToOffer,
+  ScheduledOffer,
+} from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useToastStore } from '@/store/useToastStore';
+import { friendlyError } from '@/lib/ui/errorMessage';
 
 type TripsTab = 'UPCOMING' | 'HISTORY';
 
-function UpcomingList() {
+// Matches the backend dispatch lead (SCHEDULED_DISPATCH_LEAD_MINUTES, default
+// 40): a committed trip becomes startable once inside this window.
+const START_WINDOW_MS = 40 * 60 * 1000;
+
+function whenLabel(iso: string) {
+  const when = new Date(iso);
+  return (
+    <>
+      {when.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
+      {' · '}
+      <span className="font-mono tabular-nums">
+        {when.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+      </span>
+    </>
+  );
+}
+
+// ── Advance-commitment offers: scheduled orders open for early accept ─────────
+function ScheduledOffersList({ onCommitted }: { onCommitted: () => void }) {
   const { token } = useAuthStore();
+  const [offers, setOffers] = useState<ScheduledOffer[] | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = useCallback(() => {
+    if (!token) return;
+    getScheduledOffers(token)
+      .then((res) => setOffers(res.offers ?? []))
+      .catch(() => setOffers([]));
+  }, [token]);
+
+  useEffect(load, [load]);
+
+  const act = async (id: string, action: 'accept' | 'decline') => {
+    if (!token || busyId) return;
+    setBusyId(id);
+    try {
+      if (action === 'accept') {
+        await acceptScheduledOffer(token, id);
+        useToastStore.getState().show('Booking committed — it is now in your Upcoming list.', 'success');
+        onCommitted();
+      } else {
+        await declineScheduledOffer(token, id);
+      }
+      setOffers((prev) => (prev ?? []).filter((o) => o.id !== id));
+    } catch (err) {
+      useToastStore.getState().show(friendlyError(err), 'error');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (!offers || offers.length === 0) return null;
+
+  return (
+    <section className="space-y-2.5">
+      <h2 className="text-label-large text-content-secondary">Available scheduled bookings</h2>
+      {offers.map((o) => (
+        <div key={o.id} className="card space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-label-large">{whenLabel(o.scheduled_at)}</p>
+              <p className="text-paragraph-small text-content-secondary mt-0.5">
+                {o.trip_type.replaceAll('_', ' ')} · pickup {o.pickup_lat.toFixed(4)}, {o.pickup_lng.toFixed(4)}
+              </p>
+            </div>
+            <FareDisplay amount={o.base_fare_paise} size="md" />
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={busyId === o.id}
+              onClick={() => act(o.id, 'accept')}
+              className="flex-1 h-10 rounded-sm bg-interactive-primary text-interactive-primary-text text-label-medium font-semibold transition-base cursor-pointer disabled:opacity-50"
+            >
+              Commit to trip
+            </button>
+            <button
+              type="button"
+              disabled={busyId === o.id}
+              onClick={() => act(o.id, 'decline')}
+              className="flex-1 h-10 rounded-sm border border-border-opaque text-content-secondary text-label-medium transition-base cursor-pointer hover:text-content-primary disabled:opacity-50"
+            >
+              Not interested
+            </button>
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+// ── Committed / assigned upcoming trips ───────────────────────────────────────
+function UpcomingList({ reloadKey }: { reloadKey: number }) {
+  const { token } = useAuthStore();
+  const router = useRouter();
   const [trips, setTrips] = useState<UpcomingTrip[] | null>(null);
+  const [startingId, setStartingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -27,7 +132,21 @@ function UpcomingList() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, reloadKey]);
+
+  // Inside the start window the committed ASSIGNED trip can begin: the existing
+  // offer-response ACCEPTED transition moves it to EN_ROUTE_TO_PICKUP.
+  const startTrip = async (id: string) => {
+    if (!token || startingId) return;
+    setStartingId(id);
+    try {
+      await respondToOffer(token, id, 'ACCEPTED');
+      router.push('/driver');
+    } catch (err) {
+      useToastStore.getState().show(friendlyError(err), 'error');
+      setStartingId(null);
+    }
+  };
 
   if (trips === null) {
     return <div className="skeleton h-24 w-full" aria-label="Loading upcoming trips" />;
@@ -42,35 +161,44 @@ function UpcomingList() {
         </span>
         <h2 className="text-heading-small">No scheduled bookings</h2>
         <p className="text-paragraph-small text-content-secondary max-w-xs mx-auto">
-          Riders can book drivers in advance. Scheduled trips assigned to you
-          appear here; offers for them arrive shortly before the start time.
+          Riders can book drivers in advance. Commit to an available scheduled
+          booking above, or wait — offers also arrive shortly before start time.
         </p>
       </div>
     );
   }
 
+  const now = Date.now();
+
   return (
     <div className="space-y-2.5">
       {trips.map((t) => {
-        const when = new Date(t.scheduled_at);
+        const startable =
+          t.status === 'ASSIGNED' && new Date(t.scheduled_at).getTime() - now <= START_WINDOW_MS;
         return (
-          <div key={t.id} className="card flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-label-large">
-                {when.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
-                {' · '}
-                <span className="font-mono tabular-nums">
-                  {when.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </p>
-              <p className="text-paragraph-small text-content-secondary mt-0.5">
-                {t.trip_type.replaceAll('_', ' ')} · pickup {t.pickup_lat.toFixed(4)}, {t.pickup_lng.toFixed(4)}
-              </p>
+          <div key={t.id} className="card space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-label-large">{whenLabel(t.scheduled_at)}</p>
+                <p className="text-paragraph-small text-content-secondary mt-0.5">
+                  {t.trip_type.replaceAll('_', ' ')} · pickup {t.pickup_lat.toFixed(4)}, {t.pickup_lng.toFixed(4)}
+                </p>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <FareDisplay amount={t.base_fare_paise} size="md" />
+                <span className="badge badge-accent mt-1">{t.status.replaceAll('_', ' ')}</span>
+              </div>
             </div>
-            <div className="text-right flex-shrink-0">
-              <FareDisplay amount={t.base_fare_paise} size="md" />
-              <span className="badge badge-accent mt-1">{t.status.replaceAll('_', ' ')}</span>
-            </div>
+            {startable && (
+              <button
+                type="button"
+                disabled={startingId === t.id}
+                onClick={() => startTrip(t.id)}
+                className="w-full h-10 rounded-sm bg-interactive-primary text-interactive-primary-text text-label-medium font-semibold transition-base cursor-pointer disabled:opacity-50"
+              >
+                {startingId === t.id ? 'Starting…' : 'Start trip — head to pickup'}
+              </button>
+            )}
           </div>
         );
       })}
@@ -80,6 +208,7 @@ function UpcomingList() {
 
 function TripsContent() {
   const [tab, setTab] = useState<TripsTab>('UPCOMING');
+  const [reloadKey, setReloadKey] = useState(0);
 
   return (
     <div className="min-h-screen bg-background-primary text-content-primary font-sans">
@@ -106,7 +235,14 @@ function TripsContent() {
           ))}
         </div>
 
-        {tab === 'UPCOMING' ? <UpcomingList /> : <TripHistoryList />}
+        {tab === 'UPCOMING' ? (
+          <>
+            <ScheduledOffersList onCommitted={() => setReloadKey((k) => k + 1)} />
+            <UpcomingList reloadKey={reloadKey} />
+          </>
+        ) : (
+          <TripHistoryList />
+        )}
       </div>
       <TabBar />
     </div>

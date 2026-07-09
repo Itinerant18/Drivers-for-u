@@ -409,18 +409,44 @@ func (h *DriverEngagementHandler) ListMyDocuments(w http.ResponseWriter, r *http
 // ─── Referrals ─────────────────────────────────────────────────────────────────
 
 // GET /api/v1/driver/referrals
-// No driver-referrals table exists yet, so the code is derived from the driver id
-// and the counts/earnings are zeroed (never random) until a referrals table lands.
+// Code comes from drivers.referral_code (falling back to the historical
+// UUID-derived scheme for any pre-migration row); counts/earnings aggregate the
+// driver_referrals table, populated at registration by referral attribution.
 func (h *DriverEngagementHandler) GetReferrals(w http.ResponseWriter, r *http.Request) {
 	driverID, ok := requireDriverIdentity(w, r)
 	if !ok {
 		return
 	}
+	ctx := r.Context()
+
+	code := referralCodeFor(driverID)
+	var stored *string
+	if err := h.dbPool.QueryRow(ctx,
+		`SELECT referral_code FROM drivers WHERE id = $1::uuid`, driverID).Scan(&stored); err == nil && stored != nil && *stored != "" {
+		code = *stored
+	}
+
+	var joined, pending int
+	var earnings int64
+	err := h.dbPool.QueryRow(ctx, `
+		SELECT
+			COUNT(*) FILTER (WHERE status IN ('JOINED','REWARDED')),
+			COUNT(*) FILTER (WHERE status = 'PENDING'),
+			COALESCE(SUM(reward_amount_paise) FILTER (WHERE status = 'REWARDED'), 0)
+		FROM driver_referrals
+		WHERE referrer_driver_id = $1::uuid;
+	`, driverID).Scan(&joined, &pending, &earnings)
+	if err != nil {
+		// Table missing (migration not applied yet) or transient failure — the
+		// honest-zero response is still correct.
+		joined, pending, earnings = 0, 0, 0
+	}
+
 	writeJSONResponse(w, http.StatusOK, map[string]any{
-		"code":           referralCodeFor(driverID),
-		"joined_count":   0,
-		"pending_count":  0,
-		"earnings_paise": 0,
+		"code":           code,
+		"joined_count":   joined,
+		"pending_count":  pending,
+		"earnings_paise": earnings,
 	})
 }
 

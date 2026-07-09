@@ -2526,10 +2526,15 @@ func (h *GatewayHandler) HandleDriverGetOffer(w http.ResponseWriter, r *http.Req
 		LEFT JOIN drivers d      ON d.id = o.assigned_driver_id
 		WHERE o.assigned_driver_id = $1::uuid
 		  AND o.status = 'ASSIGNED'::order_status_enum
+		  -- A far-future scheduled trip the driver committed to via the Trip
+		  -- Planner is NOT a live offer — it surfaces in Upcoming until its
+		  -- start window (the dispatch lead) opens.
+		  AND (o.scheduled_at IS NULL OR o.scheduled_at <= NOW() + $2::interval)
 		ORDER BY o.assigned_at DESC NULLS LAST
 		LIMIT 1;
 	`
-	err := h.dbPool.QueryRow(ctx, query, driverID).Scan(
+	leadInterval := fmt.Sprintf("%d seconds", int(dispatchDomain.ScheduledDispatchLead().Seconds()))
+	err := h.dbPool.QueryRow(ctx, query, driverID, leadInterval).Scan(
 		&orderID, &cityPrefix, &pickupH3Cell, &pickupLat, &pickupLng,
 		&dropoffLat, &dropoffLng, &baseFarePaise, &surgeMultiplier,
 		&riderName, &riderPhone, &carMake, &carModel, &carType, &carTransmission, &carColor,

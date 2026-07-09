@@ -566,6 +566,37 @@ export async function getUpcomingTrips(token: string): Promise<{ trips: Upcoming
   return request<{ trips: UpcomingTrip[] }>('/api/v1/driver/trips/upcoming', { method: 'GET', token });
 }
 
+export interface ScheduledOffer {
+  id: string;
+  scheduled_at: string;
+  trip_type: string;
+  pickup_lat: number;
+  pickup_lng: number;
+  base_fare_paise: number;
+}
+
+// Trip Planner: unassigned scheduled orders in the driver's city, open for
+// advance commitment.
+export async function getScheduledOffers(token: string): Promise<{ offers: ScheduledOffer[] }> {
+  return request<{ offers: ScheduledOffer[] }>('/api/v1/driver/scheduled-offers', { method: 'GET', token });
+}
+
+// Commit to a scheduled order ahead of time (locks the assignment).
+export async function acceptScheduledOffer(token: string, orderId: string): Promise<{ order_id: string; status: string }> {
+  return request<{ order_id: string; status: string }>(`/api/v1/driver/scheduled-offers/${orderId}/accept`, {
+    method: 'POST',
+    token,
+  });
+}
+
+// Dismiss a scheduled offer — it will not be shown to this driver again.
+export async function declineScheduledOffer(token: string, orderId: string): Promise<{ status: string }> {
+  return request<{ status: string }>(`/api/v1/driver/scheduled-offers/${orderId}/decline`, {
+    method: 'POST',
+    token,
+  });
+}
+
 export async function getTripHistory(
   token: string,
   limit: number,

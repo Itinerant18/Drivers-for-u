@@ -655,6 +655,10 @@ func main() {
 	mux.HandleFunc("POST /api/v1/driver/orders/{id}/car-issue-report", authGuard.AuthenticateJWT(regionRouter.RouteRegionalTraffic(rateLimiter.LimitRouteConcurrency(handler.HandleDriverCarIssueReport))))
 	mux.HandleFunc("GET /api/v1/driver/trips", authGuard.AuthenticateJWT(handler.HandleDriverGetTrips))
 	mux.HandleFunc("GET /api/v1/driver/trips/upcoming", authGuard.AuthenticateJWT(handler.HandleDriverGetUpcomingTrips))
+	// Trip Planner advance-commitment: browse / accept / decline far-future scheduled orders.
+	mux.HandleFunc("GET /api/v1/driver/scheduled-offers", authGuard.AuthenticateJWT(handler.HandleDriverGetScheduledOffers))
+	mux.HandleFunc("POST /api/v1/driver/scheduled-offers/{id}/accept", authGuard.AuthenticateJWT(rateLimiter.LimitRouteConcurrency(handler.HandleDriverAcceptScheduledOffer)))
+	mux.HandleFunc("POST /api/v1/driver/scheduled-offers/{id}/decline", authGuard.AuthenticateJWT(handler.HandleDriverDeclineScheduledOffer))
 	// Driver Earnings / Payouts / Wallet (rich, ledger-backed). The legacy
 	// handler.HandleDriverGetEarnings is superseded by GetEarnings below.
 	mux.HandleFunc("GET /api/v1/driver/earnings", authGuard.AuthenticateJWT(driverEarningsHandler.GetEarnings))

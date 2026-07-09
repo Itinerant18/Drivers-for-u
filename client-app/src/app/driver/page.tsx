@@ -221,6 +221,10 @@ export default function DriverTerminalPage() {
   // Rider's live pin during first-mile (two-way location)
   const [riderPin, setRiderPin] = useState<{ lat: number; lng: number } | null>(null);
 
+  // Set when GPS can't be read while online — the driver is then invisible to
+  // dispatch and receives no trips, so this must be shown, not swallowed.
+  const [gpsError, setGpsError] = useState<string | null>(null);
+
   // Core structural pointers
   const telemetryStopRef = useRef<TelemetryStreamHandle | null>(null);
   const streamRef = useRef<(() => void) | null>(null);
@@ -518,6 +522,7 @@ export default function DriverTerminalPage() {
     // Need both an auth token and a real driver id — never open telemetry/dispatch
     // streams under a placeholder identity.
     if (!token || !driverID) return;
+    setGpsError(null); // fresh attempt; re-set by onGpsError if GPS still fails
 
     if (!telemetryStopRef.current) {
       telemetryStopRef.current = startTelemetryStream({
@@ -526,6 +531,11 @@ export default function DriverTerminalPage() {
         cityPrefix,
         // While not CONNECTED, GPS points buffer locally and flush on reconnect.
         isConnected: () => connectionStatusRef.current === 'CONNECTED',
+        // No location = invisible to dispatch. Make that loud instead of silent.
+        onGpsError: (msg) => {
+          setGpsError(msg);
+          useToastStore.getState().show(msg, 'error');
+        },
       });
       logAudit('TELEMETRY_STREAM_STARTED', { driverID, cityPrefix });
     }
@@ -620,6 +630,7 @@ export default function DriverTerminalPage() {
   };
 
   const closeOnlineStreams = () => {
+    setGpsError(null);
     telemetryStopRef.current?.stop();
     streamRef.current?.();
     telemetryStopRef.current = null;
@@ -1133,6 +1144,14 @@ export default function DriverTerminalPage() {
           </button>
         </div>
       </header>
+
+      {/* GPS-off warning: without a location fix the driver is invisible to
+          dispatch and gets zero trips — surface it prominently, not silently. */}
+      {gpsError && (
+        <div role="alert" className="bg-surface-negative border-b border-negative-300 px-4 py-2.5 text-center text-label-medium text-content-negative">
+          {gpsError}
+        </div>
+      )}
 
       {/* CORE AREA: MAP LAYOUT AND VIEWS */}
       <main className="flex-1 flex flex-col relative min-h-[350px]">

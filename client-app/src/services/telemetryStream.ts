@@ -8,6 +8,10 @@ export interface TelemetryStreamOptions {
   /** Live connectivity probe. When it returns false, points are buffered locally
    *  instead of being sent, and flushed (oldest→newest) once connectivity returns. */
   isConnected?: () => boolean;
+  /** Surfaced when GPS can't be read (permission denied / unavailable). Without a
+   *  location the driver never enters the dispatch spatial index and silently
+   *  receives zero trips — the caller must show this, not swallow it. */
+  onGpsError?: (message: string) => void;
 }
 
 export interface TelemetryStreamHandle {
@@ -19,6 +23,7 @@ export interface TelemetryStreamHandle {
 export function startTelemetryStream(options: TelemetryStreamOptions): TelemetryStreamHandle {
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
     console.error('[TELEMETRY_STREAM] Browser geolocation is unavailable.');
+    options.onGpsError?.('This device has no location support — you will NOT receive trip offers. Use the driver app on a phone.');
     return { stop: () => { }, flush: () => { } };
   }
 
@@ -89,6 +94,24 @@ export function startTelemetryStream(options: TelemetryStreamOptions): Telemetry
     document.addEventListener('visibilitychange', handleVisibilityChange);
   }
 
+  const reportGpsError = (err: GeolocationPositionError) => {
+    console.error('[TELEMETRY_STREAM] GPS error:', err);
+    const msg =
+      err.code === err.PERMISSION_DENIED
+        ? 'Location permission is off — you will NOT receive trip offers. Enable location to go online.'
+        : 'Cannot read your location — you will NOT receive trip offers until GPS is available.';
+    options.onGpsError?.(msg);
+  };
+
+  // Seed one fix immediately so the driver enters the dispatch index within a
+  // second — watchPosition can take several seconds to first-fire, a window in
+  // which the driver is "online" but invisible to matching.
+  navigator.geolocation.getCurrentPosition(
+    (pos) => onPosition(pos.coords.latitude, pos.coords.longitude, pos.coords.heading || 0, (pos.coords.speed || 0) * 3.6),
+    reportGpsError,
+    { enableHighAccuracy: true, maximumAge: 3000, timeout: 5000 },
+  );
+
   const watchId = navigator.geolocation.watchPosition(
     (pos) => {
       onPosition(
@@ -98,7 +121,7 @@ export function startTelemetryStream(options: TelemetryStreamOptions): Telemetry
         (pos.coords.speed || 0) * 3.6,
       );
     },
-    (err) => console.error('[TELEMETRY_STREAM] GPS error:', err),
+    reportGpsError,
     { enableHighAccuracy: true, maximumAge: 3000, timeout: 5000 },
   );
 

@@ -1017,6 +1017,49 @@ export async function getPresignedUrl(
   });
 }
 
+// Uploads an onboarding KYC document via a presigned PUT so real byte-level
+// progress can be reported (XMLHttpRequest — fetch has no upload progress).
+// The presign endpoint pre-inserts the PENDING driver_documents row server-side.
+// If the presign or the PUT fails, falls back to the server-proxied
+// uploadDocument (which inserts its own document row) with indeterminate
+// progress (10 → 100). Returns the storage_url of the uploaded document.
+export async function uploadDocumentPresigned(
+  token: string,
+  documentType: string,
+  file: File,
+  onProgress?: (pct: number) => void,
+): Promise<string> {
+  try {
+    const { upload_url, storage_url } = await getPresignedUrl(token, file.name, documentType);
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', upload_url);
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          onProgress?.(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new ApiClientError(`document_upload_failed_${xhr.status}`, xhr.status, xhr.responseText));
+        }
+      };
+      xhr.onerror = () => reject(new ApiClientError('document_upload_network_error', 0, ''));
+      xhr.send(file);
+    });
+    return storage_url;
+  } catch {
+    // Fallback: server-proxied multipart upload with indeterminate progress.
+    onProgress?.(10);
+    const res = await uploadDocument(token, documentType, file);
+    onProgress?.(100);
+    return res.storage_url;
+  }
+}
+
 // Uploads a trip photo (e.g. odometer/dashboard capture) via a presigned PUT
 // and returns the public storage URL to reference in trip payloads.
 export async function uploadTripPhoto(token: string, file: File, docType: string): Promise<string> {

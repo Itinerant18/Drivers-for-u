@@ -2125,6 +2125,7 @@ func (h *GatewayHandler) HandleDriverGetProfile(w http.ResponseWriter, r *http.R
 		onboardingStep     int
 		verificationStatus string
 		canDriveManual     bool
+		bio                sql.NullString
 		emergencyName      sql.NullString
 		emergencyRelation  sql.NullString
 		emergencyPhone     sql.NullString
@@ -2134,7 +2135,7 @@ func (h *GatewayHandler) HandleDriverGetProfile(w http.ResponseWriter, r *http.R
 		SELECT id::text, name, phone, current_state::text, acceptance_rate::float8,
 		       cancellation_rate::float8, is_verified, city_prefix, created_at,
 		       COALESCE(onboarding_step, 1), COALESCE(verification_status::text, 'ONBOARDING'),
-		       COALESCE(can_drive_manual, true),
+		       COALESCE(can_drive_manual, true), bio,
 		       onboarding_data->>'emergencyName', onboarding_data->>'emergencyRelation',
 		       onboarding_data->>'emergencyPhone'
 		FROM drivers
@@ -2143,7 +2144,7 @@ func (h *GatewayHandler) HandleDriverGetProfile(w http.ResponseWriter, r *http.R
 	if err := h.dbPool.QueryRow(ctx, query, driverID).Scan(
 		&id, &name, &phone, &currentState, &acceptanceRate,
 		&cancellationRate, &isVerified, &cityPrefix, &createdAt,
-		&onboardingStep, &verificationStatus, &canDriveManual,
+		&onboardingStep, &verificationStatus, &canDriveManual, &bio,
 		&emergencyName, &emergencyRelation, &emergencyPhone,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -2192,6 +2193,7 @@ func (h *GatewayHandler) HandleDriverGetProfile(w http.ResponseWriter, r *http.R
 		"onboarding_step":     onboardingStep,
 		"verification_status": verificationStatus,
 		"can_drive_manual":    canDriveManual,
+		"bio":                 nullableString(bio),
 		"emergency_contact":   emergencyContact,
 	})
 }

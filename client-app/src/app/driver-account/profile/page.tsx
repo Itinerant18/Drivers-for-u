@@ -25,7 +25,8 @@ export default function DriverProfilePage() {
   const cityPrefix = profile?.city_prefix || 'KOL';
   const [cityConfig, setCityConfig] = useState<DriverCityConfig | null>(null);
 
-  const [bio, setBio] = useState('Professional pilot dedicated to safe, smooth, and premium commuter and outstation transits across Kolkata.');
+  // Empty until the API seeds a real bio — no fabricated marketing default.
+  const [bio, setBio] = useState('');
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [savingBio, setSavingBio] = useState(false);
   const [bioMessage, setBioMessage] = useState<string | null>(null);
@@ -49,6 +50,7 @@ export default function DriverProfilePage() {
       .then((data) => {
         if (!cancelled) {
           setProfile(data);
+          if (typeof data.bio === 'string') setBio(data.bio);
           setProfileError(null);
         }
       })
@@ -246,7 +248,9 @@ export default function DriverProfilePage() {
             rows={3}
           />
         ) : (
-          <p className="text-xs text-content-secondary leading-relaxed font-sans">{bio}</p>
+          <p className="text-xs text-content-secondary leading-relaxed font-sans">
+            {bio || 'Add a short bio so riders know a bit about you.'}
+          </p>
         )}
         {bioMessage && (
           <p className={`text-[10px] font-mono ${bioMessage.startsWith('Failed') ? 'text-content-negative' : 'text-content-positive'}`}>

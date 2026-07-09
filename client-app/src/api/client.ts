@@ -78,6 +78,8 @@ export interface DriverProfile {
   onboarding_step?: number;
   verification_status?: string;
   can_drive_manual?: boolean;
+  // Free-text driver bio; empty string until the driver writes one.
+  bio?: string;
   // Collected at onboarding step 6; null until the driver provides one.
   emergency_contact?: { name: string; relation?: string; phone: string } | null;
 }

@@ -6,19 +6,14 @@
       "Bash(Format-Table -AutoSize)",
       "Bash(node -e \"const d=require\\('./package.json'\\); console.log\\(JSON.stringify\\({deps:d.dependencies,dev:d.devDependencies},null,1\\)\\)\")",
       "Bash(timeout 110 go run ./cmd/simulator)",
-      "Bash(go build *)"
+      "Bash(go build *)",
+      "mcp__plugin_playwright_playwright__browser_navigate"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "shadcn"
   ],
-  "enabledPlugins": {
-    "carta-investors@claude-plugins-official": true,
-    "mcp-server-dev@claude-plugins-official": true,
-    "code-review@claude-plugins-official": true
-  },
-  "prefersReducedMotion": true,
-  "enableAllProjectMcpServers": true,
   "hooks": {
     "PostToolUse": [
       {
@@ -34,5 +29,11 @@
       }
     ]
   },
+  "enabledPlugins": {
+    "carta-investors@claude-plugins-official": true,
+    "mcp-server-dev@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true
+  },
+  "prefersReducedMotion": true,
   "description": "Impeccable design detector: runs after Edit/Write/MultiEdit on UI files and surfaces findings as system reminders."
 }

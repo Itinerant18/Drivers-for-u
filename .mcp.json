@@ -13,6 +13,14 @@
         "-y",
         "@magicuidesign/mcp@latest"
       ]
+    },
+    "agentation": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "agentation-mcp",
+        "server"
+      ]
     }
   }
 }

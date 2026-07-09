@@ -1,13 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { useAuthStore } from "@/lib/store/authStore";
 import { authApi } from "@/lib/api/auth";
 import { API_BASE_URL, TOKEN_STORAGE_KEY } from "@/lib/api/client";
 import { AccountScaffold } from "@/components/account/AccountScaffold";
 import { compressImage, blobToDataUrl } from "@/lib/utils/imageCompress";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { AvatarCircles } from "@/components/ui/avatar-circles";
 import { PixelImage } from "@/components/ui/pixel-image";
 
 const INPUT =
@@ -77,8 +77,6 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadPct, setUploadPct] = useState<number | null>(null);
-  const [emailOtpSent, setEmailOtpSent] = useState(false);
-  const [showPhoneFlow, setShowPhoneFlow] = useState(false);
 
   const onBlur = (field: Field, value: string) =>
     setErrors((e) => ({ ...e, [field]: validate(field, value) }));
@@ -200,29 +198,6 @@ export default function ProfilePage() {
             </p>
             <p className="text-xs text-content-secondary">Level: {rider?.kyc_level ?? "NONE"}</p>
           </div>
-          {!kycVerified && (
-            <button className="rounded-xl bg-interactive-primary px-4 py-2 text-xs font-semibold text-interactive-primary-text active:scale-95 press-spring">
-              Get Verified
-            </button>
-          )}
-        </div>
-      </BlurFade>
-
-      {/* Connected accounts */}
-      <BlurFade delay={0.25}>
-        <div className="mt-5 flex items-center justify-between rounded-xl bg-background-primary border border-border-opaque shadow-elevation-1 p-4">
-          <div>
-            <p className="text-sm font-semibold text-content-primary">Connected Accounts</p>
-            <p className="text-xs text-content-secondary">Google, Apple & Email</p>
-          </div>
-          <AvatarCircles
-            avatarUrls={[
-              { imageUrl: "https://ui-avatars.com/api/?name=G&background=4F46E5&color=fff", profileUrl: "#" },
-              { imageUrl: "https://ui-avatars.com/api/?name=A&background=B7EC4B&color=111827", profileUrl: "#" },
-              { imageUrl: "https://ui-avatars.com/api/?name=E&background=A5B4FC&color=fff", profileUrl: "#" },
-            ]}
-            numPeople={1}
-          />
         </div>
       </BlurFade>
 
@@ -241,24 +216,14 @@ export default function ProfilePage() {
           </Field>
 
           <Field label="Email">
-            <div className="flex gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={(e) => onBlur("email", e.target.value)}
-                className={`${INPUT} flex-1`}
-                placeholder="you@example.com"
-              />
-              {email && !rider?.email_verified && (
-                <button
-                  onClick={() => setEmailOtpSent(true)}
-                  className="whitespace-nowrap rounded-xl bg-background-tertiary px-3 text-xs font-semibold text-content-accent ring-1 ring-border-opaque active:scale-95 press-spring"
-                >
-                  {emailOtpSent ? "OTP Sent" : "Verify"}
-                </button>
-              )}
-            </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onBlur={(e) => onBlur("email", e.target.value)}
+              className={INPUT}
+              placeholder="you@example.com"
+            />
             {errors.email && <FieldError msg={errors.email} />}
             {rider?.email_verified && <p className="mt-1 text-xs text-content-positive">✓ Verified</p>}
           </Field>
@@ -293,12 +258,12 @@ export default function ProfilePage() {
           <Field label="Phone">
             <div className="flex items-center justify-between rounded-xl bg-background-tertiary px-4 py-3">
               <span className="text-sm text-content-primary">{rider?.phone}</span>
-              <button
-                onClick={() => setShowPhoneFlow(true)}
+              <Link
+                href="/account/support"
                 className="text-xs font-semibold text-content-accent active:scale-95 press-spring"
               >
                 Change
-              </button>
+              </Link>
             </div>
           </Field>
         </div>
@@ -314,10 +279,6 @@ export default function ProfilePage() {
           {saving ? "Saving…" : saved ? "Saved ✓" : "Save Changes"}
         </button>
       </BlurFade>
-
-      {showPhoneFlow && (
-        <PhoneChangeSheet phone={rider?.phone ?? ""} onClose={() => setShowPhoneFlow(false)} />
-      )}
     </AccountScaffold>
   );
 }
@@ -335,61 +296,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function FieldError({ msg }: { msg: string }) {
   return <p className="mt-1 text-xs text-content-negative">{msg}</p>;
-}
-
-function PhoneChangeSheet({ phone, onClose }: { phone: string; onClose: () => void }) {
-  const [step, setStep] = useState<"old" | "new" | "done">("old");
-  const [newPhone, setNewPhone] = useState("");
-  return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/60" onClick={onClose}>
-      <div className="w-full rounded-t-3xl bg-background-primary p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border-opaque" />
-        {step === "old" && (
-          <>
-            <h3 className="text-base font-bold text-content-primary">Verify current number</h3>
-            <p className="mt-1 text-sm text-content-secondary">We sent an OTP to {phone}</p>
-            <button
-              onClick={() => setStep("new")}
-              className="mt-5 w-full rounded-2xl bg-interactive-primary py-3.5 text-sm font-bold text-interactive-primary-text"
-            >
-              Verify & Continue
-            </button>
-          </>
-        )}
-        {step === "new" && (
-          <>
-            <h3 className="text-base font-bold text-content-primary">New phone number</h3>
-            <input
-              value={newPhone}
-              onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-              placeholder="10-digit number"
-              className="mt-3 w-full rounded-xl bg-background-tertiary px-4 py-3 text-sm text-content-primary outline-none"
-            />
-            <button
-              disabled={newPhone.length !== 10}
-              onClick={() => setStep("done")}
-              className="mt-5 w-full rounded-2xl bg-interactive-primary py-3.5 text-sm font-bold text-interactive-primary-text disabled:opacity-40"
-            >
-              Send OTP
-            </button>
-          </>
-        )}
-        {step === "done" && (
-          <>
-            <h3 className="text-base font-bold text-content-primary">Almost there</h3>
-            <p className="mt-1 text-sm text-content-secondary">
-              Enter the OTP sent to +91 {newPhone} to finish changing your number.
-            </p>
-            <button
-              onClick={onClose}
-              className="mt-5 w-full rounded-2xl bg-background-tertiary py-3.5 text-sm font-semibold text-content-secondary"
-            >
-              Close
-            </button>
-          </>
-        )}
-        <div className="h-4" />
-      </div>
-    </div>
-  );
 }

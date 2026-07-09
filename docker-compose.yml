@@ -443,6 +443,15 @@ services:
     container_name: dispatch_notification_prod
     environment:
       - DATABASE_URL=postgres://postgres:password@spatial-db:5432/delivery_platform?sslmode=disable
+      # Real FCM delivery: mount a Firebase service-account JSON and point this
+      # at it (see .env.example). Unset = pushes are logged, not delivered.
+      - FCM_SERVICE_ACCOUNT_FILE=${FCM_SERVICE_ACCOUNT_FILE:-}
+      # Sandbox payout auto-settler (PENDING→PROCESSING→PAID without a PSP).
+      - PAYOUT_SANDBOX_AUTOSETTLE=${PAYOUT_SANDBOX_AUTOSETTLE:-true}
+      - DOC_EXPIRY_INTERVAL_HOURS=${DOC_EXPIRY_INTERVAL_HOURS:-24}
+    volumes:
+      # Host dir holding the Firebase service-account JSON (read-only mount).
+      - ${FCM_SERVICE_ACCOUNT_HOST_DIR:-./firebase}:/secrets/fcm:ro
     depends_on:
       spatial-db:
         condition: service_healthy

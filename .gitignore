@@ -232,3 +232,4 @@ opencode.json
 
 # Personal home-laptop setup transcript (contains local dev config, not for repo)
 HOME_SETUP.md
+fcm-service-account*.json

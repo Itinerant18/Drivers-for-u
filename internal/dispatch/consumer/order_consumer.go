@@ -755,11 +755,33 @@ func (c *OrderCreatedConsumer) emitAssignedEvent(ctx context.Context, match *mat
 	// confirmed" push fires later, on driver-accept (gateway HandleAcceptOrder).
 	go c.cacheOrderRiderMapping(match.OrderID)
 
+	// Queue the driver's "new offer" push (transactional-outbox pattern; the
+	// notification daemon delivers it). Fire-and-forget: the in-app offer poll
+	// remains the source of truth, the push only wakes a backgrounded app —
+	// the 15s lease means it must go out immediately or not at all.
+	go c.queueOfferPush(match.OrderID, match.DriverID)
+
 	return c.kafkaWriter.WriteMessages(ctx, kafka.Message{
 		Key:     []byte(match.OrderID),
 		Value:   bytes,
 		Headers: msgHeaders,
 	})
+}
+
+// queueOfferPush inserts the driver-facing "new trip offer" row into
+// notification_outbox. Runs off the hot path; errors are logged only.
+func (c *OrderCreatedConsumer) queueOfferPush(orderID, driverID string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	_, err := c.dbPool.Exec(ctx, `
+		INSERT INTO notification_outbox (user_id, title, body, payload)
+		VALUES ($1::uuid, 'New trip offer',
+		        'A rider nearby needs a driver. Open the app to accept — offers expire in seconds.',
+		        jsonb_build_object('type','OFFER_ASSIGNED','order_id',$2::text));
+	`, driverID, orderID)
+	if err != nil {
+		log.Printf("[DISPATCH_MATCH] offer push enqueue failed for order %s: %v", orderID, err)
+	}
 }
 
 // cacheOrderRiderMapping caches order->rider so the telemetry ingestion fork can fan GPS

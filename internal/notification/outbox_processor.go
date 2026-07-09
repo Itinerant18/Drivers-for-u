@@ -22,6 +22,7 @@ type OutboxNotificationDaemon struct {
 	dbPool        *pgxpool.Pool
 	sweepInterval time.Duration
 	maxRetryLimit int
+	sender        FCMSender
 }
 
 type PendingNotification struct {
@@ -32,11 +33,17 @@ type PendingNotification struct {
 	PayloadJSON []byte
 }
 
-func NewOutboxNotificationDaemon(db *pgxpool.Pool) *OutboxNotificationDaemon {
+// NewOutboxNotificationDaemon builds the outbox sweeper. sender may be nil, in
+// which case pushes are logged but not delivered (local dev / CI).
+func NewOutboxNotificationDaemon(db *pgxpool.Pool, sender FCMSender) *OutboxNotificationDaemon {
+	if sender == nil {
+		sender = StubFCMSender{}
+	}
 	return &OutboxNotificationDaemon{
 		dbPool:        db,
 		sweepInterval: 2 * time.Second, // Evaluates the pending transactional outbox index table every 2 seconds
 		maxRetryLimit: 3,
+		sender:        sender,
 	}
 }
 
@@ -126,12 +133,19 @@ func (d *OutboxNotificationDaemon) dispatchPushNotification(ctx context.Context,
 		return
 	}
 
-	// Mock third-party provider push orchestration handshake logic
-	// In production, integrate standard client frameworks: "github.com/appleboy/go-fcm" or "github.com/sideshow/apns2"
-	success := d.simulateExternalNotificationProviderCall(token, platform, item.Title, item.Body, item.PayloadJSON)
-
-	if success {
-		// Payout success: mark record state as SENT cleanly
+	res, err := d.sender.Send(ctx, token, platform, item.Title, item.Body, item.PayloadJSON)
+	switch {
+	case err == nil && res.InvalidRegistration:
+		// The token is dead — retrying can never succeed. Fail terminally and
+		// drop the token so future rows fail fast at the lookup step.
+		updateQuery := `
+			UPDATE notification_outbox
+			SET status = 'FAILED', error_log = 'invalid_registration', processed_at = CURRENT_TIMESTAMP, retry_count = retry_count + 1
+			WHERE id = $1;
+		`
+		_, _ = q.Exec(ctx, updateQuery, item.ID)
+		_, _ = q.Exec(ctx, "DELETE FROM user_device_tokens WHERE device_token = $1;", token)
+	case err == nil:
 		successQuery := "UPDATE notification_outbox SET status = 'SENT', processed_at = CURRENT_TIMESTAMP WHERE id = $1;"
 		_, _ = q.Exec(ctx, successQuery, item.ID)
 		tokenPreview := token
@@ -139,15 +153,9 @@ func (d *OutboxNotificationDaemon) dispatchPushNotification(ctx context.Context,
 			tokenPreview = tokenPreview[:8]
 		}
 		log.Printf("[NOTIFICATION_SENT] Push alert successfully delivered via %s to device token: %s...", platform, tokenPreview)
-	} else {
-		// Requeue update fallback loop
-		failQuery := "UPDATE notification_outbox SET retry_count = retry_count + 1, error_log = 'provider_timeout' WHERE id = $1;"
-		_, _ = q.Exec(ctx, failQuery, item.ID)
+	default:
+		// Transient provider failure — leave PENDING for the retry sweep.
+		failQuery := "UPDATE notification_outbox SET retry_count = retry_count + 1, error_log = $1 WHERE id = $2;"
+		_, _ = q.Exec(ctx, failQuery, truncate(err.Error(), 500), item.ID)
 	}
-}
-
-func (d *OutboxNotificationDaemon) simulateExternalNotificationProviderCall(token, platform, title, body string, payload []byte) bool {
-	// Emulate external network latency overhead constraints
-	time.Sleep(45 * time.Millisecond)
-	return true
 }

@@ -25,10 +25,31 @@ func main() {
 	}
 	defer dbPool.Close()
 
-	daemon := notification.NewOutboxNotificationDaemon(dbPool)
+	// Real FCM sender when a service-account credential is configured; stub
+	// (log-only) otherwise so local dev and CI boot cleanly without secrets.
+	var sender notification.FCMSender
+	if s, err := notification.NewFCMHTTPSenderFromEnv(ctx); err == nil {
+		log.Println("[NOTIFICATION] FCM HTTP v1 sender active")
+		sender = s
+	} else if err == notification.ErrFCMNotConfigured {
+		log.Println("[NOTIFICATION] FCM_SERVICE_ACCOUNT_FILE unset — pushes will be logged, not delivered")
+	} else {
+		log.Fatalf("FCM sender init failed: %v", err)
+	}
+
+	daemon := notification.NewOutboxNotificationDaemon(dbPool, sender)
 
 	// Start outbox processing loops concurrently
 	go daemon.StartProcessingLoop(ctx)
+
+	// Driver-lifecycle sweeps (single-replica via advisory locks):
+	// vehicle-document expiry flips + expiry pushes, and the sandbox payout
+	// settler that advances PENDING payouts when no real PSP is wired.
+	docJanitor := notification.NewDocumentExpiryJanitor(dbPool)
+	go docJanitor.StartLoop(ctx)
+
+	payoutWorker := notification.NewSandboxPayoutWorker(dbPool)
+	go payoutWorker.StartLoop(ctx)
 
 	go startHealthServer("NOTIFICATION", getEnv("HEALTH_PORT", "8080"))
 

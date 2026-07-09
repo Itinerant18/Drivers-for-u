@@ -9,9 +9,23 @@
 ALTER TABLE drivers
     ADD COLUMN IF NOT EXISTS referral_code VARCHAR(12) UNIQUE;
 
-UPDATE drivers
-SET referral_code = 'DRV' || UPPER(LEFT(REPLACE(id::text, '-', ''), 5))
-WHERE referral_code IS NULL;
+-- Backfill DRV + first 5 hex of the id (the code the engagement handler always
+-- displayed), disambiguating collisions with a numeric suffix. Seed/test rows
+-- can share a uuid prefix, and the column is UNIQUE, so a naive prefix would
+-- violate the constraint — the ROW_NUMBER suffix guarantees uniqueness while
+-- leaving the common (non-colliding) case identical to what was shown before.
+UPDATE drivers d
+SET referral_code = 'DRV' || UPPER(LEFT(REPLACE(d.id::text, '-', ''), 5))
+    || CASE WHEN x.rn > 1 THEN x.rn::text ELSE '' END
+FROM (
+    SELECT id,
+           ROW_NUMBER() OVER (
+               PARTITION BY UPPER(LEFT(REPLACE(id::text, '-', ''), 5))
+               ORDER BY created_at
+           ) AS rn
+    FROM drivers
+) x
+WHERE d.id = x.id AND d.referral_code IS NULL;
 
 CREATE TABLE IF NOT EXISTS driver_referrals (
     id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),

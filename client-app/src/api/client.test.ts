@@ -3,15 +3,19 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import {
   acceptOffer,
+  acceptScheduledOffer,
   arriveAtPickup,
   completeTrip,
   declineOffer,
+  declineScheduledOffer,
   driverLogin,
   getDriverProfile,
   getEarnings,
   getPendingOffer,
   getPricingQuote,
+  getScheduledOffers,
   getTripHistory,
+  getUpcomingTrips,
   registerDeviceToken,
   setDriverStatus,
   startTrip,
@@ -188,6 +192,62 @@ describe('driver API client smoke tests', () => {
     expect(captured).toMatchObject({
       pathname: '/api/v1/dispatch/decline',
       body: { order_id: 'order-1', driver_id: 'driver-1', city_prefix: 'KOL' },
+    });
+  });
+
+  it('reads and acts on scheduled offers (Trip Planner advance commitment)', async () => {
+    server.use(
+      http.get(`${baseUrl}/api/v1/driver/scheduled-offers`, async ({ request }) => {
+        await capture(request);
+        return HttpResponse.json({ offers: [] });
+      }),
+      // accept/decline send no request body, so don't parse json — just record
+      // that the right method/path/auth was hit.
+      http.post(`${baseUrl}/api/v1/driver/scheduled-offers/order-9/accept`, ({ request }) => {
+        captured = { method: request.method, pathname: new URL(request.url).pathname, search: '', authorization: request.headers.get('Authorization'), region: request.headers.get('X-Region-Prefix'), body: undefined };
+        return HttpResponse.json({ order_id: 'order-9', status: 'ASSIGNED' });
+      }),
+      http.post(`${baseUrl}/api/v1/driver/scheduled-offers/order-9/decline`, ({ request }) => {
+        captured = { method: request.method, pathname: new URL(request.url).pathname, search: '', authorization: request.headers.get('Authorization'), region: request.headers.get('X-Region-Prefix'), body: undefined };
+        return HttpResponse.json({ status: 'DECLINED' });
+      }),
+    );
+
+    await getScheduledOffers('jwt');
+    expect(captured).toMatchObject({
+      method: 'GET',
+      pathname: '/api/v1/driver/scheduled-offers',
+      authorization: 'Bearer jwt',
+    });
+
+    const accepted = await acceptScheduledOffer('jwt', 'order-9');
+    expect(accepted).toMatchObject({ order_id: 'order-9', status: 'ASSIGNED' });
+    expect(captured).toMatchObject({
+      method: 'POST',
+      pathname: '/api/v1/driver/scheduled-offers/order-9/accept',
+      authorization: 'Bearer jwt',
+    });
+
+    const declined = await declineScheduledOffer('jwt', 'order-9');
+    expect(declined).toMatchObject({ status: 'DECLINED' });
+    expect(captured).toMatchObject({
+      method: 'POST',
+      pathname: '/api/v1/driver/scheduled-offers/order-9/decline',
+    });
+  });
+
+  it('gets upcoming scheduled trips', async () => {
+    server.use(http.get(`${baseUrl}/api/v1/driver/trips/upcoming`, async ({ request }) => {
+      await capture(request);
+      return HttpResponse.json({ trips: [] });
+    }));
+
+    const res = await getUpcomingTrips('jwt');
+    expect(res).toMatchObject({ trips: [] });
+    expect(captured).toMatchObject({
+      method: 'GET',
+      pathname: '/api/v1/driver/trips/upcoming',
+      authorization: 'Bearer jwt',
     });
   });
 

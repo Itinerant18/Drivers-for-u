@@ -104,16 +104,33 @@ VM (`dfu-stack`, repo path `/home/itine/Vahnly` — note spelling).
    upload.onprogress, falls back to proxied upload) + full Aura restyle.
    P6 fix `a13439db`: onboarding had the same pre-hydration `/login` bounce
    as AuthGuard (it sits outside the guard) — added a `hasHydrated` gate.
-7. **Landing / privacy / terms pages** still the old dark marketing shells —
-   intentional exclusion, but they now clash with the Aura app; brand-register
-   redesign pass when priorities allow.
-8. **Profile bio default** is hardcoded marketing copy until the driver
-   edits it; backend has no bio read column surfaced in `/driver/me`.
-9. **Admin panel (frontend/)** untouched by all of this — `VITE_FCM_VAPID_KEY`
-   still a placeholder there; unknown fake-button debt (never audited).
-10. **Test coverage.** New endpoints (route, upcoming, emergency-contact,
-    city-config, demand-forecast) have no Go handler tests; client has no
-    tests for the new tab pages.
+7. ~~**Landing / privacy / terms pages** dark marketing shells.~~ ✅ `e8d8566`.
+   All three restyled to Aura (white/forest/sage, flat cards, serif headline,
+   dark backdrop divs deleted). `share`/`sos` were already Aura.
+8. ~~**Profile bio default** hardcoded.~~ ✅ `4d57811`. bio column already
+   existed (`000107`) and PATCH already persisted it; the gaps were `/driver/me`
+   not returning bio and the page seeding a fake default. Both fixed — bio now
+   round-trips, empty-state prompt instead of marketing copy.
+9. ~~**Admin panel audit.**~~ ✅ No-op — the transcript note was wrong.
+   `VITE_FCM_VAPID_KEY` **does not exist** in `frontend/` (no FCM/web-push code
+   at all), and there are **no fake buttons** (every `alert()` follows a real
+   fetch; admin login hits the real endpoint). Only placeholder is
+   `VITE_GOOGLE_MAPS_API_KEY=your_key_here` in `.env.example` — correct for a
+   template; the real key lives in the per-machine `.env`.
+10. ~~**Test coverage.**~~ ✅ `e4a2f37`. Go handler tests for scheduled-offers
+    (auth/validation branches), upcoming-trips guard, and `referralCodeFor`
+    determinism/uniqueness; client MSW tests for the new scheduled-offers +
+    upcoming API. Note: the Go suite is nil-pool/pre-DB-branch style (no
+    DB-backed harness exists in the repo), so query-path coverage for the new
+    endpoints would need a pgxmock/testcontainers harness introduced first.
+
+## Also fixed this session
+- **Heatmap SSE 502 + console spam** (`946deb9`). Gateway `ANALYTICS_SSE_URL`
+  was unset in compose → defaulted to `localhost:8089` (the gateway itself)
+  → 502 on every heatmap connect; pointed it at `spatial-analytics:8089`.
+  Client `EventSource.onerror` spammed `console.error` with empty `{}` on
+  every transient reconnect — now quiet, single warning only after 5
+  consecutive failures with the stream CLOSED.
 
 ## 4. Environment notes (bit-rot risks)
 - VM repo path is `/home/itine/Vahnly` (no second "a" — differs from the

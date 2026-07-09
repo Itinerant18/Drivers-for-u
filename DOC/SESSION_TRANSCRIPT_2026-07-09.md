@@ -68,25 +68,42 @@ VM (`dfu-stack`, repo path `/home/itine/Vahnly` — note spelling).
 
 ## 3. FIX NEXT — known gaps, ordered
 
-1. **FCM push dispatcher (backend).** Device tokens are stored
-   (`/driver/device-token`) and the web VAPID key is real, but no service
-   sends pushes. Needed for: new-offer alerts when the app is backgrounded,
-   scheduled-trip reminders, document expiry, payout settled. Kafka consumer
-   + FCM HTTP v1 sender.
-2. **Scheduled-booking accept/decline flow.** Upcoming tab is read-only v1
-   (shows early/force-matched assignments). Full Trip Planner needs an
-   advance-commitment flow (offer scheduled orders days ahead, accept →
-   locked assignment + T-60/T-15 reminders).
-3. **Referral attribution.** `/driver/referrals` returns a deterministic
-   code with honest zeros; registration flow doesn't capture referral codes,
-   so joined/pending/earnings never move.
-4. **Document expiry job.** `driver_documents.expiry_date` exists but no
-   nightly job flips VALID→EXPIRING→EXPIRED; Documents screen chips + expiry
-   pushes depend on it.
-5. **Payout rails state machine.** `payout_history` statuses exist; no
-   worker advances PENDING→PROCESSING→PAID/FAILED (PSP can stay sandboxed).
-6. **Onboarding restyle + real upload progress** (still pre-Aura visuals;
-   progress bar is a fake setInterval around the real upload).
+> **DONE 2026-07-09 (items 1–6, commits `2ca94ba`→`a13439db`):** FCM
+> dispatcher, scheduled-booking flow, referral attribution, document-expiry
+> job, payout state machine, and onboarding restyle+real-progress all
+> shipped; P6 QA walked 360/768/1024. Notes appended per item. Items 7–10
+> remain open.
+
+1. ~~**FCM push dispatcher (backend).**~~ ✅ `2ca94ba`. Real FCM HTTP v1
+   sender (`internal/notification/fcm_http_sender.go`, service-account JWT via
+   x/oauth2/google; `FCM_SERVICE_ACCOUNT_FILE` env, stub fallback). Dead
+   tokens fail terminally + drop. Offer push queued at matcher assignment.
+   **Lookout:** a real Firebase service-account JSON must be placed on the VM
+   and `FCM_SERVICE_ACCOUNT_FILE` set (see `.env.example` §12) — until then
+   pushes are logged, not delivered.
+2. ~~**Scheduled-booking accept/decline flow.**~~ ✅ `257e08e6`. GET/accept/
+   decline `/driver/scheduled-offers`, guarded CREATED→ASSIGNED, per-driver
+   declines, GetOffer excludes committed far-future trips, T-60/T-15
+   reminders in the dispatch scheduler. Client Trips tab now actionable.
+   Migration `000125`.
+3. ~~**Referral attribution.**~~ ✅ `257e08e6`. `driver_referrals` table +
+   `drivers.referral_code` (migration `000124`, collision-safe backfill),
+   register accepts `referred_by_code`, `/driver/referrals` returns real
+   counts. Client register form has an optional code field.
+4. ~~**Document expiry job.**~~ ✅ `2ca94ba`. `DocumentExpiryJanitor`
+   (advisory lock 911003, nightly) flips **`vehicle_documents`** (NOT
+   driver_documents — that table has no expiry_date) to EXPIRING/EXPIRED +
+   queues a push. `DOC_EXPIRY_INTERVAL_HOURS` env.
+5. ~~**Payout rails state machine.**~~ ✅ `2ca94ba`. `SandboxPayoutWorker`
+   (lock 911004, `PAYOUT_SANDBOX_AUTOSETTLE=true`) advances **`payout_requests`**
+   (the real table; `payout_history` was only a JSON key) PENDING→PROCESSING
+   →PAID + settled push, never touching admin-claimed rows. Turn off once a
+   real PSP lands.
+6. ~~**Onboarding restyle + real upload progress.**~~ ✅ `85a0511c`. Real
+   presigned-PUT byte progress (`uploadDocumentPresigned`, XHR
+   upload.onprogress, falls back to proxied upload) + full Aura restyle.
+   P6 fix `a13439db`: onboarding had the same pre-hydration `/login` bounce
+   as AuthGuard (it sits outside the guard) — added a `hasHydrated` gate.
 7. **Landing / privacy / terms pages** still the old dark marketing shells —
    intentional exclusion, but they now clash with the Aura app; brand-register
    redesign pass when priorities allow.
@@ -106,3 +123,14 @@ VM (`dfu-stack`, repo path `/home/itine/Vahnly` — note spelling).
   VAPID key. `DRIVER_APP_OPEN_ISSUES.md` records the working values.
 - `graphify` CLI not installed on this machine — knowledge graph in
   `graphify-out/` is stale relative to all of the above.
+  **Update 2026-07-09:** graph refreshed on the office machine (has the CLI).
+- New migrations `000124` (driver referrals) + `000125` (scheduled offers)
+  must run on any DB before the new endpoints work. The db-migrator bakes
+  migrations into its image (no volume mount), so `docker compose build
+  db-migrator` is required before it picks up new migration files.
+- New env vars (`.env.example` §12): `FCM_SERVICE_ACCOUNT_FILE`/`_HOST_DIR`,
+  `PAYOUT_SANDBOX_AUTOSETTLE`, `DOC_EXPIRY_INTERVAL_HOURS`. The three new
+  workers all run inside the existing `outbox-notification-engine` service.
+- Local QA login needs a seeded driver with a password (seed drivers have
+  none) AND the client dev server on **:3000** (gateway CORS allowlist —
+  :3050 is rider, :5173 is admin; other ports fail with net::ERR_FAILED).

@@ -1388,7 +1388,7 @@ export default function DriverTerminalPage() {
       )}
 
       <footer className="bg-background-primary border-t border-border-opaque p-3 text-center text-label-small font-mono text-content-tertiary select-none">
-        D4U · ENCRYPTED WS · TELEMETRY ACTIVE
+        VAHNLY · ENCRYPTED WS · TELEMETRY ACTIVE
       </footer>
     </div>
   );

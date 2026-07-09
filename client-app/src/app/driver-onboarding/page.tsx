@@ -11,7 +11,7 @@ import { AnimSettings, AnimCar, AnimCheck } from '@/assets/icons/animated';
 
 export default function DriverOnboardingWizard() {
   const router = useRouter();
-  const { token } = useAuthStore();
+  const { token, hasHydrated } = useAuthStore();
   const { step: currentStep, data: onboardingStoreData, updateData, setStep, clearStore } = useDriverOnboardingStore();
   
   const [logs, setLogs] = useState<string[]>([]);
@@ -92,6 +92,9 @@ export default function DriverOnboardingWizard() {
   };
 
   useEffect(() => {
+    // Wait for the persisted session to load before judging auth — reading token
+    // pre-hydration always sees null and bounces a logged-in driver to /login.
+    if (!hasHydrated) return;
     if (!token) {
       useToastStore.getState().show('Log in to continue driver onboarding.', 'error');
       router.push('/login?role=driver');
@@ -100,7 +103,7 @@ export default function DriverOnboardingWizard() {
 
     // Attempt to sync any cached offline payloads
     void syncOfflineOnboarding();
-  }, [token, router]);
+  }, [token, hasHydrated, router]);
 
   // Helper log function
   const logEvent = (action: string, meta: any) => {

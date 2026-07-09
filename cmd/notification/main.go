@@ -27,6 +27,9 @@ func main() {
 
 	// Real FCM sender when a service-account credential is configured; stub
 	// (log-only) otherwise so local dev and CI boot cleanly without secrets.
+	// A misconfigured credential (unreadable/invalid file) must NOT crash the
+	// daemon — it also runs the doc-expiry and payout workers, which have
+	// nothing to do with FCM. Degrade to the stub and log loudly instead.
 	var sender notification.FCMSender
 	if s, err := notification.NewFCMHTTPSenderFromEnv(ctx); err == nil {
 		log.Println("[NOTIFICATION] FCM HTTP v1 sender active")
@@ -34,7 +37,7 @@ func main() {
 	} else if err == notification.ErrFCMNotConfigured {
 		log.Println("[NOTIFICATION] FCM_SERVICE_ACCOUNT_FILE unset — pushes will be logged, not delivered")
 	} else {
-		log.Fatalf("FCM sender init failed: %v", err)
+		log.Printf("[NOTIFICATION] WARNING: FCM sender init failed (%v) — falling back to log-only; pushes will NOT be delivered until this is fixed", err)
 	}
 
 	daemon := notification.NewOutboxNotificationDaemon(dbPool, sender)

@@ -447,7 +447,11 @@ services:
       # at it (see .env.example). Unset = pushes are logged, not delivered.
       - FCM_SERVICE_ACCOUNT_FILE=${FCM_SERVICE_ACCOUNT_FILE:-}
       # Sandbox payout auto-settler (PENDING→PROCESSING→PAID without a PSP).
-      - PAYOUT_SANDBOX_AUTOSETTLE=${PAYOUT_SANDBOX_AUTOSETTLE:-true}
+      # OFF by default — auto-marking real payouts PAID with a synthetic bank
+      # reference must never happen in production. Enable ONLY in demo/staging
+      # (set =true in that environment's .env). Prod keeps admin-driven
+      # settlement (HandleSettlePayout) until a real PSP is integrated.
+      - PAYOUT_SANDBOX_AUTOSETTLE=${PAYOUT_SANDBOX_AUTOSETTLE:-false}
       - DOC_EXPIRY_INTERVAL_HOURS=${DOC_EXPIRY_INTERVAL_HOURS:-24}
     volumes:
       # Host dir holding the Firebase service-account JSON (read-only mount).

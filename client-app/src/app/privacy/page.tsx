@@ -15,11 +15,7 @@ export default function PrivacyPolicy() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center py-12 px-4 md:px-8 bg-black text-white font-sans overflow-x-hidden selection:bg-white selection:text-black">
-      {/* Grid line matrix background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-background-primary via-black to-background-secondary z-0 opacity-80 pointer-events-none" />
-
+    <div className="min-h-screen relative flex flex-col items-center py-12 px-4 md:px-8 bg-background-primary text-content-primary font-sans overflow-x-hidden selection:bg-accent-400 selection:text-content-primary">
       {/* Content Container */}
       <div className="relative z-10 w-full max-w-4xl animate-enter-up">
         {/* Navigation / Header Actions */}
@@ -27,7 +23,7 @@ export default function PrivacyPolicy() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/')}
-              className="group flex items-center justify-center h-10 px-4 rounded-md border border-border-opaque bg-background-secondary hover:bg-white hover:text-black hover:border-white transition-all duration-200 cursor-pointer"
+              className="group flex items-center justify-center h-10 px-4 rounded-md border border-border-opaque text-content-primary hover:bg-background-secondary transition-all duration-200 cursor-pointer"
             >
               <svg
                 width="16"
@@ -51,8 +47,8 @@ export default function PrivacyPolicy() {
                 onClick={() => handleTabChange('privacy')}
                 className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   activeTab === 'privacy'
-                    ? 'bg-white text-black shadow-md'
-                    : 'text-content-secondary hover:text-white'
+                    ? 'bg-interactive-primary text-interactive-primary-text shadow-elevation-1'
+                    : 'text-content-secondary hover:text-content-primary'
                 }`}
               >
                 Privacy Policy
@@ -61,8 +57,8 @@ export default function PrivacyPolicy() {
                 onClick={() => handleTabChange('terms')}
                 className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   activeTab === 'terms'
-                    ? 'bg-white text-black shadow-md'
-                    : 'text-content-secondary hover:text-white'
+                    ? 'bg-interactive-primary text-interactive-primary-text shadow-elevation-1'
+                    : 'text-content-secondary hover:text-content-primary'
                 }`}
               >
                 Terms of Service
@@ -72,7 +68,7 @@ export default function PrivacyPolicy() {
 
           <button
             onClick={() => window.print()}
-            className="flex items-center justify-center h-10 px-4 rounded-md border border-border-opaque bg-background-secondary hover:border-white transition-all cursor-pointer text-sm"
+            className="flex items-center justify-center h-10 px-4 rounded-md border border-border-opaque text-content-primary hover:bg-background-secondary transition-all cursor-pointer text-sm"
           >
             <svg
               width="16"
@@ -94,17 +90,17 @@ export default function PrivacyPolicy() {
         </div>
 
         {/* Card containing policy */}
-        <div className="bg-background-secondary/40 backdrop-blur-md border border-border-opaque rounded-2xl p-6 md:p-10 shadow-elevation-3">
+        <div className="card p-6 md:p-10">
           <div className="space-y-6">
             <div className="border-b border-border-opaque pb-6">
-              <span className="text-xs font-mono uppercase tracking-widest text-accent-400 font-bold">Legal Document</span>
-              <h1 className="text-3xl font-extrabold tracking-tight mt-2 font-move bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
+              <span className="text-label-small text-content-secondary">Legal Document</span>
+              <h1 className="text-display-serif text-3xl mt-2 text-content-primary">
                 Privacy Policy
               </h1>
-              <p className="text-xs text-content-tertiary font-mono mt-2">Last Updated: June 15, 2026</p>
+              <p className="text-label-small text-content-tertiary mt-2">Last Updated: June 15, 2026</p>
             </div>
 
-            <div className="prose prose-invert max-w-none text-content-secondary space-y-6 text-paragraph-medium leading-relaxed">
+            <div className="prose max-w-none text-content-secondary space-y-6 text-paragraph-medium leading-relaxed">
               <p>
                 At <strong>Vahnly</strong>, we prioritize the protection and confidentiality of your personal data. 
                 This Privacy Policy explains how our unified dispatch matching platform collects, stores, uses, and protects 
@@ -112,7 +108,7 @@ export default function PrivacyPolicy() {
               </p>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">1. Information We Collect</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">1. Information We Collect</h2>
                 <p>We collect information to provide, maintain, and secure a premium experience. This includes:</p>
                 <ul className="list-disc pl-5 space-y-2 mt-2">
                   <li>
@@ -136,7 +132,7 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">2. How We Use Your Information</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">2. How We Use Your Information</h2>
                 <p>Your data is processed strictly to fulfill operational and safety requirements:</p>
                 <ul className="list-disc pl-5 space-y-2 mt-2">
                   <li>Facilitating instant matching between riders and professional drivers.</li>
@@ -148,7 +144,7 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">3. SMS & Communication Policy</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">3. SMS & Communication Policy</h2>
                 <p>
                   To secure user accounts, we utilize Firebase Phone Authentication. Verification codes (OTPs) and 
                   critical transaction updates are sent via SMS. 
@@ -160,7 +156,7 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">4. Information Sharing & Third-Parties</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">4. Information Sharing & Third-Parties</h2>
                 <p>We do not sell your personal data. Your information is shared only under strict conditions:</p>
                 <ul className="list-disc pl-5 space-y-2 mt-2">
                   <li>
@@ -179,7 +175,7 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">5. Data Retention & Deletion Rights</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">5. Data Retention & Deletion Rights</h2>
                 <p>
                   We retain personal data as long as your account remains active. You hold the right to request deletion 
                   of your profile and all linked records. Upon request, we will expunge your sensitive details from our active 
@@ -188,12 +184,12 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">6. Contact and Administration</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">6. Contact and Administration</h2>
                 <p>
                   If you have questions, feedback, or data privacy requests regarding the Vahnly platform, 
                   please reach out to our administration team at:
                 </p>
-                <p className="mt-2 font-mono text-xs text-white bg-black/60 p-3 rounded border border-border-opaque">
+                <p className="mt-2 font-mono text-xs text-content-primary bg-background-secondary p-3 rounded border border-border-opaque">
                   Email: karmakaraniket018@gmail.com<br />
                   Operational Hub: Asia-South1 (India)
                 </p>

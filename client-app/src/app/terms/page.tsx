@@ -15,11 +15,7 @@ export default function TermsOfService() {
   };
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center py-12 px-4 md:px-8 bg-black text-white font-sans overflow-x-hidden selection:bg-white selection:text-black">
-      {/* Grid line matrix background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-background-primary via-black to-background-secondary z-0 opacity-80 pointer-events-none" />
-
+    <div className="min-h-screen relative flex flex-col items-center py-12 px-4 md:px-8 bg-background-primary text-content-primary font-sans overflow-x-hidden selection:bg-accent-400 selection:text-content-primary">
       {/* Content Container */}
       <div className="relative z-10 w-full max-w-4xl animate-enter-up">
         {/* Navigation / Header Actions */}
@@ -27,7 +23,7 @@ export default function TermsOfService() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/')}
-              className="group flex items-center justify-center h-10 px-4 rounded-md border border-border-opaque bg-background-secondary hover:bg-white hover:text-black hover:border-white transition-all duration-200 cursor-pointer"
+              className="group flex items-center justify-center h-10 px-4 rounded-md border border-border-opaque text-content-primary hover:bg-background-secondary transition-all duration-200 cursor-pointer"
             >
               <svg
                 width="16"
@@ -51,8 +47,8 @@ export default function TermsOfService() {
                 onClick={() => handleTabChange('privacy')}
                 className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   activeTab === 'privacy'
-                    ? 'bg-white text-black shadow-md'
-                    : 'text-content-secondary hover:text-white'
+                    ? 'bg-interactive-primary text-interactive-primary-text shadow-elevation-1'
+                    : 'text-content-secondary hover:text-content-primary'
                 }`}
               >
                 Privacy Policy
@@ -61,8 +57,8 @@ export default function TermsOfService() {
                 onClick={() => handleTabChange('terms')}
                 className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   activeTab === 'terms'
-                    ? 'bg-white text-black shadow-md'
-                    : 'text-content-secondary hover:text-white'
+                    ? 'bg-interactive-primary text-interactive-primary-text shadow-elevation-1'
+                    : 'text-content-secondary hover:text-content-primary'
                 }`}
               >
                 Terms of Service
@@ -72,7 +68,7 @@ export default function TermsOfService() {
 
           <button
             onClick={() => window.print()}
-            className="flex items-center justify-center h-10 px-4 rounded-md border border-border-opaque bg-background-secondary hover:border-white transition-all cursor-pointer text-sm"
+            className="flex items-center justify-center h-10 px-4 rounded-md border border-border-opaque text-content-primary hover:bg-background-secondary transition-all cursor-pointer text-sm"
           >
             <svg
               width="16"
@@ -94,17 +90,17 @@ export default function TermsOfService() {
         </div>
 
         {/* Card containing terms */}
-        <div className="bg-background-secondary/40 backdrop-blur-md border border-border-opaque rounded-2xl p-6 md:p-10 shadow-elevation-3">
+        <div className="card p-6 md:p-10">
           <div className="space-y-6">
             <div className="border-b border-border-opaque pb-6">
-              <span className="text-xs font-mono uppercase tracking-widest text-accent-400 font-bold">Legal Agreement</span>
-              <h1 className="text-3xl font-extrabold tracking-tight mt-2 font-move bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
+              <span className="text-label-small text-content-secondary">Legal Agreement</span>
+              <h1 className="text-display-serif text-3xl mt-2 text-content-primary">
                 Terms of Service
               </h1>
-              <p className="text-xs text-content-tertiary font-mono mt-2">Last Updated: June 15, 2026</p>
+              <p className="text-label-small text-content-tertiary mt-2">Last Updated: June 15, 2026</p>
             </div>
 
-            <div className="prose prose-invert max-w-none text-content-secondary space-y-6 text-paragraph-medium leading-relaxed">
+            <div className="prose max-w-none text-content-secondary space-y-6 text-paragraph-medium leading-relaxed">
               <p>
                 Welcome to <strong>Vahnly</strong>. By accessing or using our unified dispatch ride matching 
                 ecosystem, including our mobile and web applications (the &quot;Service&quot;), you agree to be bound by these 
@@ -112,7 +108,7 @@ export default function TermsOfService() {
               </p>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">1. Scope of Service</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">1. Scope of Service</h2>
                 <p>
                   Vahnly acts exclusively as a technology dispatch matching platform that connects independent 
                   riders with independent professional drivers. 
@@ -125,7 +121,7 @@ export default function TermsOfService() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">2. Account Registration & MFA Verification</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">2. Account Registration & MFA Verification</h2>
                 <p>To use the Service, you must comply with the following registration requirements:</p>
                 <ul className="list-disc pl-5 space-y-2 mt-2">
                   <li>You must be at least 18 years of age or the age of legal majority in your jurisdiction.</li>
@@ -142,7 +138,7 @@ export default function TermsOfService() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">3. Acceptable Code of Conduct</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">3. Acceptable Code of Conduct</h2>
                 <p>You agree to utilize the platform in a safe, legal, and respectful manner. You shall not:</p>
                 <ul className="list-disc pl-5 space-y-2 mt-2">
                   <li>Use the service to transport illicit, dangerous, or hazardous substances.</li>
@@ -153,7 +149,7 @@ export default function TermsOfService() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">4. Fare Calculation, Pricing, and Payments</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">4. Fare Calculation, Pricing, and Payments</h2>
                 <p>
                   Fares are calculated dynamically based on regional routing models. Factors include base rates, trip duration, 
                   distance, hub zones, and real-time surge multipliers. 
@@ -165,7 +161,7 @@ export default function TermsOfService() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">5. Disclaimer and Limitation of Liability</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">5. Disclaimer and Limitation of Liability</h2>
                 <p>
                   VAHNLY PROVIDES THE SERVICE ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS. WE DISCLAIM ALL WARRANTIES, EXPRESS 
                   OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -177,7 +173,7 @@ export default function TermsOfService() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">6. Governing Law</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">6. Governing Law</h2>
                 <p>
                   These Terms of Service and any disputes arising out of your relationship with Vahnly are governed 
                   exclusively by the laws of India, under the jurisdiction of Kolkata courts.
@@ -185,7 +181,7 @@ export default function TermsOfService() {
               </div>
 
               <div>
-                <h2 className="text-heading-large text-white mb-3">7. Modifications & Termination</h2>
+                <h2 className="text-heading-large text-content-primary mb-3">7. Modifications & Termination</h2>
                 <p>
                   We reserve the right to revise these Terms of Service or suspend your access to the Service at our sole 
                   discretion, without notice, in the event of code of conduct violations or security compromises.

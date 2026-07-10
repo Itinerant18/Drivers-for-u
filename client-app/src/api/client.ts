@@ -1633,9 +1633,13 @@ export interface DriverSurgePrediction {
   multiplier: string;
 }
 
+// Live gateway shape (verified 2026-07-10): surge_zones, not surge_predictions.
 export interface DriverIncentivesResponse {
   quests: DriverIncentiveQuest[];
-  surge_predictions: DriverSurgePrediction[];
+  surge_zones: DriverSurgePrediction[];
+  referral_code?: string;
+  trips_today?: number;
+  trips_week?: number;
 }
 
 export async function getDriverIncentives(token: string): Promise<DriverIncentivesResponse> {
@@ -1683,8 +1687,25 @@ export interface DriverKycDocument {
   date: string;
 }
 
+// Live gateway shape (verified 2026-07-10): a bare array of
+// {doc_type, status, storage_url, uploaded_at} — normalized here to the
+// UI-facing DriverKycDocument so consumers keep their {documents: [...]} view.
+interface DriverKycDocumentRaw {
+  doc_type: string;
+  status: string;
+  storage_url: string;
+  uploaded_at: string;
+}
+
 export async function getDriverDocuments(token: string): Promise<{ documents: DriverKycDocument[] }> {
-  return request<{ documents: DriverKycDocument[] }>("/api/v1/driver/me/documents", { method: "GET", token });
+  const raw = await request<DriverKycDocumentRaw[]>("/api/v1/driver/me/documents", { method: "GET", token });
+  return {
+    documents: (Array.isArray(raw) ? raw : []).map((d) => ({
+      name: d.doc_type,
+      status: d.status,
+      date: (d.uploaded_at || '').split('T')[0],
+    })),
+  };
 }
 
 export async function updateDriverProfile(

@@ -172,7 +172,9 @@ export default function DriverDocumentsPage() {
             <div key={idx} className="py-3 flex justify-between items-center text-xs font-mono">
               <div>
                 <span className="text-content-primary block font-medium font-sans">{doc.name}</span>
-                <span className="text-content-tertiary text-[8px] block mt-0.5">Uploaded on: {doc.date}</span>
+                {doc.date && (
+                  <span className="text-content-tertiary text-[8px] block mt-0.5">Uploaded on: {doc.date}</span>
+                )}
               </div>
               <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${
                 doc.status === 'Verified'

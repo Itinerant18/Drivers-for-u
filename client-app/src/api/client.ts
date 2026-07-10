@@ -31,7 +31,7 @@ export const WS_BASE_URL =
 // There is deliberately no /api/v1/city-config fetch here — the only backend
 // route is rider-scoped and auth-gated (GET /api/v1/rider/city-config), and
 // without a ?city param it can only echo the same KOL default back anyway.
-let currentRegion = (process.env.NEXT_PUBLIC_REGION_PREFIX || '').trim().toUpperCase();
+const currentRegion = (process.env.NEXT_PUBLIC_REGION_PREFIX || '').trim().toUpperCase();
 
 function getRegionPrefix(): string {
   return currentRegion || 'KOL';

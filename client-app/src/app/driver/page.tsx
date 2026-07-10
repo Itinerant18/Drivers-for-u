@@ -14,7 +14,6 @@ const DriverMap = dynamic(() => import('@/components/map/DriverMap'), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-background-secondary" />,
 });
-import { TabBar } from '@/components/TabBar';
 import { UserIcon } from '@/components/ds/Icon';
 import Link from 'next/link';
 import { DevLocationSpoof } from '../../components/DevLocationSpoof';
@@ -45,7 +44,10 @@ import { connectDispatchStream } from '@/services/dispatchStream';
 import { connectHeatmapStream, HeatmapData } from '@/services/heatmapStream';
 import { startTelemetryStream, TelemetryStreamHandle } from '@/services/telemetryStream';
 import { attachForegroundPushHandler } from '@/services/notifications';
-import { OfferPopup } from '@/components/OfferPopup';
+import { OfferScreen } from '@/components/OfferScreen';
+import { HomeOffline } from '@/components/home/HomeOffline';
+import { HomeOnline } from '@/components/home/HomeOnline';
+import { TabBarRedesign } from '@/components/TabBarRedesign';
 import { RefreshIcon, NavigateIcon, FlameIcon, PauseIcon, ChatIcon, OctagonAlertIcon, ClockIcon, ChevronDownIcon } from '@/components/ds';
 import { SirenIcon3D, SignalIcon3D } from '@/components/ds/Icons8';
 import { useOfferStore } from '@/store/useOfferStore';
@@ -1061,6 +1063,77 @@ export default function DriverTerminalPage() {
     neutral: 'bg-background-secondary border-border-opaque text-content-secondary',
   };
 
+  // ── Redesign (Aura mobile) home states ─────────────────────────────────────
+  // OFFLINE and ONLINE/OFFER_PENDING render the redesigned screens; the trip
+  // flow below keeps the legacy panes because they own the odometer/fuel/OTP
+  // billing contract the redesigned trip screens don't carry yet.
+  const fatigueCritical =
+    fatigue && (fatigue.must_take_break || fatigue.hours_remaining <= 0) && dutyState !== 'OFFLINE';
+
+  if (dutyState === 'OFFLINE') {
+    return (
+      <div className="min-h-screen bg-background-primary text-content-primary font-sans">
+        <SosModal />
+        <DevLocationSpoof />
+        <div className="pb-14">
+          <HomeOffline
+            driverName={driverName}
+            stats={{
+              tripsCount: stats.trips_count,
+              earningsRupees: stats.earnings_rupees,
+              onlineHours: stats.online_hours,
+              rating: stats.rating,
+            }}
+            upcomingJob={null}
+            onGoOnline={handleToggleDutySwitch}
+          />
+        </div>
+        <TabBarRedesign />
+      </div>
+    );
+  }
+
+  if (dutyState === 'ONLINE' || dutyState === 'OFFER_PENDING') {
+    // GPS-weak staleness folds into HomeOnline's gps banner slot; cooldown,
+    // connection state and reconnect live inside HomeOnline already.
+    const onlineGpsMsg =
+      gpsError ||
+      (locStatus && !locStatus.is_visible_to_dispatch && !locStatus.on_cooldown
+        ? 'Your GPS signal is weak. Move to an open area to receive job requests.'
+        : null);
+    return (
+      <div className="min-h-screen bg-background-primary text-content-primary font-sans">
+        <SosModal />
+        <DevLocationSpoof />
+        <OfferScreen />
+        {fatigueCritical && (
+          <div role="alert" className={`border-b px-4 py-2.5 flex items-center justify-center gap-2 text-center text-label-small ${bannerToneCls.negative}`}>
+            <span className="flex items-center flex-shrink-0 animate-pulse"><OctagonAlertIcon size={16} /></span>
+            <span>{`Mandatory rest break required — ${fatigue?.message || 'you have reached the daily driving limit. Please go offline and rest.'}`}</span>
+          </div>
+        )}
+        <div className="pb-14">
+          <HomeOnline
+            connectionStatus={connectionStatus === 'OFFLINE' ? 'DISCONNECTED' : connectionStatus}
+            stats={{
+              tripsCount: stats.trips_count,
+              earningsRupees: stats.earnings_rupees,
+              acceptanceRate: stats.acceptance_rate,
+              rating: stats.rating,
+            }}
+            gpsError={onlineGpsMsg}
+            cooldownSecs={locStatus?.on_cooldown ? cooldownSecs : 0}
+            tripFilter={preferredTripFilter}
+            onTripFilterChange={setPreferredTripFilter}
+            onGoOffline={handleToggleDutySwitch}
+            onReconnect={reconnect}
+          />
+        </div>
+        <TabBarRedesign />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background-primary text-content-primary p-0 font-sans flex flex-col justify-between selection:bg-forest-400 selection:text-white overflow-x-hidden relative">
 
@@ -1069,9 +1142,6 @@ export default function DriverTerminalPage() {
 
       {/* DEV-ONLY: GPS location spoof (tree-shaken out of prod) */}
       <DevLocationSpoof />
-
-      {/* 3. INCOMING BOOKING OFFER MODAL SHEET OVERLAY */}
-      <OfferPopup />
 
       {/* CANCEL ALLOCATION PICKER OVERLAY */}
       {showCancelModal && activeTrip && (
@@ -1166,7 +1236,7 @@ export default function DriverTerminalPage() {
         <div className="flex items-center gap-3">
           {/* Connection chip only when something is wrong — a permanent green
               "Connected" badge is noise on a phone-width header. */}
-          {dutyState !== 'OFFLINE' && connectionStatus !== 'CONNECTED' && (
+          {connectionStatus !== 'CONNECTED' && (
             <span role="status" aria-live="polite">{
             connectionStatus === 'OFFLINE' ? (
               <button
@@ -1221,18 +1291,9 @@ export default function DriverTerminalPage() {
       <main className="flex-1 flex flex-col relative min-h-[350px]">
         <div
           className="absolute inset-0 bg-background-primary z-0 overflow-hidden flex items-center justify-center"
-          style={{ filter: dutyState === 'OFFLINE' ? 'grayscale(1) opacity(0.6)' : 'none' }}
+          
         >
-          {dutyState === 'OFFLINE' ? (
-            <svg className="w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" className="text-border-opaque" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-            </svg>
-          ) : (
+          {(
             <div className="w-full h-full">
               <DriverMap
                 drivers={mapDrivers}
@@ -1282,24 +1343,10 @@ export default function DriverTerminalPage() {
             </button>
           )}
 
-          {/* Offline overlay */}
-          {dutyState === 'OFFLINE' && (
-            <div className="absolute inset-0 bg-black/60 z-10 flex items-center justify-center p-6">
-            <div className="text-center space-y-3">
-              <span className="flex justify-center">
-                <SignalIcon3D size={64} />
-              </span>
-              <h3 className="text-heading-small text-content-secondary">Terminal Offline</h3>
-              <p className="text-paragraph-small text-content-tertiary max-w-xs">
-                Go Online to connect to dispatch and start receiving trip offers.
-              </p>
-            </div>
-          </div>
-          )}
 
           {/* Heatmap toggle — icon-only map control; the "N cells" diagnostic chip
               was developer telemetry, not driver-facing information. */}
-          {dutyState !== 'OFFLINE' && (
+          {(
             <button
               type="button"
               onClick={() => setShowHeatmap(!showHeatmap)}
@@ -1320,9 +1367,7 @@ export default function DriverTerminalPage() {
 
         {/* BOTTOM CONTROL SHEET — leaves room for the tab bar while browsing
             offline; during duty/trips the trip flow owns the bottom edge. */}
-        <div className={`mt-auto w-full z-10 bg-background-primary/95 border-t border-border-opaque p-4 sm:p-6 space-y-4 max-w-xl mx-auto rounded-t-lg shadow-elevation-3 backdrop-blur-sm ${
-          dutyState === 'OFFLINE' ? 'mb-[calc(3.5rem+env(safe-area-inset-bottom))]' : ''
-        }`}>
+        <div className="mt-auto w-full z-10 bg-background-primary/95 border-t border-border-opaque p-4 sm:p-6 space-y-4 max-w-xl mx-auto rounded-t-lg shadow-elevation-3 backdrop-blur-sm">
           {/* Mid-trip wait toggle (round-trip destination wait, billed) */}
           {dutyState === 'DELIVERING' && activeTrip && (
             <button
@@ -1451,10 +1496,6 @@ export default function DriverTerminalPage() {
           </SentryErrorBoundary>
         </div>
       </main>
-
-      {/* PRIMARY TAB BAR — browsing mode only; the trip flow owns the bottom
-          edge once the driver is on duty. */}
-      {dutyState === 'OFFLINE' && <TabBar />}
 
       {/* TELEMETRY LOG CONSOLE — dev-only debug surface. Drivers must never see a
           raw event feed; in prod the same events still go to console + sessionStorage

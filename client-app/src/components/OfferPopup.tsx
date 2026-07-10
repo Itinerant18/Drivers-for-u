@@ -339,6 +339,16 @@ export function OfferPopup() {
         {/* ── Pinned action footer (always visible) ── */}
         <div className="flex-shrink-0 border-t border-border-opaque bg-background-primary px-500 pt-400 pb-[calc(var(--space-500)+env(safe-area-inset-bottom,0px))] space-y-300">
           <SlideToAccept onAccept={handleAccept} />
+          {/* Plain-tap fallback: the slide gesture is the primary affordance, but a
+              gesture-only accept fails keyboard/switch-access users (WCAG 2.5.1) and
+              anyone whose drag doesn't register in the 15s window. */}
+          <button
+            type="button"
+            onClick={handleAccept}
+            className="w-full min-h-[48px] rounded-pill bg-status-online text-gray-0 text-label-large font-semibold cursor-pointer shadow-elevation-1 hover:opacity-90 transition-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus-visible:ring-offset-2"
+          >
+            Accept job
+          </button>
           <button
             type="button"
             onClick={() => setShowDeclinePicker(true)}

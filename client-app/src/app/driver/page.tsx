@@ -44,6 +44,7 @@ import {
 import { connectDispatchStream } from '@/services/dispatchStream';
 import { connectHeatmapStream, HeatmapData } from '@/services/heatmapStream';
 import { startTelemetryStream, TelemetryStreamHandle } from '@/services/telemetryStream';
+import { attachForegroundPushHandler } from '@/services/notifications';
 import { OfferPopup } from '@/components/OfferPopup';
 import { RefreshIcon, SirenIcon, NavigateIcon, SignalIcon, FlameIcon, PauseIcon, ChatIcon, OctagonAlertIcon, ClockIcon } from '@/components/ds';
 import { useOfferStore } from '@/store/useOfferStore';
@@ -408,6 +409,65 @@ export default function DriverTerminalPage() {
     return () => clearTimeout(t);
   }, [cooldownSecs]);
 
+  // Offer poll fallback: the WS AssignmentFrame is the primary wake signal but has no
+  // retry — a single dropped frame would leave an idle-online driver silently offerless
+  // (only recoverable by reconnect or an off/on toggle). Poll the authoritative REST
+  // offer endpoint every 10s while ONLINE as a safety net; the 15s offer lease means a
+  // 10s cadence still leaves time to respond.
+  useEffect(() => {
+    if (!token || dutyState !== 'ONLINE') return;
+
+    const pollOffer = async () => {
+      try {
+        const res = await getPendingOffer(token);
+        if (
+          res.order &&
+          (res.offer_expires_in_seconds ?? 0) > 0 &&
+          useDriverDutyStore.getState().dutyState === 'ONLINE'
+        ) {
+          useOfferStore.getState().setOffer(res.order, res.offer_expires_in_seconds);
+          useDriverDutyStore.getState().setDutyState('OFFER_PENDING');
+          logAudit('INCOMING_OFFER_RECEIVED', { orderId: res.order.orderId, source: 'HTTP_POLL' });
+        }
+      } catch {
+        // transient — next tick retries
+      }
+    };
+
+    const interval = setInterval(pollOffer, 10000);
+    return () => clearInterval(interval);
+  }, [token, dutyState]);
+
+  // Server-side forced-offline reconciliation: the telemetry pruner takes a driver
+  // offline server-side when GPS goes stale (>60s), and an admin can too. Without this
+  // check the app keeps showing "Online" while the driver is unmatchable — a zombie
+  // state that previously persisted until a manual off/on toggle. Mirror a server
+  // OFFLINE locally and tell the driver why.
+  useEffect(() => {
+    if (!token || dutyState !== 'ONLINE') return;
+
+    const reconcileDuty = async () => {
+      try {
+        const p = await getDriverProfile(token);
+        if (p.current_state === 'OFFLINE' && useDriverDutyStore.getState().dutyState === 'ONLINE') {
+          closeOnlineStreams();
+          setDutyState('OFFLINE');
+          setActiveTrip(null);
+          useToastStore.getState().show(
+            'You were taken offline — GPS signal was lost. Go online again when ready.',
+            'error',
+          );
+          logAudit('DUTY_FORCED_OFFLINE', { source: 'SERVER_RECONCILE' });
+        }
+      } catch {
+        // transient — next tick retries
+      }
+    };
+
+    const interval = setInterval(reconcileDuty, 30000);
+    return () => clearInterval(interval);
+  }, [token, dutyState]);
+
   // Real device GPS drives the map marker while a trip is live (the telemetry
   // stream posts the same positions to the backend independently).
   useEffect(() => {
@@ -644,6 +704,10 @@ export default function DriverTerminalPage() {
     };
 
     let cancelled = false;
+
+    // FCM foreground pushes surface the offer popup (third delivery path after WS + poll).
+    void attachForegroundPushHandler().catch(() => { /* messaging unsupported — WS + poll cover it */ });
+
     getDriverProfile(token)
       .then((fetchedProfile) => {
         if (cancelled) return;

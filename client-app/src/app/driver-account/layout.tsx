@@ -7,25 +7,23 @@ import { TabBar } from '@/components/TabBar';
 import { useAuthStore } from '@/store/useAuthStore';
 
 import {
-  IconDeviceMobile as DeviceMobileIcon,
-  IconCurrencyRupee as CurrencyRupeeIcon,
-  IconFolder as FolderIcon,
-  IconChartBar as ChartBarIcon,
-  IconSchool as SchoolIcon
-} from '@tabler/icons-react';
-import {
-  UserIcon,
-  CardIcon,
-  TrophyIcon,
-  CarIcon,
-  WalletIcon,
-  NotificationIcon,
-  GiftIcon,
-  SettingsIcon,
-  ChatIcon,
-  LogoutDoorIcon,
-  MenuIcon
-} from '@/components/ds/Icon';
+  MobileIcon3D,
+  UserIcon3D,
+  EarningsIcon3D,
+  CardIcon3D,
+  FolderIcon3D,
+  TrophyIcon3D,
+  CarIcon3D,
+  ChartIcon3D,
+  WalletIcon3D,
+  NotificationIcon3D,
+  SchoolIcon3D,
+  GiftIcon3D,
+  SettingsIcon3D,
+  ChatIcon3D,
+  DoorIcon3D,
+  MenuIcon3D,
+} from '@/components/ds/Icons8';
 
 export default function DriverAccountLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore();
@@ -34,20 +32,20 @@ export default function DriverAccountLayout({ children }: { children: React.Reac
   const driverID = user?.id || '';
 
   const menuItems: { label: string; href: string; icon: React.ReactNode }[] = [
-    { label: 'Dashboard Home', href: '/driver', icon: <DeviceMobileIcon size={18} /> },
-    { label: 'My Profile', href: '/driver-account/profile', icon: <UserIcon size={18} /> },
-    { label: 'Earnings Summary', href: '/driver-account/earnings', icon: <CurrencyRupeeIcon size={18} /> },
-    { label: 'Instant Payouts', href: '/driver-account/payouts', icon: <CardIcon size={18} /> },
-    { label: 'Trip History', href: '/driver-account/trip-history', icon: <FolderIcon size={18} /> },
-    { label: 'Incentives & Quests', href: '/driver-account/incentives', icon: <TrophyIcon size={18} /> },
-    { label: 'Vehicle Records', href: '/driver-account/vehicles', icon: <CarIcon size={18} /> },
-    { label: 'Performance Analytics', href: '/driver-account/performance', icon: <ChartBarIcon size={18} /> },
-    { label: 'Platform Wallet', href: '/driver-account/wallet', icon: <WalletIcon size={18} /> },
-    { label: 'Notifications Inbox', href: '/driver-account/notifications', icon: <NotificationIcon size={18} /> },
-    { label: 'Training Academy', href: '/driver-account/training', icon: <SchoolIcon size={18} /> },
-    { label: 'Refer a Friend', href: '/driver-account/refer', icon: <GiftIcon size={18} /> },
-    { label: 'System Settings', href: '/driver-account/settings', icon: <SettingsIcon size={18} /> },
-    { label: 'Support & FAQs', href: '/driver-account/support', icon: <ChatIcon size={18} /> }
+    { label: 'Dashboard Home',        href: '/driver',                        icon: <MobileIcon3D       size={28} /> },
+    { label: 'My Profile',            href: '/driver-account/profile',        icon: <UserIcon3D         size={28} /> },
+    { label: 'Earnings Summary',      href: '/driver-account/earnings',       icon: <EarningsIcon3D     size={28} /> },
+    { label: 'Instant Payouts',       href: '/driver-account/payouts',        icon: <CardIcon3D         size={28} /> },
+    { label: 'Trip History',          href: '/driver-account/trip-history',   icon: <FolderIcon3D       size={28} /> },
+    { label: 'Incentives & Quests',   href: '/driver-account/incentives',     icon: <TrophyIcon3D       size={28} /> },
+    { label: 'Vehicle Records',       href: '/driver-account/vehicles',       icon: <CarIcon3D          size={28} /> },
+    { label: 'Performance Analytics', href: '/driver-account/performance',    icon: <ChartIcon3D        size={28} /> },
+    { label: 'Platform Wallet',       href: '/driver-account/wallet',         icon: <WalletIcon3D       size={28} /> },
+    { label: 'Notifications Inbox',   href: '/driver-account/notifications',  icon: <NotificationIcon3D size={28} /> },
+    { label: 'Training Academy',      href: '/driver-account/training',       icon: <SchoolIcon3D       size={28} /> },
+    { label: 'Refer a Friend',        href: '/driver-account/refer',          icon: <GiftIcon3D         size={28} /> },
+    { label: 'System Settings',       href: '/driver-account/settings',       icon: <SettingsIcon3D     size={28} /> },
+    { label: 'Support & FAQs',        href: '/driver-account/support',        icon: <ChatIcon3D         size={28} /> },
   ];
 
   return (
@@ -65,8 +63,8 @@ export default function DriverAccountLayout({ children }: { children: React.Reac
 
             {/* Profile recap */}
             <div className="flex items-center gap-3 bg-background-secondary/40 p-3 border border-border-opaque rounded-xl">
-              <div className="h-10 w-10 bg-background-tertiary rounded-lg flex items-center justify-center text-xs">
-                <UserIcon size={18} />
+              <div className="h-12 w-12 bg-background-secondary rounded-xl flex items-center justify-center">
+                <UserIcon3D size={36} />
               </div>
               <div className="truncate">
                 <h4 className="text-xs font-bold text-content-primary truncate">{driverName}</h4>
@@ -95,9 +93,9 @@ export default function DriverAccountLayout({ children }: { children: React.Reac
                 useAuthStore.getState().logout();
                 window.location.href = '/login';
               }}
-              className="w-full bg-background-secondary hover:bg-background-tertiary text-content-secondary hover:text-content-primary rounded-lg py-2.5 text-[9px] font-bold uppercase tracking-wider transition font-mono border border-border-opaque cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full bg-background-secondary hover:bg-background-tertiary text-content-secondary hover:text-content-primary rounded-lg py-2.5 text-[9px] font-bold uppercase tracking-wider transition font-mono border border-border-opaque cursor-pointer flex items-center justify-center gap-2"
             >
-              <LogoutDoorIcon size={14} /> Terminate Session
+              <DoorIcon3D size={22} /> Terminate Session
             </button>
           </div>
         </aside>
@@ -108,9 +106,9 @@ export default function DriverAccountLayout({ children }: { children: React.Reac
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Open menu"
-              className="h-8 w-8 bg-background-secondary rounded-lg border border-border-opaque flex items-center justify-center text-sm cursor-pointer"
+              className="h-9 w-9 bg-background-secondary rounded-lg border border-border-opaque flex items-center justify-center cursor-pointer"
             >
-              <MenuIcon size={18} />
+              <MenuIcon3D size={26} />
             </button>
             <h2 className="text-xs font-bold font-mono tracking-widest text-content-primary">CORE ACCT HUB</h2>
           </div>
@@ -156,9 +154,9 @@ export default function DriverAccountLayout({ children }: { children: React.Reac
                     useAuthStore.getState().logout();
                     window.location.href = '/login';
                   }}
-                  className="w-full bg-background-secondary hover:bg-background-tertiary text-content-tertiary hover:text-content-primary border border-border-opaque rounded-lg py-2 text-[9px] font-bold uppercase tracking-wider transition font-mono flex items-center justify-center gap-1.5"
+                   className="w-full bg-background-secondary hover:bg-background-tertiary text-content-tertiary hover:text-content-primary border border-border-opaque rounded-lg py-2 text-[9px] font-bold uppercase tracking-wider transition font-mono flex items-center justify-center gap-2"
                 >
-                  <LogoutDoorIcon size={14} /> Logout
+                  <DoorIcon3D size={22} /> Logout
                 </button>
               </div>
             </div>

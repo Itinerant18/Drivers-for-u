@@ -46,7 +46,8 @@ import { connectHeatmapStream, HeatmapData } from '@/services/heatmapStream';
 import { startTelemetryStream, TelemetryStreamHandle } from '@/services/telemetryStream';
 import { attachForegroundPushHandler } from '@/services/notifications';
 import { OfferPopup } from '@/components/OfferPopup';
-import { RefreshIcon, SirenIcon, NavigateIcon, SignalIcon, FlameIcon, PauseIcon, ChatIcon, OctagonAlertIcon, ClockIcon } from '@/components/ds';
+import { RefreshIcon, NavigateIcon, FlameIcon, PauseIcon, ChatIcon, OctagonAlertIcon, ClockIcon, ChevronDownIcon } from '@/components/ds';
+import { SirenIcon3D, SignalIcon3D } from '@/components/ds/Icons8';
 import { useOfferStore } from '@/store/useOfferStore';
 import { openGoogleMapsNavigation } from '@/lib/map/navigation';
 import { useToastStore } from '@/store/useToastStore';
@@ -942,9 +943,9 @@ export default function DriverTerminalPage() {
         </header>
 
         <main className="flex-grow flex flex-col items-center justify-center max-w-md mx-auto text-center space-y-6">
-          <div className="h-16 w-16 rounded-pill bg-background-secondary border border-border-opaque flex items-center justify-center text-content-secondary animate-pulse">
-            <ClockIcon size={28} />
-          </div>
+          <div className="h-20 w-20 rounded-pill bg-background-secondary border border-border-opaque flex items-center justify-center animate-pulse">
+              <ClockIcon size={36} />
+            </div>
           <div className="space-y-3">
             <span className="badge badge-neutral">
               KYC Compliance Review
@@ -1037,7 +1038,7 @@ export default function DriverTerminalPage() {
       };
     }
     if (gpsError) {
-      return { tone: 'negative' as const, pulse: false, icon: <SignalIcon size={16} />, text: gpsError };
+      return { tone: 'negative' as const, pulse: false, icon: <SignalIcon3D size={20} />, text: gpsError };
     }
     if (forceMatched && dutyState !== 'ONLINE' && dutyState !== 'OFFLINE') {
       return { tone: 'warning' as const, pulse: true, icon: null, text: 'Assigned by dispatch — proceed to pickup. This trip was force-matched to you.' };
@@ -1046,7 +1047,7 @@ export default function DriverTerminalPage() {
       return { tone: 'neutral' as const, pulse: false, icon: <span className="h-2 w-2 rounded-full border border-content-warning border-t-transparent animate-spin" />, text: "Reconnecting to dispatch — you won't receive new offers until the link is restored." };
     }
     if (dutyState === 'ONLINE' && locStatus && !locStatus.is_visible_to_dispatch && !locStatus.on_cooldown) {
-      return { tone: 'warning' as const, pulse: true, icon: <SignalIcon size={16} />, text: 'Your GPS signal is weak. Move to an open area to receive job requests.' };
+      return { tone: 'warning' as const, pulse: true, icon: <SignalIcon3D size={20} />, text: 'Your GPS signal is weak. Move to an open area to receive job requests.' };
     }
     if (dutyState === 'ONLINE' && locStatus?.on_cooldown && cooldownSecs > 0) {
       return { tone: 'neutral' as const, pulse: false, icon: <ClockIcon size={14} />, text: `You declined a job. New requests resume in ${cooldownSecs}s.` };
@@ -1202,7 +1203,7 @@ export default function DriverTerminalPage() {
             {sosHolding && (
               <span className="absolute inset-0 bg-negative-600 transition-none" style={{ width: `${sosProgress}%` }} />
             )}
-            <span className="relative z-10 inline-flex items-center justify-center gap-1.5"><SirenIcon size={15} /> SOS {sosHolding ? `${Math.round(sosProgress)}%` : '(Hold)'}</span>
+            <span className="relative z-10 inline-flex items-center justify-center gap-1.5"><SirenIcon3D size={20} /> SOS {sosHolding ? `${Math.round(sosProgress)}%` : '(Hold)'}</span>
           </button>
         </div>
       </header>
@@ -1284,14 +1285,16 @@ export default function DriverTerminalPage() {
           {/* Offline overlay */}
           {dutyState === 'OFFLINE' && (
             <div className="absolute inset-0 bg-black/60 z-10 flex items-center justify-center p-6">
-              <div className="text-center space-y-3">
-                <span className="flex justify-center text-content-secondary"><SignalIcon size={40} /></span>
-                <h3 className="text-heading-small text-content-secondary">Terminal Offline</h3>
-                <p className="text-paragraph-small text-content-tertiary max-w-xs">
-                  Go Online to connect to dispatch and start receiving trip offers.
-                </p>
-              </div>
+            <div className="text-center space-y-3">
+              <span className="flex justify-center">
+                <SignalIcon3D size={64} />
+              </span>
+              <h3 className="text-heading-small text-content-secondary">Terminal Offline</h3>
+              <p className="text-paragraph-small text-content-tertiary max-w-xs">
+                Go Online to connect to dispatch and start receiving trip offers.
+              </p>
             </div>
+          </div>
           )}
 
           {/* Heatmap toggle — icon-only map control; the "N cells" diagnostic chip
@@ -1345,7 +1348,12 @@ export default function DriverTerminalPage() {
                 className="w-full flex items-center justify-between px-4 py-2.5 text-label-medium font-semibold text-content-primary"
               >
                 <span className="flex items-center gap-2"><ChatIcon size={18} /> Message rider{chat.length > 0 ? ` (${chat.length})` : ''}</span>
-                <span className="text-content-tertiary">{chatOpen ? '▾' : '▸'}</span>
+                <span className="text-content-tertiary flex items-center">
+                  <ChevronDownIcon
+                    size={14}
+                    className={`transition-transform duration-150 ${chatOpen ? '' : '-rotate-90'}`}
+                  />
+                </span>
               </button>
               {chatOpen && (
                 <div className="px-4 pb-3 space-y-2.5">

@@ -5,17 +5,17 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { getDriverWallet, type DriverWalletTxn } from '@/api/client';
 import { formatCompactDate } from '@/lib/format';
 import { FareDisplay } from '@/components/ds';
-import { RouteIcon, ParkingIcon, FlameIcon, GiftIcon, PlusIcon, CashIcon } from '@/components/ds/Icon';
+import { RouteIcon3D, ParkingIcon3D, FlameIcon3D, FuelIcon3D, GiftIcon3D, PlusIcon3D, WalletIcon3D } from '@/components/ds/Icons8';
 
 // Maps a transaction description to a type icon. The driver wallet is system-managed
 // (toll/parking reimbursements, fuel card, referral bonuses) — no self top-up.
 function txnIcon(description: string, entry: 'CREDIT' | 'DEBIT'): React.ReactNode {
   const d = description.toLowerCase();
-  if (d.includes('toll') || d.includes('fastag')) return <RouteIcon size={20} />;
-  if (d.includes('park')) return <ParkingIcon size={20} />;
-  if (d.includes('fuel')) return <FlameIcon size={20} />;
-  if (d.includes('referral') || d.includes('bonus')) return <GiftIcon size={20} />;
-  return entry === 'CREDIT' ? <PlusIcon size={20} /> : <CashIcon size={20} />;
+  if (d.includes('toll') || d.includes('fastag')) return <RouteIcon3D size={28} />;
+  if (d.includes('park')) return <ParkingIcon3D size={28} />;
+  if (d.includes('fuel')) return <FuelIcon3D size={28} />;
+  if (d.includes('referral') || d.includes('bonus')) return <GiftIcon3D size={28} />;
+  return entry === 'CREDIT' ? <PlusIcon3D size={28} /> : <WalletIcon3D size={28} />;
 }
 
 export default function DriverWalletPage() {

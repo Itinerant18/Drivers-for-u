@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useToastStore } from '@/store/useToastStore';
-import { PlusIcon, WarningIcon, OctagonAlertIcon } from '@/components/ds/Icon';
+import { PlusIcon, WarningIcon, OctagonAlertIcon, CheckIcon, CrossIcon } from '@/components/ds/Icon';
 import {
   getVehicles, createVehicle, uploadVehicleDocument, deleteVehicleNew,
   type DriverVehicleFull, type VehicleDocSlot, type VehicleDocStatus,
@@ -22,14 +22,20 @@ function DocSlot({ doc, label, onUpload }: { doc: VehicleDocSlot; label: string;
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [expiry, setExpiry] = useState('');
 
-  const statusText = doc.status === 'VALID' ? '✓ Valid'
-    : doc.status === 'EXPIRING' ? `⚠ ${doc.expiry_date ?? ''}`
-    : doc.status === 'EXPIRED' ? '✗ Expired' : '+ Upload';
+  // Status indicator rendered as icon + text node for correct color theming
+  const statusNode: React.ReactNode =
+    doc.status === 'VALID'
+      ? <span className="inline-flex items-center gap-1 justify-center"><CheckIcon size={10} /> Valid</span>
+      : doc.status === 'EXPIRING'
+        ? <span className="inline-flex items-center gap-1 justify-center"><WarningIcon size={10} /> {doc.expiry_date ?? 'Expiring'}</span>
+        : doc.status === 'EXPIRED'
+          ? <span className="inline-flex items-center gap-1 justify-center"><CrossIcon size={10} /> Expired</span>
+          : <span className="inline-flex items-center gap-1 justify-center"><PlusIcon size={10} /> Upload</span>;
 
   return (
     <div className={`flex-1 rounded-xl border p-2.5 text-center ${STATUS_STYLE[doc.status]}`}>
       <span className="block text-[9px] font-mono font-bold uppercase tracking-wider">{label}</span>
-      <span className="block text-[10px] font-mono mt-1">{statusText}</span>
+      <span className="block text-[10px] font-mono mt-1">{statusNode}</span>
       {doc.status === 'MISSING' || doc.status === 'EXPIRED' ? (
         <>
           <input ref={fileRef} type="file" accept="image/*,application/pdf" className="hidden"

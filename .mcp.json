@@ -21,6 +21,14 @@
         "agentation-mcp",
         "server"
       ]
+    },
+    "icons8mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.icons8.com/mcp/"
+      ]
     }
   }
 }

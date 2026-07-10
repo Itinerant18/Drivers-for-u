@@ -7,6 +7,7 @@ import { DriverProfile, getDemandForecast, DemandWindow } from '../api/client';
 import { ArrivedVerificationPane } from '../app/driver/trip/live/ArrivedVerificationPane';
 import { TripInProgressPane } from '../app/driver/trip/live/TripInProgressPane';
 import { FareDisplay, ETADisplay, StatusBadge, PhoneIcon, ChatIcon, NavigateIcon, CheckIcon } from './ds';
+import { StarIcon, ChevronDownIcon } from './ds/Icon';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DashboardHome — Duty toggle + stats
@@ -124,7 +125,12 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           <span className="font-mono text-label-large text-content-primary tabular-nums">
             ₹{stats.earnings_rupees.toLocaleString('en-IN')} today · {stats.trips_count} trips
           </span>
-          <span className="text-content-tertiary text-label-small">{showDetails ? '▾' : '▸'}</span>
+          <span className="text-content-tertiary text-label-small">
+            <ChevronDownIcon
+              size={14}
+              className={`transition-transform duration-150 ${showDetails ? '' : '-rotate-90'}`}
+            />
+          </span>
         </button>
       )}
 
@@ -300,7 +306,7 @@ export const NavigationPane: React.FC<NavigationPaneProps> = ({
         <div className="flex-1 min-w-0">
           <p className="text-heading-small text-content-primary truncate">{activeTrip.customer_name}</p>
           <div className="flex items-center gap-1 mt-0.5">
-            <span className="text-content-warning text-label-medium">★</span>
+            <StarIcon size={14} className="text-content-warning" />
             <span className="font-mono text-mono-small text-content-secondary tabular-nums">
               {activeTrip.customer_rating?.toFixed(2) ?? '—'}
             </span>

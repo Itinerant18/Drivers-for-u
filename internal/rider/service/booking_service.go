@@ -41,6 +41,7 @@ var (
 	ErrTooManyStops        = errors.New("maximum of 3 stops already added")
 	ErrMonthlyNotBookable  = errors.New("monthly package estimate only; recurring billing not yet available")
 	ErrOutsideServiceArea  = errors.New("pickup is outside our service area; Vahnly operates in Kolkata only for now")
+	ErrDropoffOutOfRange   = errors.New("drop-off is too far for an in-city trip — choose an outstation trip type")
 )
 
 // Fare engine constants for the metered point-to-point path. Per-tier base/per-km live in the
@@ -184,6 +185,12 @@ func (s *BookingService) EstimateFare(ctx context.Context, req FareEstimateReque
 	straight := 0.0
 	if req.DropoffLat != nil && req.DropoffLng != nil {
 		straight = haversineMeters(req.PickupLat, req.PickupLng, *req.DropoffLat, *req.DropoffLng)
+	}
+	// In-city trip types must stay in-city: without this an IN_CITY_* booking with an
+	// out-of-region drop priced the full metered distance (e.g. a ₹44k "in-city"
+	// Kolkata→Himachal fare). Rejected at estimate so the rider never sees the bad quote.
+	if isInCityTrip(req.TripType) && straight/1000 > maxInCityOneWayKm {
+		return nil, ErrDropoffOutOfRange
 	}
 	roadMeters := straight * roadFactor
 	if strings.Contains(strings.ToUpper(req.TripType), "ROUND") {

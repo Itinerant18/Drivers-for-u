@@ -304,7 +304,7 @@ export const DashboardHome: React.FC = () => {
           <StatCard label="New Signups"       value={kpis ? formatNumber(kpis.newRiderSignups + kpis.newDriverSignups) : '—'} loading={loading || !kpis} trend={kpis ? { value: kpis.newSignupsDelta } : null} />
           <StatCard label="Online Drivers"    value={kpis ? `${kpis.onlineDrivers}/${formatNumber(kpis.totalDrivers)}` : '—'} loading={loading || !kpis} trend={kpis ? { value: kpis.onlineDriversDelta } : null} />
           <StatCard label="Cancellation Rate" value={kpis ? `${kpis.cancellationRate}%` : '—'}    loading={loading || !kpis} trend={kpis ? { value: kpis.cancellationDelta } : null} />
-          <StatCard label="Avg ETA"           value={kpis ? `${kpis.avgEtaMinutes} min` : '—'}    loading={loading || !kpis} />
+          <StatCard label="Avg ETA"           value={kpis ? `${Math.round(kpis.avgEtaMinutes)} min` : '—'}    loading={loading || !kpis} />
           <StatCard label="Avg Rating"        value={kpis ? `${kpis.avgRating} ★` : '—'}          loading={loading || !kpis} />
           <StatCard label="Revenue"           value={kpis ? `₹${formatNumber(kpis.grossRevenue)}` : '—'} loading={loading || !kpis} trend={kpis ? { value: kpis.revenueDelta } : null} />
           <StatCard label="Promo Cost"        value={kpis ? formatPaiseCompact(kpis.promoCostPaise) : '—'} loading={loading || !kpis} />

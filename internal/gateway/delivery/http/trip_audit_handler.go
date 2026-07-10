@@ -52,107 +52,90 @@ func (h *TripAuditHandler) CompileTripAuditTrail(w http.ResponseWriter, r *http.
 	var paymentConfirmedAt *time.Time
 	var ratingRider, ratingDriver *int
 	var arrivalAt, tripStartedAt, tripEndedAt *time.Time
+	var baseP, distP, nightP, totalP int64
 
 	dbErr := h.dbPool.QueryRow(ctx, `
-		SELECT driver_id, offer_received_at, offer_responded_at, offer_resolution, COALESCE(decline_reason, ''), response_latency_ms,
-		       start_odometer, end_odometer, start_fuel_percentage, end_fuel_percentage, otp_attempts_count,
-		       arrival_at, trip_started_at, trip_ended_at, total_wait_minutes, total_idle_minutes, total_route_deviation_meters,
-		       payment_method, payment_confirmed_at, rating_rider_stars, rating_driver_stars
-		FROM trip_audit_summaries
-		WHERE order_id = $1::uuid
+		SELECT tas.driver_id, tas.offer_received_at, tas.offer_responded_at, tas.offer_resolution,
+		       COALESCE(tas.decline_reason, ''), tas.response_latency_ms,
+		       tas.start_odometer, tas.end_odometer, tas.start_fuel_percentage, tas.end_fuel_percentage, tas.otp_attempts_count,
+		       tas.arrival_at, tas.trip_started_at, tas.trip_ended_at,
+		       tas.total_wait_minutes, tas.total_idle_minutes, tas.total_route_deviation_meters,
+		       tas.payment_method, tas.payment_confirmed_at, tas.rating_rider_stars, tas.rating_driver_stars,
+		       COALESCE(fb.base_paise, 0), COALESCE(fb.distance_paise, 0), COALESCE(fb.night_paise, 0), COALESCE(fb.total_paise, 0)
+		FROM trip_audit_summaries tas
+		LEFT JOIN order_fare_breakdowns fb ON fb.order_id = tas.order_id
+		WHERE tas.order_id = $1::uuid
 	`, orderID).Scan(
 		&driverID, &offerReceived, &offerResponded, &offerResolution, &declineReason, &responseLatencyMs,
 		&startOdo, &endOdo, &startFuel, &endFuel, &otpAttempts,
 		&arrivalAt, &tripStartedAt, &tripEndedAt, &waitMin, &idleMin, &deviationMeters,
 		&paymentMethod, &paymentConfirmedAt, &ratingRider, &ratingDriver,
+		&baseP, &distP, &nightP, &totalP,
 	)
+	if dbErr != nil {
+		// No trip_audit_summaries row → this order never produced forensic telemetry
+		// (e.g. cancelled or never matched to a driver). Do NOT fabricate a "completed"
+		// trail — fake odometer/device/payment data on a trip that never happened is a
+		// data-integrity hazard. The admin SPA renders a graceful "no forensic audit
+		// available" state on 404. (Previously this path returned a hardcoded simulated
+		// dataset — removed.)
+		http.Error(w, "no_forensic_audit_trail", http.StatusNotFound)
+		return
+	}
 
-	var trail ForensicAuditTrail
-	if dbErr == nil {
-		trail = ForensicAuditTrail{
-			OrderID:  orderID.String(),
-			DriverID: driverID.String(),
-			OfferTimestamps: map[string]interface{}{
-				"received_ts":       offerReceived,
-				"responded_ts":      offerResponded,
-				"action":            offerResolution,
-				"decline_reason":    declineReason,
-				"response_latency":  responseLatencyMs,
-			},
-			OdometerInputs: map[string]interface{}{
-				"start_km":                 startOdo,
-				"end_km":                   endOdo,
-				"total_distance_travelled": endOdo - startOdo,
-				"start_fuel_pct":           startFuel,
-				"end_fuel_pct":             endFuel,
-				"otp_attempts":             otpAttempts,
-			},
-			RouteMetrics: map[string]interface{}{
-				"arrival_at":         arrivalAt,
-				"trip_started_at":    tripStartedAt,
-				"trip_ended_at":      tripEndedAt,
-				"wait_time_minutes":  waitMin,
-				"idle_time_minutes":  idleMin,
-				"route_deviations_m": deviationMeters,
-			},
-			HardwareState: map[string]interface{}{
-				"device_model":      "SM-G998B",
-				"app_version_build": "v2026.06.09",
-				"network_type":      "5G_SA",
-				"battery_pct_drain": 4,
-			},
-			FinalInvoice: map[string]interface{}{
-				"currency":          "INR",
-				"base_fare":         80000,
-				"extra_km_fare":     25000,
-				"waiting_charge":    0,
-				"total_collected":   105000,
-				"payment_confirmed": paymentConfirmedAt != nil,
-				"payment_method":    paymentMethod,
-			},
-			CapturedAt: time.Now(),
+	// Hardware state comes from the last real GPS-trail ping. device_model / app_version
+	// are not captured by the platform, so they are omitted rather than invented.
+	hardware := map[string]interface{}{}
+	var battery int
+	var networkType string
+	if err := h.dbPool.QueryRow(ctx, `
+		SELECT COALESCE(battery, 0), COALESCE(network_type, '')
+		FROM orders_gps_trail WHERE order_id = $1::uuid ORDER BY captured_at DESC LIMIT 1
+	`, orderID).Scan(&battery, &networkType); err == nil {
+		hardware["battery_pct"] = battery
+		if networkType != "" {
+			hardware["network_type"] = networkType
 		}
-	} else {
-		// Fallback to the exact simulated dataset required by Feature 13 specification
-		trail = ForensicAuditTrail{
-			OrderID:  orderID.String(),
-			DriverID: "00000000-0000-0000-0000-000000000001",
-			OfferTimestamps: map[string]interface{}{
-				"received_ts":       time.Now().Add(-1 * time.Hour),
-				"responded_ts":      time.Now().Add(-59 * time.Minute),
-				"action":            "ACCEPTED",
-				"response_latency":  850,
-			},
-			OdometerInputs: map[string]interface{}{
-				"start_km":                 14500,
-				"end_km":                   14525,
-				"total_distance_travelled": 25,
-				"start_fuel_pct":           82,
-				"end_fuel_pct":             75,
-				"otp_attempts":             1,
-			},
-			RouteMetrics: map[string]interface{}{
-				"wait_time_minutes":  4,
-				"idle_time_minutes":  2,
-				"route_deviations_m": 120,
-			},
-			HardwareState: map[string]interface{}{
-				"device_model":      "SM-G998B",
-				"app_version_build": "v2026.06.09",
-				"network_type":      "5G_SA",
-				"battery_pct_drain": 4,
-			},
-			FinalInvoice: map[string]interface{}{
-				"currency":          "INR",
-				"base_fare":         80000,
-				"extra_km_fare":     25000,
-				"waiting_charge":    0,
-				"total_collected":   105000,
-				"payment_confirmed": true,
-				"payment_method":    "UPI",
-			},
-			CapturedAt: time.Now(),
-		}
+	}
+
+	trail := ForensicAuditTrail{
+		OrderID:  orderID.String(),
+		DriverID: driverID.String(),
+		OfferTimestamps: map[string]interface{}{
+			"received_ts":      offerReceived,
+			"responded_ts":     offerResponded,
+			"action":           offerResolution,
+			"decline_reason":   declineReason,
+			"response_latency": responseLatencyMs,
+		},
+		OdometerInputs: map[string]interface{}{
+			"start_km":                 startOdo,
+			"end_km":                   endOdo,
+			"total_distance_travelled": endOdo - startOdo,
+			"start_fuel_pct":           startFuel,
+			"end_fuel_pct":             endFuel,
+			"otp_attempts":             otpAttempts,
+		},
+		RouteMetrics: map[string]interface{}{
+			"arrival_at":         arrivalAt,
+			"trip_started_at":    tripStartedAt,
+			"trip_ended_at":      tripEndedAt,
+			"wait_time_minutes":  waitMin,
+			"idle_time_minutes":  idleMin,
+			"route_deviations_m": deviationMeters,
+		},
+		HardwareState: hardware,
+		// Real fare from order_fare_breakdowns (paise). No hardcoded amounts.
+		FinalInvoice: map[string]interface{}{
+			"currency":              "INR",
+			"base_fare_paise":       baseP,
+			"distance_fare_paise":   distP,
+			"night_charge_paise":    nightP,
+			"total_collected_paise": totalP,
+			"payment_confirmed":     paymentConfirmedAt != nil,
+			"payment_method":        paymentMethod,
+		},
+		CapturedAt: time.Now(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")

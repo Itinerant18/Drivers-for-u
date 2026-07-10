@@ -77,7 +77,13 @@ export const AdminAuthGateway: React.FC<AdminAuthGatewayProps> = ({ onAuthSucces
         }),
       });
 
-      const data = await response.json();
+      // The gateway returns JSON for success/MFA/lockout but a plain-text code
+      // (e.g. "invalid_credentials") on http.Error paths. Parsing unconditionally as
+      // JSON threw on those and mislabelled a 401 as a network timeout — read text,
+      // parse only when it's JSON.
+      const raw = await response.text();
+      let data: { mfa_required?: boolean; message?: string; role?: string } = {};
+      try { data = raw ? JSON.parse(raw) : {}; } catch { /* plain-text error code */ }
 
       if (response.ok) {
         if (data.mfa_required) {
@@ -90,11 +96,17 @@ export const AdminAuthGateway: React.FC<AdminAuthGatewayProps> = ({ onAuthSucces
           onAuthSuccess();
         }
       } else {
-        const errText = data.message || 'Authentication rejected: Invalid corporate credentials.';
+        // Lockout/enrolment paths return JSON with a user-facing `message`; the plain
+        // http.Error paths (401/403/429…) don't, so map the status to a real message.
+        const errText = data.message
+          || (response.status === 401 ? 'Invalid email or password.'
+          :  response.status === 429 ? 'Too many attempts. Please wait a minute and try again.'
+          :  response.status === 403 ? 'Access denied for this account or network.'
+          :  'Sign-in failed. Please try again.');
         setStatusMessage({ type: 'ERROR', text: errText });
       }
     } catch {
-      setStatusMessage({ type: 'ERROR', text: 'Network connection timeout to auth gateway.' });
+      setStatusMessage({ type: 'ERROR', text: 'Network error contacting the auth gateway. Check your connection and retry.' });
     } finally {
       setIsLoading(false);
     }

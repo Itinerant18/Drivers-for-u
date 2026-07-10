@@ -31,6 +31,16 @@ const STATUS_CHIP: Partial<Record<TripStatus, string>> = {
   ASSIGNED: "bg-surface-accent text-content-accent",
 };
 
+// Friendly labels for the raw trip_type enum (mirrors the server trip catalog).
+const TRIP_TYPE_LABELS: Record<string, string> = {
+  IN_CITY_ONE_WAY: "One-Way",
+  IN_CITY_ROUND: "Round Trip",
+  IN_CITY_HOURLY: "Hourly",
+  MINI_OUTSTATION: "Mini Out.",
+  OUTSTATION: "Outstation",
+  MONTHLY: "Monthly",
+};
+
 function bucket(status: TripStatus): Tab {
   if (status === "COMPLETED") return "Completed";
   if (status === "CANCELLED") return "Cancelled";
@@ -86,7 +96,7 @@ function TripCard({ order, onRebook, onCancel }: { order: Order; onRebook: () =>
           <FareDisplay amount={order.base_fare_paise} size="md" className="font-bold text-content-primary" />
           {order.trip_type && (
             <span className="rounded-pill bg-surface-neutral px-2 py-0.5 text-[10px] font-medium text-content-secondary">
-              {order.trip_type}
+              {TRIP_TYPE_LABELS[order.trip_type] ?? order.trip_type}
             </span>
           )}
         </div>

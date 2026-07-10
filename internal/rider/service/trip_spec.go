@@ -58,6 +58,17 @@ func validateTrip(tripType, packageType string, hasDropoff bool) error {
 	return nil
 }
 
+// maxInCityOneWayKm caps the straight-line pickup→drop distance for in-city trip
+// types. Generous enough for any metro + surrounding districts; an out-of-region
+// drop belongs on an outstation tier. Outstation types are intentionally uncapped.
+const maxInCityOneWayKm = 150.0
+
+// isInCityTrip reports whether a trip type is an in-city tier (IN_CITY_*), which
+// must keep its drop within maxInCityOneWayKm.
+func isInCityTrip(tripType string) bool {
+	return strings.HasPrefix(strings.ToUpper(strings.TrimSpace(tripType)), "IN_CITY")
+}
+
 // tripBookable reports whether a trip type may be booked (vs estimate-only).
 // Empty/unknown values pass — CreateOrder's package-type gate still applies.
 func tripBookable(tripType string) bool {

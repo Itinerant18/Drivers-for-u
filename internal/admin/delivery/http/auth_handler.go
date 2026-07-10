@@ -89,6 +89,12 @@ func (h *AdminAuthHandler) recordAuditLog(ctx context.Context, adminID string, e
 	_, _ = h.dbPool.Exec(ctx, query, idVal, email, action, details, ip)
 }
 
+// dummyPasswordHash is a real bcrypt hash (cost 12, matching the login/register cost)
+// compared against on the email-not-found path so a missing account takes the same time
+// as a wrong password — closing the timing side-channel that would otherwise let an
+// attacker enumerate valid admin emails.
+var dummyPasswordHash, _ = bcrypt.GenerateFromPassword([]byte("timing-equalizer"), 12)
+
 func isValidRole(role string) bool {
 	roles := []string{
 		"SUPER_ADMIN", "OPERATIONS_MANAGER", "FLEET_MANAGER",
@@ -152,6 +158,10 @@ func (h *AdminAuthHandler) HandleAdminLogin(w http.ResponseWriter, r *http.Reque
 	)
 
 	if err != nil {
+		// Spend the same bcrypt time as the wrong-password path so email-not-found and
+		// bad-password are indistinguishable by response latency. (The client already
+		// gets the identical "invalid_credentials" body; this closes the timing leak.)
+		_ = bcrypt.CompareHashAndPassword(dummyPasswordHash, []byte(req.Password))
 		h.recordAuditLog(ctx, "", req.Email, "LOGIN_FAILURE", "User email does not exist", ip)
 		http.Error(w, "invalid_credentials", http.StatusUnauthorized)
 		return
@@ -237,6 +247,14 @@ func (h *AdminAuthHandler) HandleAdminLogin(w http.ResponseWriter, r *http.Reque
 	// Do NOT grant a full-access token — that let invited/reset admins in with a
 	// password only. Issue a short-lived enrolment-scoped token that the RBAC guards
 	// reject for everything except /2fa/enroll. SSO logins are externally verified.
+	//
+	// SECURITY DEBT: the `req.TwoFactorCode != "123456"` clause is a hardcoded bypass.
+	// It cannot simply be deleted yet: the admin SPA has NO TOTP-enrolment/QR screen
+	// wired to /2fa/enroll, and every invited admin is created two_factor_enabled=true
+	// with an empty secret — so `123456` is currently the *only* code any admin can log
+	// in with. Removing it here bricks every admin. Correct sequence: (1) ship the SPA
+	// enrolment flow (call /2fa/enroll, render the QR), (2) migrate existing admins to a
+	// real secret, (3) THEN delete this clause. Tracked in vahnly_deep_dive_report.md.
 	if dbTwoFactorEnabled && dbTwoFactorSecret == "" && !isSSOLogin && req.TwoFactorCode != "123456" {
 		enrolExp := time.Now().Add(15 * time.Minute)
 		enrolClaims := &middleware.CustomClaims{

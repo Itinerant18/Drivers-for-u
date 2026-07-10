@@ -333,7 +333,12 @@ function UnifiedLoginContent() {
       router.push('/driver');
     } catch (err) {
       console.warn('[UnifiedAuth] Authentication failed against gateway.', err);
-      setAuthError('Authentication failed. Check your credentials and try again.');
+      // A 429 (rate-limited) was previously shown as "Authentication failed", telling the
+      // user to recheck credentials that were probably correct. Detect it and say to wait.
+      const rateLimited = (err as { status?: number })?.status === 429 || /RATE_LIMIT|\b429\b/.test(String(err));
+      setAuthError(rateLimited
+        ? 'Too many attempts. Please wait a minute and try again.'
+        : 'Authentication failed. Check your credentials and try again.');
       addAuditLog('LOGIN_FAILED', { role: 'DRIVER', phone: `+91 ${cleanPhone}`, reason: String(err) });
     } finally {
       setLoading(false);

@@ -1472,9 +1472,6 @@ export default function DriverTerminalPage() {
         </div>
       )}
 
-      <footer className="bg-background-primary border-t border-border-opaque p-3 text-center text-label-small font-mono text-content-tertiary select-none">
-        VAHNLY · ENCRYPTED WS · TELEMETRY ACTIVE
-      </footer>
     </div>
   );
 }

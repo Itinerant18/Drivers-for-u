@@ -26,7 +26,7 @@
 ### Step 1-6: Login
 
 - **URL:** <https://rider.aniket.site/login/>
-- **Credentials:** Phone 7029295088, Password Aniket018@
+- **Credentials:** Phone <redacted>, Password <redacted — rotated>
 - **Result:** ✅ Login successful, redirected to `/home/`
 - **Platform name:** Vahnly
 
@@ -76,7 +76,7 @@
 ### Step 16-21: Driver Login & Dashboard
 
 - **URL:** <https://driver.aniket.site/login/>
-- **Credentials:** Phone 9832520886, Password Aniket018@
+- **Credentials:** Phone <redacted>, Password <redacted — rotated>
 - **Result:** ✅ Login successful
 - **Driver name:** Sar
 - **Hub:** KOL (Kolkata)

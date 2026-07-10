@@ -33,19 +33,17 @@ export default function DriverPerformancePage() {
     );
   }
 
-  const m = data?.metrics;
-
   return (
     <PerformanceScreen
       metrics={{
-        acceptanceRate: m?.acceptance ?? 0,
+        acceptanceRate: Math.round(data?.acceptance_rate ?? 0),
         acceptanceTrend: 0, // API has no trend data
-        completionRate: m?.completion ?? 0,
+        completionRate: Math.round(data?.completion_rate ?? 0),
         completionTrend: 0, // API has no trend data
-        avgRating: m?.rating ?? 0,
+        avgRating: data?.rating ?? 0,
         ratingTrend: 0, // API has no trend data
         onTimePercent: 0, // not provided by API
-        totalJobs: m?.trips ?? 0,
+        totalJobs: data?.total_trips ?? 0,
         totalEarnings: 0, // not provided by API
         avgPerJob: 0, // not provided by API
         peakHours: '', // not provided by API

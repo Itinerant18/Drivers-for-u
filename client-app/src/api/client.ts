@@ -1642,19 +1642,6 @@ export async function getDriverIncentives(token: string): Promise<DriverIncentiv
   return request<DriverIncentivesResponse>("/api/v1/driver/incentives", { method: "GET", token });
 }
 
-export interface DriverPerformanceMetrics {
-  rating: number;
-  acceptance: number;
-  cancellation: number;
-  completion: number;
-  trips: number;
-}
-
-export interface DriverPerformanceCompliment {
-  label: string;
-  count: number;
-}
-
 export interface DriverPerformanceReview {
   name: string;
   rating: number;
@@ -1662,16 +1649,16 @@ export interface DriverPerformanceReview {
   text: string;
 }
 
-export interface DriverPerformanceTier {
-  name: string;
-  perks: string;
-}
-
+// Live gateway shape (verified 2026-07-10): flat, percent-scaled rates.
 export interface DriverPerformanceResponse {
-  metrics: DriverPerformanceMetrics;
-  compliments: DriverPerformanceCompliment[];
-  reviews: DriverPerformanceReview[];
-  tiers: DriverPerformanceTier[];
+  acceptance_rate: number;   // 0-100
+  cancellation: number;      // 0-100
+  completion_rate: number;   // 0-100
+  rating: number;            // 0-5
+  rating_breakdown: Record<string, number>;
+  recent_reviews: DriverPerformanceReview[];
+  tier: string;
+  total_trips: number;
 }
 
 export async function getDriverPerformance(token: string): Promise<DriverPerformanceResponse> {

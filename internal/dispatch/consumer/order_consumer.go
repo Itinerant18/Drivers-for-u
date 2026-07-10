@@ -327,10 +327,23 @@ func (c *OrderCreatedConsumer) executeMatchingBatch(ctx context.Context, orders 
 			if err != nil {
 				observability.DBTransactionDurationSeconds.WithLabelValues("error").Observe(time.Since(txStart).Seconds())
 				if errors.Is(err, pgx.ErrNoRows) {
+					// Order was already claimed by a concurrent batch/pod — nothing to
+					// retry, just let the Kafka offset advance.
 					mu.Lock()
 					collectedMessages = append(collectedMessages, o.KafkaMessageContext)
 					mu.Unlock()
+					return
 				}
+				// Any other commit failure (e.g. the driver-side guard update affected
+				// zero rows because current_state had drifted from ONLINE_AVAILABLE)
+				// leaves the order itself still CREATED — requeue it against a
+				// different candidate instead of dropping it silently.
+				log.Printf("Assignment commit failed for order %s, driver %s: %v. Routing to re-queue.", o.OrderID, optimalMatch.DriverID, err)
+				observability.OrdersUnmatchedTotal.WithLabelValues("commit_failure").Inc()
+				c.requeueUnmatchedOrder(ctx, o)
+				mu.Lock()
+				collectedMessages = append(collectedMessages, o.KafkaMessageContext)
+				mu.Unlock()
 				return
 			}
 			observability.DBTransactionDurationSeconds.WithLabelValues("success").Observe(time.Since(txStart).Seconds())

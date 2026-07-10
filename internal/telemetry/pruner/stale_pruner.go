@@ -137,9 +137,15 @@ func (p *StaleTelemetryPruner) ExecuteGarbageCollection(ctx context.Context, cit
 		dbCtx, dbCancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer dbCancel()
 
+		// duty_state must move with current_state here, same as every other writer
+		// of current_state in the codebase (duty_handler.go, handler.go, etc.) — a
+		// driver whose GPS went stale must not be left showing "Online" in their own
+		// app while silently unmatchable in the dispatcher (current_state=OFFLINE,
+		// duty_state=ONLINE): future assignment attempts fail the driver-guard update
+		// in commitAssignmentTransaction with no way for the driver to notice.
 		query := `
-			UPDATE drivers 
-			SET current_state = 'OFFLINE'::driver_state_enum, updated_at = CURRENT_TIMESTAMP
+			UPDATE drivers
+			SET current_state = 'OFFLINE'::driver_state_enum, duty_state = 'OFFLINE'::driver_duty_state, updated_at = CURRENT_TIMESTAMP
 			WHERE id = ANY($1::uuid[]) AND current_state = 'ONLINE_AVAILABLE'::driver_state_enum;
 		`
 

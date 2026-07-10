@@ -1449,8 +1449,10 @@ export default function DriverTerminalPage() {
           edge once the driver is on duty. */}
       {dutyState === 'OFFLINE' && <TabBar />}
 
-      {/* TELEMETRY LOG CONSOLE */}
-      {auditLogs.length > 0 && (
+      {/* TELEMETRY LOG CONSOLE — dev-only debug surface. Drivers must never see a
+          raw event feed; in prod the same events still go to console + sessionStorage
+          via logAudit for support diagnostics. */}
+      {process.env.NODE_ENV === 'development' && auditLogs.length > 0 && (
         <div className="w-full bg-background-secondary border-t border-border-opaque p-4 text-left max-w-xl mx-auto z-10">
           <div className="flex justify-between items-center mb-2">
             <span className="text-label-small text-content-tertiary font-mono uppercase tracking-wider">Telemetry logs</span>

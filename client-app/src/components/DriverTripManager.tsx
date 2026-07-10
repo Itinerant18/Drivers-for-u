@@ -89,6 +89,9 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
 }) => {
   const isOffline = dutyState === 'OFFLINE';
   const firstName = (profile?.name || 'Driver').split(' ')[0];
+  // Online mode is a waiting screen on a phone — the map is the hero. Stats and
+  // filters collapse behind a one-line summary so the bottom sheet stays short.
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <div className="space-y-4 text-left">
@@ -108,67 +111,92 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         )}
       </div>
 
-      {/* ── Bento: forest hero earnings tile + sage stat tiles ── */}
-      <div className="grid grid-cols-2 gap-2.5">
-        {/* Hero — today's earnings, forest-drenched */}
-        <div className="col-span-2 rounded-md bg-forest-400 text-white p-5 flex items-end justify-between">
-          <div>
-            <span className="text-label-small text-accent-200 block mb-1.5">Today&apos;s earnings</span>
-            <span className="font-mono text-[32px] leading-none font-medium tabular-nums">
-              ₹{stats.earnings_rupees.toLocaleString('en-IN')}
+      {/* ── Online: one-line summary, details on demand ── */}
+      {!isOffline && (
+        <button
+          type="button"
+          onClick={() => setShowDetails((v) => !v)}
+          aria-expanded={showDetails}
+          className="w-full flex items-center justify-between rounded-md border border-border-opaque px-4 py-3
+            text-left cursor-pointer transition-base hover:bg-background-secondary
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
+        >
+          <span className="font-mono text-label-large text-content-primary tabular-nums">
+            ₹{stats.earnings_rupees.toLocaleString('en-IN')} today · {stats.trips_count} trips
+          </span>
+          <span className="text-content-tertiary text-label-small">{showDetails ? '▾' : '▸'}</span>
+        </button>
+      )}
+
+      {/* ── Stats bento — always while browsing offline, expanded-only while online ── */}
+      {(isOffline || showDetails) && (
+        <div className="grid grid-cols-2 gap-2.5">
+          {/* Hero — today's earnings, forest-drenched (offline browsing only; while
+              online the summary row above already carries the number) */}
+          {isOffline && (
+            <div className="col-span-2 rounded-md bg-forest-400 text-white p-5 flex items-end justify-between">
+              <div>
+                <span className="text-label-small text-accent-200 block mb-1.5">Today&apos;s earnings</span>
+                <span className="font-mono text-[32px] leading-none font-medium tabular-nums">
+                  ₹{stats.earnings_rupees.toLocaleString('en-IN')}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="font-mono text-mono-large tabular-nums block">{stats.trips_count}</span>
+                <span className="text-label-small text-accent-200">trips</span>
+              </div>
+            </div>
+          )}
+
+          {/* Hours online */}
+          <div className="rounded-md bg-accent-50 p-4">
+            <span className="font-mono text-mono-large text-content-primary tabular-nums block">
+              {stats.online_hours.toFixed(1)}h
             </span>
+            <span className="text-label-small text-content-secondary">online today</span>
           </div>
-          <div className="text-right">
-            <span className="font-mono text-mono-large tabular-nums block">{stats.trips_count}</span>
-            <span className="text-label-small text-accent-200">trips</span>
+
+          {/* Acceptance */}
+          <div className="rounded-md bg-background-secondary border border-border-opaque p-4">
+            <span className="font-mono text-mono-large text-content-primary tabular-nums block">
+              {stats.acceptance_rate}%
+            </span>
+            <span className="text-label-small text-content-secondary">acceptance</span>
           </div>
         </div>
-
-        {/* Hours online */}
-        <div className="rounded-md bg-accent-50 p-4">
-          <span className="font-mono text-mono-large text-content-primary tabular-nums block">
-            {stats.online_hours.toFixed(1)}h
-          </span>
-          <span className="text-label-small text-content-secondary">online today</span>
-        </div>
-
-        {/* Acceptance */}
-        <div className="rounded-md bg-background-secondary border border-border-opaque p-4">
-          <span className="font-mono text-mono-large text-content-primary tabular-nums block">
-            {stats.acceptance_rate}%
-          </span>
-          <span className="text-label-small text-content-secondary">acceptance</span>
-        </div>
-      </div>
+      )}
 
       {/* ── When to drive (offline browsing only) ── */}
       {isOffline && <DemandTile />}
 
-      {/* ── Capability + trip-type filter ── */}
-      <div className="flex justify-between items-start rounded-md p-4 border border-border-opaque">
-        <div className="min-w-0 flex-1">
-          <span className="text-label-small text-content-tertiary block mb-1">
-            Allowed cars
-          </span>
-          <span className="text-label-large text-content-primary font-medium">
-            {profile?.can_drive_manual ? 'Manual & Automatic' : 'Automatic Only'}
-          </span>
+      {/* ── Capability + trip-type filter — browsing/expanded only; not needed
+            while passively waiting for offers ── */}
+      {(isOffline || showDetails) && (
+        <div className="flex justify-between items-start rounded-md p-4 border border-border-opaque">
+          <div className="min-w-0 flex-1">
+            <span className="text-label-small text-content-tertiary block mb-1">
+              Allowed cars
+            </span>
+            <span className="text-label-large text-content-primary font-medium">
+              {profile?.can_drive_manual ? 'Manual & Automatic' : 'Automatic Only'}
+            </span>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <span className="text-label-small text-content-tertiary block mb-1">
+              Job type
+            </span>
+            <select
+              value={preferredTripFilter}
+              onChange={(e) => setPreferredTripFilter(e.target.value as any)}
+              className="bg-transparent text-label-large text-content-primary outline-none cursor-pointer text-right"
+            >
+              <option value="ALL">All</option>
+              <option value="CITY">City Only</option>
+              <option value="OUTSTATION">Outstation Only</option>
+            </select>
+          </div>
         </div>
-        <div className="text-right flex-shrink-0">
-          <span className="text-label-small text-content-tertiary block mb-1">
-            Job type
-          </span>
-          <select
-            value={preferredTripFilter}
-            onChange={(e) => setPreferredTripFilter(e.target.value as any)}
-            className="bg-transparent text-label-large text-content-primary outline-none cursor-pointer text-right"
-          >
-            <option value="ALL">All</option>
-            <option value="CITY">City Only</option>
-            <option value="OUTSTATION">Outstation Only</option>
-          </select>
-        </div>
-      </div>
+      )}
 
       {/* ── Duty toggle — full-width thumb-zone anchor ── */}
       {isOffline ? (

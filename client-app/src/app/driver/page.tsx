@@ -282,6 +282,16 @@ export default function DriverTerminalPage() {
     } catch {}
   };
 
+  // DEV-ONLY: expose stores so QA/E2E can inject offer/trip states without a live
+  // matcher (tree-shaken from prod like DevLocationSpoof).
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+    (window as unknown as Record<string, unknown>).__qa = {
+      offer: useOfferStore,
+      duty: useDriverDutyStore,
+    };
+  }, []);
+
   // Setup initial session storage logs cleanup or load
   useEffect(() => {
     logAudit('SESSION_STARTED', { driverID, device: navigator.userAgent });
@@ -1016,57 +1026,48 @@ export default function DriverTerminalPage() {
     }
   };
 
+  // Single priority banner — the five independent `fixed top-0` banners could render
+  // simultaneously and overlap each other on a phone. Exactly one (the most critical)
+  // shows at a time, in-flow under the header so it never covers the SOS button.
+  const banner = (() => {
+    if (fatigue && (fatigue.must_take_break || fatigue.hours_remaining <= 0) && dutyState !== 'OFFLINE') {
+      return {
+        tone: 'negative' as const, pulse: true, icon: <OctagonAlertIcon size={16} />,
+        text: `Mandatory rest break required — ${fatigue.message || 'you have reached the daily driving limit. Please go offline and rest.'}`,
+      };
+    }
+    if (gpsError) {
+      return { tone: 'negative' as const, pulse: false, icon: <SignalIcon size={16} />, text: gpsError };
+    }
+    if (forceMatched && dutyState !== 'ONLINE' && dutyState !== 'OFFLINE') {
+      return { tone: 'warning' as const, pulse: true, icon: null, text: 'Assigned by dispatch — proceed to pickup. This trip was force-matched to you.' };
+    }
+    if (connectionStatus === 'RECONNECTING' && dutyState !== 'OFFLINE') {
+      return { tone: 'neutral' as const, pulse: false, icon: <span className="h-2 w-2 rounded-full border border-content-warning border-t-transparent animate-spin" />, text: "Reconnecting to dispatch — you won't receive new offers until the link is restored." };
+    }
+    if (dutyState === 'ONLINE' && locStatus && !locStatus.is_visible_to_dispatch && !locStatus.on_cooldown) {
+      return { tone: 'warning' as const, pulse: true, icon: <SignalIcon size={16} />, text: 'Your GPS signal is weak. Move to an open area to receive job requests.' };
+    }
+    if (dutyState === 'ONLINE' && locStatus?.on_cooldown && cooldownSecs > 0) {
+      return { tone: 'neutral' as const, pulse: false, icon: <ClockIcon size={14} />, text: `You declined a job. New requests resume in ${cooldownSecs}s.` };
+    }
+    return null;
+  })();
+
+  const bannerToneCls = {
+    negative: 'bg-surface-negative border-negative-300 text-content-negative',
+    warning: 'bg-surface-warning border-border-opaque text-content-warning',
+    neutral: 'bg-background-secondary border-border-opaque text-content-secondary',
+  };
+
   return (
     <div className="min-h-screen bg-background-primary text-content-primary p-0 font-sans flex flex-col justify-between selection:bg-forest-400 selection:text-white overflow-x-hidden relative">
-      
+
       {/* 1. SOS EMERGENCY PULSE TRIGGER MODAL */}
       <SosModal />
 
       {/* DEV-ONLY: GPS location spoof (tree-shaken out of prod) */}
       <DevLocationSpoof />
-
-      {/* MANDATORY BREAK BANNER — fatigue safety gate */}
-      {fatigue && (fatigue.must_take_break || fatigue.hours_remaining <= 0) && dutyState !== 'OFFLINE' && (
-        <div className="fixed top-0 inset-x-0 z-[100002] bg-negative-400 px-4 py-3 flex items-center justify-center gap-2 font-mono text-label-small text-white shadow-elevation-2 text-center">
-          <span className="flex items-center animate-pulse"><OctagonAlertIcon size={18} /></span>
-          <span className="font-bold uppercase tracking-wider">
-            Mandatory rest break required — {fatigue.message || 'you have reached the daily driving limit. Please go offline and rest.'}
-          </span>
-        </div>
-      )}
-
-      {/* GPS STALENESS BANNER — driver is online but their last ping is >30s old, so the
-          dispatch scanner can't see them. Hidden while on cooldown (that banner takes priority). */}
-      {dutyState === 'ONLINE' && locStatus && !locStatus.is_visible_to_dispatch && !locStatus.on_cooldown && (
-        <div className="fixed top-0 inset-x-0 z-[100000] bg-surface-warning px-4 py-2.5 flex items-center justify-center gap-2 font-mono text-label-small text-content-warning shadow-elevation-1 text-center">
-          <span className="flex items-center animate-pulse"><SignalIcon size={18} /></span>
-          Your GPS signal is weak. Move to an open area to receive ride requests.
-        </div>
-      )}
-
-      {/* DECLINE COOLDOWN BANNER — driver recently declined/timed-out an offer. */}
-      {dutyState === 'ONLINE' && locStatus?.on_cooldown && cooldownSecs > 0 && (
-        <div className="fixed top-0 inset-x-0 z-[100000] bg-background-secondary border-b border-border-opaque px-4 py-2.5 flex items-center justify-center gap-2 font-mono text-label-small text-content-secondary shadow text-center">
-          <span className="flex items-center"><ClockIcon size={16} /></span>
-          You declined a ride. New requests resume in {cooldownSecs}s.
-        </div>
-      )}
-
-      {/* FORCE-MATCH BANNER */}
-      {forceMatched && dutyState !== 'ONLINE' && dutyState !== 'OFFLINE' && (
-        <div className="fixed top-0 inset-x-0 z-[100001] bg-surface-warning px-4 py-2.5 flex items-center justify-center gap-2 font-mono text-label-small text-content-warning shadow-elevation-1">
-          <span className="animate-pulse">●</span>
-          Assigned by dispatch — proceed to pickup. This trip was force-matched to you.
-        </div>
-      )}
-
-      {/* CONNECTIVITY DEGRADED BANNER */}
-      {connectionStatus === 'RECONNECTING' && dutyState !== 'OFFLINE' && (
-        <div className="fixed top-0 inset-x-0 z-[100000] bg-background-secondary border-b border-border-opaque px-4 py-2 flex items-center justify-center gap-2 font-mono text-label-small text-content-secondary shadow">
-          <span className="h-2 w-2 rounded-full border border-content-warning border-t-transparent animate-spin" />
-          Reconnecting to dispatch — you won&apos;t receive new offers until the link is restored.
-        </div>
-      )}
 
       {/* 3. INCOMING BOOKING OFFER MODAL SHEET OVERLAY */}
       <OfferPopup />
@@ -1153,16 +1154,18 @@ export default function DriverTerminalPage() {
           </Link>
           <div>
             <h1 className="text-label-large font-mono tracking-tight uppercase text-content-primary">VAHNLY</h1>
-            <div className="flex items-center gap-1.5 mt-0.5 font-mono text-label-small text-content-tertiary">
-              <span>HUB: {cityPrefix}</span>
-              <span>·</span>
-              <span>{dutyState}</span>
+            {/* Duty state lives on the big toggle + "Seeking matches" indicator —
+                repeating it here was one chip too many at 360px. */}
+            <div className="mt-0.5 font-mono text-label-small text-content-tertiary">
+              HUB: {cityPrefix}
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          {dutyState !== 'OFFLINE' && (
+          {/* Connection chip only when something is wrong — a permanent green
+              "Connected" badge is noise on a phone-width header. */}
+          {dutyState !== 'OFFLINE' && connectionStatus !== 'CONNECTED' && (
             <span role="status" aria-live="polite">{
             connectionStatus === 'OFFLINE' ? (
               <button
@@ -1174,11 +1177,6 @@ export default function DriverTerminalPage() {
                 <span className="status-dot status-dot-negative" />
                 <span className="ml-1">Offline · Retry</span>
               </button>
-            ) : connectionStatus === 'CONNECTED' ? (
-              <span className="badge badge-positive">
-                <span className="status-dot status-dot-online" />
-                <span className="ml-1">Connected</span>
-              </span>
             ) : (
               <span className="badge badge-warning">
                 <span className="status-dot status-dot-pending" />
@@ -1209,11 +1207,12 @@ export default function DriverTerminalPage() {
         </div>
       </header>
 
-      {/* GPS-off warning: without a location fix the driver is invisible to
-          dispatch and gets zero trips — surface it prominently, not silently. */}
-      {gpsError && (
-        <div role="alert" className="bg-surface-negative border-b border-negative-300 px-4 py-2.5 text-center text-label-medium text-content-negative">
-          {gpsError}
+      {/* PRIORITY BANNER SLOT — exactly one system message at a time (fatigue, GPS,
+          force-match, reconnecting, staleness, cooldown), most critical first. */}
+      {banner && (
+        <div role="alert" className={`border-b px-4 py-2.5 flex items-center justify-center gap-2 text-center text-label-small ${bannerToneCls[banner.tone]}`}>
+          {banner.icon && <span className={`flex items-center flex-shrink-0 ${banner.pulse ? 'animate-pulse' : ''}`}>{banner.icon}</span>}
+          <span>{banner.text}</span>
         </div>
       )}
 
@@ -1295,24 +1294,24 @@ export default function DriverTerminalPage() {
             </div>
           )}
 
-          {/* Heatmap toggle */}
+          {/* Heatmap toggle — icon-only map control; the "N cells" diagnostic chip
+              was developer telemetry, not driver-facing information. */}
           {dutyState !== 'OFFLINE' && (
-            <div className="absolute top-4 right-4 z-10 space-y-2">
-              <button
-                type="button"
-                onClick={() => setShowHeatmap(!showHeatmap)}
-                className="bg-background-primary/90 border border-border-opaque text-label-small text-content-secondary
-                  py-1.5 px-3 rounded-pill hover:bg-background-secondary transition-base flex items-center gap-1.5
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
-              >
-                <FlameIcon size={14} /> {showHeatmap ? 'Heatmap ON' : 'Heatmap OFF'}
-              </button>
-              {heatmapData && (
-                <div className="bg-background-primary/90 border border-border-opaque text-label-small text-content-tertiary py-1.5 px-3 rounded-pill">
-                  {heatmapData.region} · {Object.keys(heatmapData.cell_data).length} cells
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowHeatmap(!showHeatmap)}
+              aria-label={showHeatmap ? 'Hide demand heatmap' : 'Show demand heatmap'}
+              aria-pressed={showHeatmap}
+              className={`absolute top-4 right-4 z-10 h-11 w-11 rounded-pill border flex items-center justify-center
+                transition-base cursor-pointer shadow-elevation-1
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 ${
+                showHeatmap
+                  ? 'bg-forest-400 border-forest-400 text-white'
+                  : 'bg-background-primary/90 border-border-opaque text-content-secondary hover:bg-background-secondary'
+              }`}
+            >
+              <FlameIcon size={18} />
+            </button>
           )}
         </div>
 

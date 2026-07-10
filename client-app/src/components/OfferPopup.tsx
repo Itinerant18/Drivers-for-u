@@ -210,8 +210,10 @@ export function OfferPopup() {
 
   return (
     <>
-      {/* ── Full-screen incoming-job takeover (DriveU-style) ── */}
-      <div className="fixed inset-0 z-50 bg-background-primary flex flex-col animate-enter">
+      {/* ── Full-screen incoming-job takeover (DriveU-style) ──
+          z must clear the sticky dashboard header (z-50) — at z-50 the header painted
+          over the countdown ring. Same overlay tier as the cancel-allocation modal. */}
+      <div className="fixed inset-0 z-[100000] bg-background-primary flex flex-col animate-enter">
 
         {/* ── Top banner: rider + countdown ── */}
         <div className="flex-shrink-0 bg-surface-positive border-b border-positive-300 px-500 pb-400 pt-[calc(var(--space-500)+env(safe-area-inset-top,0px))]">
@@ -238,9 +240,10 @@ export function OfferPopup() {
           <div className="grid grid-cols-3 gap-300">
             <div className="bg-background-secondary rounded-md p-400 text-center">
               <span className="text-label-small text-content-tertiary block mb-1">Est. Payout</span>
+              {/* size="lg" — "display" overflowed the third-width tile at 360px */}
               <FareDisplay
                 amount={currentOffer.fareEstimate}
-                size="display"
+                size="lg"
                 className="text-content-primary font-bold"
               />
             </div>
@@ -361,7 +364,7 @@ export function OfferPopup() {
 
       {/* ── Decline reason sheet ── */}
       {showDeclinePicker && (
-        <div className="fixed inset-0 z-[60] bg-black/60 flex items-end">
+        <div className="fixed inset-0 z-[100001] bg-black/60 flex items-end">
           <div className="w-full bg-background-primary rounded-t-lg shadow-elevation-3 px-500 pt-400 pb-[calc(var(--space-500)+env(safe-area-inset-bottom,0px))] animate-enter">
             <div className="flex justify-center mb-400">
               <div className="w-9 h-1 rounded-pill bg-border-opaque" />

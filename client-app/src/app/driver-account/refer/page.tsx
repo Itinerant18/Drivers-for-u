@@ -1,107 +1,67 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { FareDisplay } from '@/components/ds';
 import { getDriverReferrals } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useToastStore } from '@/store/useToastStore';
+import { ReferralScreen } from '@/components/account/ReferralScreen';
 
 export default function DriverReferPage() {
-  const t = useTranslations('driverRefer');
   const { token } = useAuthStore();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // No fake defaults — the card renders from live data only.
+  // No fake defaults — the screen renders from live data only.
   const [code, setCode] = useState('');
   const [stats, setStats] = useState({
     joined: 0,
     pending: 0,
-    earnings: 0
+    earnings: 0,
   });
 
   const load = useCallback(async () => {
-    if (!token) { setLoading(false); return; }
-    setLoading(true);
+    if (!token) return;
     try {
       const res = await getDriverReferrals(token);
       setCode(res.code);
-      setStats(res.stats);
-      setError(null);
+      setStats({
+        joined: res.joined_count || 0,
+        pending: res.pending_count || 0,
+        earnings: Math.round((res.earnings_paise || 0) / 100),
+      });
     } catch (err) {
       console.warn('[DriverRefer] fetch failed:', err);
-      setError('Live referral data is unavailable.');
-    } finally {
-      setLoading(false);
     }
   }, [token]);
 
   useEffect(() => { void load(); }, [load]);
 
+  const referralLink = typeof window !== 'undefined' ? window.location.origin : '';
+
   const handleShare = () => {
+    const text = code ? `Join me as a Vahnly driver partner. Use my referral code ${code}.` : 'Join me as a Vahnly driver partner.';
     if (navigator.share) {
-      navigator.share({
-        title: t('shareTitle'),
-        text: t('shareText', { code }),
-        url: window.location.origin
-      }).catch(() => {});
+      navigator.share({ title: 'Vahnly Driver Referral', text, url: referralLink }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(t('shareTextWithLink', { code, link: window.location.origin }));
-      useToastStore.getState().show(t('copySuccess'), 'success');
+      navigator.clipboard.writeText(`${text} ${referralLink}`);
+      useToastStore.getState().show('Referral link copied to clipboard.', 'success');
     }
   };
 
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(code);
+  };
+
   return (
-    <div className="space-y-6 text-left">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">{t('title')}</h2>
-        <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">{t('subtitle')}</p>
-        {error && <p className="text-content-negative text-[10px] font-mono mt-2">{error}</p>}
-        {loading && <p className="text-content-tertiary text-[10px] font-mono mt-2 animate-pulse uppercase tracking-wider">Loading referrals…</p>}
-      </div>
-
-      {/* Code card */}
-      <div className="bg-background-primary border border-border-opaque rounded-2xl p-6 text-center space-y-4 max-w-md mx-auto">
-        <span className="text-content-tertiary text-[9px] uppercase font-mono tracking-wider font-bold">{t('yourCode')}</span>
-        <div className="bg-background-secondary border border-border-opaque p-4 rounded-xl font-mono text-xl font-bold tracking-widest text-content-primary select-all">
-          {code}
-        </div>
-        <button
-          onClick={handleShare}
-          className="w-full bg-interactive-primary hover:bg-interactive-hover text-interactive-primary-text py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer active:scale-95"
-        >
-          {t('shareButton')}
-        </button>
-      </div>
-
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-background-primary border border-border-opaque p-5 rounded-2xl space-y-1 text-center font-mono">
-          <span className="text-content-tertiary block text-[8px] uppercase">{t('partnersJoined')}</span>
-          <span className="text-xl font-bold text-content-primary block mt-0.5">{t('driversCount', { count: stats.joined })}</span>
-        </div>
-        <div className="bg-background-primary border border-border-opaque p-5 rounded-2xl space-y-1 text-center font-mono">
-          <span className="text-content-tertiary block text-[8px] uppercase">{t('pendingVerification')}</span>
-          <span className="text-xl font-bold text-content-primary block mt-1">{stats.pending}</span>
-        </div>
-        <div className="bg-background-primary border border-border-opaque p-5 rounded-2xl space-y-1 text-center font-mono">
-          <span className="text-content-tertiary block text-[8px] uppercase">{t('totalReferralPayouts')}</span>
-          <FareDisplay amount={stats.earnings * 100} size="md" className="text-xl font-bold text-content-positive block mt-1" />
-        </div>
-      </div>
-
-      {/* Rules */}
-      <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-3 text-xs leading-relaxed text-content-secondary">
-        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
-          {t('rewardTermsTitle')}
-        </h4>
-        <p>{t('rewardTerm1')}</p>
-        <p>{t('rewardTerm2')}</p>
-        <p>{t('rewardTerm3')}</p>
-      </div>
-
-    </div>
+    <ReferralScreen
+      referralCode={code}
+      referralLink={referralLink}
+      // No per-referral reward amount in the API yet — honest zero.
+      rewardPerReferral={0}
+      totalReferred={stats.joined + stats.pending}
+      totalEarned={stats.earnings}
+      // API returns aggregate stats only, no per-referral list.
+      referrals={[]}
+      onShare={handleShare}
+      onCopyCode={handleCopyCode}
+    />
   );
 }

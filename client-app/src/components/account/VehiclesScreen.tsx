@@ -101,7 +101,7 @@ function VehicleCard({
   return (
     <div className="rounded-sm border border-border-opaque bg-background-primary overflow-hidden">
       {/* Header */}
-      <div className="px-400 py-350 flex items-center gap-300">
+      <div className="px-400 py-3.5 flex items-center gap-300">
         <div className="w-10 h-10 rounded-sm bg-accent-50 flex items-center justify-center flex-shrink-0">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-accent-500">
             <path d="M5 17h14M7 11l1.5-4h7L17 11M6 17V11h12v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

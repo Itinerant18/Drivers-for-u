@@ -1678,13 +1678,12 @@ export async function getDriverPerformance(token: string): Promise<DriverPerform
   return request<DriverPerformanceResponse>("/api/v1/driver/performance", { method: "GET", token });
 }
 
+// Live gateway shape (verified 2026-07-10): flat counts + paise, not nested stats.
 export interface DriverReferralsResponse {
   code: string;
-  stats: {
-    joined: number;
-    pending: number;
-    earnings: number;
-  };
+  earnings_paise: number;
+  joined_count: number;
+  pending_count: number;
 }
 
 export async function getDriverReferrals(token: string): Promise<DriverReferralsResponse> {

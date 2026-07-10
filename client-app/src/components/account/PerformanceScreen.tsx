@@ -113,7 +113,8 @@ export function PerformanceScreen({ metrics, weeklyData }: PerformanceScreenProp
           </div>
         </div>
 
-        {/* Peak hours + top areas */}
+        {/* Peak hours + top areas — hidden until the API provides them */}
+        {(metrics.peakHours || metrics.topAreas.length > 0) && (
         <div className="rounded-sm border border-border-opaque bg-background-primary p-400 space-y-300">
           <SectionHeader title="Insights" />
           <div className="flex items-center gap-300 py-200">
@@ -139,6 +140,7 @@ export function PerformanceScreen({ metrics, weeklyData }: PerformanceScreenProp
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

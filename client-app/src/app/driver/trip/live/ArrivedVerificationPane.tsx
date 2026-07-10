@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { DutyState } from '@/store/useDriverDutyStore';
-import { verifyTripOTP, addOrderEvent, uploadTripPhoto, ApiClientError } from '@/api/client';
+import { verifyTripOTP, addOrderEvent, uploadTripPhoto, sendDriverChat, ApiClientError } from '@/api/client';
 import { useToastStore } from '@/store/useToastStore';
 import { FareDisplay, CheckIcon, SirenIcon, ClockIcon, CrossIcon, CameraIcon } from '@/components/ds';
 
@@ -149,6 +149,7 @@ export const ArrivedVerificationPane: React.FC<ArrivedVerificationPaneProps> = (
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [noShowSubmitting, setNoShowSubmitting] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
+  const [sentQuickMsg, setSentQuickMsg] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const showToast = useToastStore((s) => s.show);
 
@@ -340,6 +341,30 @@ export const ArrivedVerificationPane: React.FC<ArrivedVerificationPaneProps> = (
             </>
           )}
         </div>
+      </div>
+
+      {/* ── Quick messages — one-tap pickup coordination, no keyboard ── */}
+      <div className="flex flex-wrap gap-2">
+        {['I have arrived at the pickup', 'I am at the gate', 'Where should I find the car?'].map((msg) => (
+          <button
+            key={msg}
+            type="button"
+            disabled={sentQuickMsg === msg}
+            onClick={() => {
+              if (!token || !orderId) return;
+              setSentQuickMsg(msg);
+              sendDriverChat(token, orderId, msg).catch(() => {
+                setSentQuickMsg(null);
+                showToast('Message failed to send. Try again.', 'error');
+              });
+            }}
+            className="rounded-pill border border-border-opaque px-3 py-2 min-h-[36px] text-label-small
+              text-content-secondary hover:text-content-primary hover:bg-background-secondary
+              transition-base cursor-pointer disabled:opacity-60 disabled:cursor-default"
+          >
+            {sentQuickMsg === msg ? '✓ Sent' : msg}
+          </button>
+        ))}
       </div>
 
       {/* ── Verification form ── */}

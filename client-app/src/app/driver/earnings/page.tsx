@@ -1,73 +1,89 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AuthGuard from '../../../components/AuthGuard';
-import { TabBar } from '@/components/TabBar';
-import EarningsDashboard from '../../driver-account/earnings/page';
-import { getDriverIncentives, DriverIncentiveQuest } from '@/api/client';
+import { TabBarRedesign } from '@/components/TabBarRedesign';
+import { EarningsScreen } from '@/components/earnings';
+import { getDriverEarnings, getDriverPayouts } from '@/api/client';
 import { useAuthStore } from '@/store/useAuthStore';
-import { FareDisplay } from '@/components/ds';
 
-// Quest strip — live incentive campaigns (admin driver-ops tables) with
-// progress toward each reward. Renders nothing when no campaign is active.
-function QuestStrip() {
+// Earn tab (redesign). Hero number per period + weekly bars + wallet/payout CTA.
+// The ledger-backed detail dashboard stays at /driver-account/earnings and is
+// reachable via the "Detailed breakdown" link.
+
+const paiseToRupees = (p: number | undefined) => Math.round((p || 0) / 100);
+
+export default function DriverEarningsTabPage() {
+  const router = useRouter();
   const { token } = useAuthStore();
-  const [quests, setQuests] = useState<DriverIncentiveQuest[]>([]);
+  const [earnings, setEarnings] = useState({
+    today: 0,
+    todayGoal: 0, // ponytail: no daily-goal concept in the backend; section hides at 0
+    todayJobs: 0,
+    todayHours: 0,
+    weekTotal: 0,
+    weekDays: [] as { day: string; amount: number }[],
+    monthTotal: 0,
+  });
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [canInstantPayout, setCanInstantPayout] = useState(false);
 
   useEffect(() => {
     if (!token) return;
     let cancelled = false;
-    getDriverIncentives(token)
-      .then((res) => {
-        if (!cancelled) setQuests(res.quests ?? []);
-      })
-      .catch(() => { /* strip simply doesn't render */ });
-    return () => {
-      cancelled = true;
-    };
+
+    Promise.allSettled([
+      getDriverEarnings(token, 'TODAY'),
+      getDriverEarnings(token, 'WEEK'),
+      getDriverEarnings(token, 'MONTH'),
+      getDriverPayouts(token),
+    ]).then(([today, week, month, payouts]) => {
+      if (cancelled) return;
+      setEarnings((prev) => ({
+        ...prev,
+        ...(today.status === 'fulfilled' && {
+          today: paiseToRupees(today.value.summary.net_earnings_paise),
+          todayJobs: today.value.summary.trip_count || 0,
+          todayHours: today.value.summary.online_hours || 0,
+        }),
+        ...(week.status === 'fulfilled' && {
+          weekTotal: paiseToRupees(week.value.summary.net_earnings_paise),
+          weekDays: (week.value.daily_breakdown || []).map((d) => ({
+            day: new Date(d.date).toLocaleDateString('en-IN', { weekday: 'short' }),
+            amount: paiseToRupees(d.earnings_paise),
+          })),
+        }),
+        ...(month.status === 'fulfilled' && {
+          monthTotal: paiseToRupees(month.value.summary.net_earnings_paise),
+        }),
+      }));
+      if (payouts.status === 'fulfilled') {
+        // Payout availability mirrors the payouts page: verified bank + >= ₹100.
+        setWalletBalance(paiseToRupees(payouts.value.available_balance_paise));
+        setCanInstantPayout(
+          !!payouts.value.bank_account?.verified &&
+          (payouts.value.available_balance_paise || 0) >= 10000,
+        );
+      }
+    });
+
+    return () => { cancelled = true; };
   }, [token]);
 
-  if (!quests.length) return null;
-
-  return (
-    <div className="space-y-2.5 mb-6">
-      <span className="text-label-medium text-content-secondary block">Active quests</span>
-      <div className="flex gap-2.5 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
-        {quests.map((q) => {
-          const pct = q.total > 0 ? Math.min(100, Math.round((q.completed / q.total) * 100)) : 0;
-          return (
-            <div key={q.title} className="flex-shrink-0 w-60 rounded-md bg-accent-50 p-4 space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-label-medium text-content-primary">{q.title}</span>
-                <FareDisplay amount={q.reward * 100} size="sm" className="text-content-accent flex-shrink-0" />
-              </div>
-              <div className="h-1.5 rounded-pill bg-accent-100 overflow-hidden">
-                <div className="h-full bg-accent-500 transition-all duration-500" style={{ width: `${pct}%` }} />
-              </div>
-              <div className="flex justify-between text-label-small text-content-secondary">
-                <span>{q.completed}/{q.total} trips</span>
-                <span>{q.expiry}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// Earnings as a first-class tab (category standard). Reuses the ledger-backed
-// earnings dashboard component; the account route keeps working for deep links.
-export default function DriverEarningsTabPage() {
   return (
     <AuthGuard allowedRole="DRIVER">
-      <div className="min-h-screen bg-background-primary text-content-primary font-sans">
-        <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-24">
-          <QuestStrip />
-          <EarningsDashboard />
-        </div>
-        <TabBar />
+      <div className="pb-14 bg-background-primary min-h-screen">
+        <EarningsScreen
+          earnings={earnings}
+          walletBalance={walletBalance}
+          canInstantPayout={canInstantPayout}
+          onInstantPayout={() => router.push('/driver-account/payouts')}
+          onViewBreakdown={() => router.push('/driver-account/earnings')}
+          onViewIncentives={() => router.push('/driver-account/incentives')}
+        />
       </div>
+      <TabBarRedesign />
     </AuthGuard>
   );
 }

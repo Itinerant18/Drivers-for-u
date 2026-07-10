@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import AuthGuard from '../../components/AuthGuard';
-import { TabBar } from '@/components/TabBar';
+import { TabBarRedesign } from '@/components/TabBarRedesign';
 import { useAuthStore } from '@/store/useAuthStore';
 
 import {
@@ -164,14 +164,16 @@ export default function DriverAccountLayout({ children }: { children: React.Reac
           </div>
         )}
 
-        {/* 4. MAIN CENTRAL CONTENT AREA PANEL */}
-        <main className="flex-1 p-4 sm:p-8 pb-24 md:pb-8 overflow-y-auto h-screen max-w-4xl mx-auto w-full">
+        {/* 4. MAIN CENTRAL CONTENT AREA PANEL — no fixed height: redesigned
+            screens bring their own viewport-height scroll containers, and a
+            nested h-screen scroll region clips them. */}
+        <main className="flex-1 p-4 sm:p-8 pb-24 md:pb-8 max-w-4xl mx-auto w-full">
           {children}
         </main>
 
         {/* Primary tab bar on phones; the md+ sidebar covers navigation above. */}
         <div className="md:hidden">
-          <TabBar />
+          <TabBarRedesign />
         </div>
 
       </div>

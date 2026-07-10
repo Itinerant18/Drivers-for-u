@@ -155,7 +155,7 @@ function SettingsToggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between px-400 py-350">
+    <div className="flex items-center justify-between px-400 py-3.5">
       <div className="flex-1 min-w-0 mr-300">
         <span className="text-label-small font-sans font-medium text-content-primary block">{label}</span>
         {description && (
@@ -191,7 +191,7 @@ function SettingsSelect({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex items-center justify-between px-400 py-350">
+    <div className="flex items-center justify-between px-400 py-3.5">
       <span className="text-label-small font-sans font-medium text-content-primary">{label}</span>
       <select
         value={value}

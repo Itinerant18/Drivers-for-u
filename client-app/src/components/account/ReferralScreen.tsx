@@ -53,7 +53,7 @@ export function ReferralScreen({
             </svg>
           </div>
           <h2 className="text-lg font-sans font-bold text-content-primary mb-200">
-            Earn ₹{rewardPerReferral} per referral
+            {rewardPerReferral > 0 ? `Earn ₹${rewardPerReferral} per referral` : 'Refer drivers, earn rewards'}
           </h2>
           <p className="text-[12px] font-sans text-content-secondary">
             Share your code with other drivers. You both earn when they complete 10 jobs.

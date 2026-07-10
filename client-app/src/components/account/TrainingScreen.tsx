@@ -75,7 +75,7 @@ function LessonCard({ lesson }: { lesson: Lesson }) {
   return (
     <div className={`rounded-sm border bg-background-primary overflow-hidden
       ${lesson.isCompleted ? 'border-positive-400' : 'border-border-opaque'}`}>
-      <div className="px-400 py-350 flex items-start gap-300">
+      <div className="px-400 py-3.5 flex items-start gap-300">
         {/* Status icon */}
         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
           ${lesson.isCompleted

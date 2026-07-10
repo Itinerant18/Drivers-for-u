@@ -119,7 +119,7 @@ export function SupportScreen({
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full text-left px-400 py-350 flex items-center justify-between
+                  className="w-full text-left px-400 py-3.5 flex items-center justify-between
                     hover:bg-gray-50 transition-base cursor-pointer"
                 >
                   <span className="text-label-small font-sans font-medium text-content-primary flex-1 mr-300">
@@ -134,7 +134,7 @@ export function SupportScreen({
                   </svg>
                 </button>
                 {openFaq === i && (
-                  <div className="px-400 pb-350 text-[12px] font-sans text-content-secondary animate-enter">
+                  <div className="px-400 pb-3.5 text-[12px] font-sans text-content-secondary animate-enter">
                     {faq.answer}
                   </div>
                 )}

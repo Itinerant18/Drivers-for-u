@@ -1,97 +1,61 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useToastStore } from '@/store/useToastStore';
 import { getDriverTraining, TrainingModule } from '@/api/client';
+import { TrainingScreen } from '@/components/account/TrainingScreen';
+
+type LessonCategory = 'ONBOARDING' | 'SAFETY' | 'SKILLS' | 'PLATFORM';
+
+// module_type is a free-form string from the API; bucket it into the screen's
+// four categories. PLATFORM is the catch-all so no module ever disappears.
+function toCategory(moduleType: string): LessonCategory {
+  const t = moduleType.toUpperCase();
+  if (t.includes('ONBOARD')) return 'ONBOARDING';
+  if (t.includes('SAFETY')) return 'SAFETY';
+  if (t.includes('SKILL')) return 'SKILLS';
+  return 'PLATFORM';
+}
+
+// duration_label is display text like "15 min"; extract the leading number.
+function toDurationMin(label: string): number {
+  const n = parseInt(label, 10);
+  return Number.isFinite(n) ? n : 0;
+}
 
 export default function DriverTrainingPage() {
-  const t = useTranslations('driverTraining');
   const { token } = useAuthStore();
-
-  const statusLabel = (status: string): string => {
-    if (status === 'COMPLETED') return t('statusCompleted');
-    if (status === 'IN_PROGRESS') return t('statusInProgress');
-    return t('statusNotStarted');
-  };
-
   const [modules, setModules] = useState<TrainingModule[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    if (!token) return;
     getDriverTraining(token)
       .then((res) => setModules(res.modules))
-      .catch(() => useToastStore.getState().show('Could not load training modules.', 'error'))
-      .finally(() => setLoading(false));
+      .catch(() => useToastStore.getState().show('Could not load training modules.', 'error'));
   }, [token]);
 
-  const completed = modules.filter((m) => m.status === 'COMPLETED').length;
+  const lessons = modules.map((m) => ({
+    id: m.id,
+    title: m.title,
+    // No description field in the API yet — honest empty string.
+    description: '',
+    durationMin: toDurationMin(m.duration_label),
+    // API exposes status only, not a percent — completed is 100, anything else 0.
+    progress: m.status === 'COMPLETED' ? 100 : 0,
+    isCompleted: m.status === 'COMPLETED',
+    // No required flag in the API yet.
+    isRequired: false,
+    category: toCategory(m.module_type),
+  }));
+
+  const completedCount = lessons.filter((l) => l.isCompleted).length;
 
   return (
-    <div className="space-y-6 text-left">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold tracking-tight text-content-primary font-move">{t('title')}</h2>
-        <p className="text-content-tertiary text-[10px] font-mono uppercase tracking-wider mt-0.5">{t('subtitle')}</p>
-      </div>
-
-      {/* Progress overview */}
-      <div className="bg-background-primary border border-border-opaque rounded-2xl p-5 space-y-2">
-        <h4 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
-          {t('certificationProgress')}
-        </h4>
-        <p className="font-mono text-[11px] text-content-secondary">
-          <span className="text-content-positive font-bold">{completed}</span> {t('ofModulesCompleted', { total: modules.length })}
-        </p>
-      </div>
-
-      {/* Modules listing */}
-      <div className="space-y-4">
-        <h3 className="text-xs font-bold text-content-primary font-mono uppercase tracking-wider border-b border-border-opaque pb-2">
-          {t('academyModules')}
-        </h3>
-
-        <div className="space-y-3">
-          {loading && <p className="text-[10px] font-mono text-content-tertiary">{t('loadingModules')}</p>}
-          {!loading && modules.length === 0 && (
-            <p className="text-[10px] font-mono text-content-tertiary">{t('noModules')}</p>
-          )}
-          {modules.map((m) => (
-            <div key={m.id} className="bg-background-primary border border-border-opaque p-5 rounded-2xl space-y-4">
-              <div className="flex justify-between items-start gap-4 text-xs font-mono">
-                <div className="space-y-1.5 flex-grow truncate">
-                  <div className="flex items-center gap-2">
-                    <span className="bg-background-secondary text-content-tertiary px-2 py-0.5 rounded text-[8px] font-bold uppercase border border-border-opaque">
-                      {m.module_type.replace(/_/g, ' ')}
-                    </span>
-                    <span className="text-[8px] text-content-tertiary font-bold uppercase">{m.duration_label}</span>
-                  </div>
-                  <h4 className="text-sm font-bold text-content-primary truncate font-sans tracking-tight">{m.title}</h4>
-                </div>
-
-                <span className={`px-2.5 py-1 rounded text-[9px] font-bold uppercase tracking-wider shrink-0 border ${
-                  m.status === 'COMPLETED'
-                    ? 'bg-surface-positive/20 text-content-positive border-positive-400'
-                    : 'bg-background-secondary text-content-tertiary border-border-opaque'
-                }`}>
-                  {statusLabel(m.status)}
-                </span>
-              </div>
-
-              <div className="border-t border-border-opaque pt-3 text-[10px] font-mono text-content-secondary flex justify-between">
-                <span>{t('quizScore')}</span>
-                <span className="text-content-primary font-bold">{m.score != null ? `${m.score}%` : '—'}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-    </div>
+    <TrainingScreen
+      lessons={lessons}
+      completedCount={completedCount}
+      totalCount={lessons.length}
+    />
   );
 }

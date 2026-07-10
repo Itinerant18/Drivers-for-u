@@ -71,8 +71,8 @@ export function EarningsScreen({
           ₹{(period === 'TODAY' ? earnings.today : period === 'WEEK' ? earnings.weekTotal : earnings.monthTotal).toLocaleString('en-IN')}
         </span>
 
-        {/* Goal Progress (today only) */}
-        {period === 'TODAY' && (
+        {/* Goal Progress (today only; hidden when no goal is configured) */}
+        {period === 'TODAY' && earnings.todayGoal > 0 && (
           <div className="mt-400">
             <div className="flex justify-between items-center mb-200">
               <span className="text-[10px] font-mono opacity-70">Daily goal</span>

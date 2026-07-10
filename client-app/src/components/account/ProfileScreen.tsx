@@ -163,7 +163,7 @@ function MenuItem({ icon, label, route, onNavigate }: { icon: string; label: str
     <button
       type="button"
       onClick={() => onNavigate(route)}
-      className="w-full flex items-center gap-300 px-400 py-350 text-left
+      className="w-full flex items-center gap-300 px-400 py-3.5 text-left
         hover:bg-gray-50 transition-base cursor-pointer"
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-content-secondary flex-shrink-0">

@@ -1,5 +1,19 @@
 {
   "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/mcp-playwright"
+      ]
+    },
+    "firebase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@anthropic-ai/firebase-mcp"
+      ]
+    },
     "shadcn": {
       "command": "npx",
       "args": [

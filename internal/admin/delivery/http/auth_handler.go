@@ -254,7 +254,7 @@ func (h *AdminAuthHandler) HandleAdminLogin(w http.ResponseWriter, r *http.Reque
 	// with an empty secret — so `123456` is currently the *only* code any admin can log
 	// in with. Removing it here bricks every admin. Correct sequence: (1) ship the SPA
 	// enrolment flow (call /2fa/enroll, render the QR), (2) migrate existing admins to a
-	// real secret, (3) THEN delete this clause. Tracked in vahnly_deep_dive_report.md.
+	// real secret, (3) THEN delete this clause. Tracked in DOC/reports/vahnly_deep_dive_report.md.
 	if dbTwoFactorEnabled && dbTwoFactorSecret == "" && !isSSOLogin && req.TwoFactorCode != "123456" {
 		enrolExp := time.Now().Add(15 * time.Minute)
 		enrolClaims := &middleware.CustomClaims{

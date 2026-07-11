@@ -146,6 +146,7 @@ Thumbs.db
 # Agent / assistant workspaces
 .agent/
 .agents/
+.playwright-mcp/
 .claude/
 .codex/
 .code-review-graph/

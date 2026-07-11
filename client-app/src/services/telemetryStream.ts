@@ -27,7 +27,6 @@ export function startTelemetryStream(options: TelemetryStreamOptions): Telemetry
     return { stop: () => { }, flush: () => { } };
   }
 
-  let isVisible = typeof document === 'undefined' || document.visibilityState !== 'hidden';
   const isConnected = options.isConnected ?? (() => true);
 
   const readDeviceContext = async (): Promise<{ batteryLevel: number; networkType: string }> => {
@@ -70,8 +69,11 @@ export function startTelemetryStream(options: TelemetryStreamOptions): Telemetry
     return true;
   });
 
+  // Pings must keep flowing even when the tab is hidden. A driver who backgrounds the
+  // PWA (or flips to another tab) would otherwise stop reporting GPS and drop out of the
+  // dispatch spatial index within the scanner's stale window — going silently unmatchable.
+  // Browsers already throttle geolocation in hidden tabs, so this won't drain battery.
   const onPosition = (lat: number, lng: number, bearing: number, speedKms: number) => {
-    if (!isVisible) return;
     const packet: GPSCoordinatePacket = {
       driver_id: options.driverId,
       city_prefix: options.cityPrefix,
@@ -85,14 +87,6 @@ export function startTelemetryStream(options: TelemetryStreamOptions): Telemetry
     // when offline, the point is retained in the ring buffer for a later flush.
     buffer.logCoordinate(packet, isConnected());
   };
-
-  const handleVisibilityChange = () => {
-    isVisible = document.visibilityState !== 'hidden';
-  };
-
-  if (typeof document !== 'undefined') {
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-  }
 
   const reportGpsError = (err: GeolocationPositionError) => {
     console.error('[TELEMETRY_STREAM] GPS error:', err);
@@ -128,9 +122,6 @@ export function startTelemetryStream(options: TelemetryStreamOptions): Telemetry
   return {
     stop: () => {
       navigator.geolocation.clearWatch(watchId);
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-      }
     },
     flush: () => {
       void buffer.flushCachedTelemetryPools();

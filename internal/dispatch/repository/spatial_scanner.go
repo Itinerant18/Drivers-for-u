@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"sync/atomic"
 	"time"
@@ -21,6 +22,18 @@ func NewSpatialScanner(client *redis.ClusterClient) *SpatialScanner {
 	return &SpatialScanner{clusterClient: client}
 }
 
+// staleWindowSec is how many seconds past a driver's last GPS ping still counts as
+// matchable. 30s in production; DISPATCH_STALE_WINDOW_SEC widens it for low-supply
+// staging, where a single test driver's brief GPS gaps shouldn't drop them from matching.
+func staleWindowSec() int64 {
+	if v := os.Getenv("DISPATCH_STALE_WINDOW_SEC"); v != "" {
+		if n, err := strconv.ParseInt(v, 10, 64); err == nil && n > 0 {
+			return n
+		}
+	}
+	return 30
+}
+
 // ScanNearbyDrivers retrieves all available driver IDs and hydrates their true graph metadata
 func (s *SpatialScanner) ScanNearbyDrivers(ctx context.Context, cityPrefix string, targetCellStr string) ([]matcher.CandidateDriver, error) {
 	targetCell := h3.FromString(targetCellStr)
@@ -32,7 +45,7 @@ func (s *SpatialScanner) ScanNearbyDrivers(ctx context.Context, cityPrefix strin
 	}
 
 	now := time.Now().Unix()
-	staleThreshold := now - 30 // 30-second stale sliding window threshold
+	staleThreshold := now - staleWindowSec() // sliding window; DISPATCH_STALE_WINDOW_SEC overrides the 30s default
 
 	discoveredDriverCells := make(map[string]string)
 

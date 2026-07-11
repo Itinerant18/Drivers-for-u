@@ -230,6 +230,10 @@ playground/
 # Local reference screenshots + personal tool config
 SCREEEN/
 opencode.json
+opencode.jsonc
+
+# Impeccable session critiques (ephemeral per-run output; config/design.json stay tracked)
+.impeccable/critique/
 
 # Personal home-laptop setup transcript (contains local dev config, not for repo)
 HOME_SETUP.md

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useBookingStore, bookingBlocker, tripNeedsDropoff, TRIP_HINT } from "@/lib/store/bookingStore";
@@ -167,30 +167,47 @@ function Chip({
 }
 
 // ── Add-on toggle — hand-tuned glass switch, not a system default ─────────────
-function Toggle({ on, onToggle, tone = "positive" }: { on: boolean; onToggle: () => void; tone?: "positive" | "warm" }) {
+function Toggle({
+  on,
+  onToggle,
+  tone = "positive",
+}: {
+  on: boolean;
+  onToggle: () => void;
+  tone?: "positive" | "warm";
+}) {
+  const id = useId();
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      onClick={onToggle}
-      className={[
-        "relative h-7 w-12 rounded-pill transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 cursor-pointer",
-        "shadow-[inset_0_1px_3px_rgba(15,30,80,0.12)]",
-        on
-          ? tone === "positive" ? "bg-positive-400" : "bg-warning-400"
-          : "bg-background-tertiary",
-      ].join(" ")}
-    >
-      <span
-        className={[
-          "absolute top-0.5 h-6 w-6 rounded-pill bg-white shadow-elevation-1",
-          "transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          on ? "translate-x-[22px]" : "translate-x-0.5",
-        ].join(" ")}
+    <div className="toggle-switch relative inline-block w-10 h-6 select-none">
+      <input
+        className="toggle-input sr-only"
+        id={id}
+        type="checkbox"
+        checked={on}
+        onChange={onToggle}
       />
-    </button>
+      <label
+        className={[
+          "toggle-label absolute inset-0 rounded-[34px] cursor-pointer transition-colors duration-300",
+          on
+            ? tone === "positive"
+              ? "bg-[#4CAF50]"
+              : "bg-[#F0B840]"
+            : "bg-[#BEBEBE] dark:bg-[#4B4B4B]",
+        ].join(" ")}
+        htmlFor={id}
+      >
+        <span
+          className={[
+            "absolute top-[2px] left-[2px] w-5 h-5 rounded-full bg-white transition-transform duration-300",
+            on ? "translate-x-[16px]" : "translate-x-0",
+          ].join(" ")}
+          style={{
+            boxShadow: "0px 2px 5px 0px rgba(0, 0, 0, 0.3)",
+          }}
+        />
+      </label>
+    </div>
   );
 }
 

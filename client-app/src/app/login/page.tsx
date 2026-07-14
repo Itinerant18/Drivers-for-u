@@ -502,7 +502,7 @@ function UnifiedLoginContent() {
             VAHNLY
           </h1>
           <p className="text-label-small text-content-secondary uppercase tracking-wider mt-1">
-            Enterprise Fleet Access Gateway
+            Driver Partner Login
           </p>
         </div>
 
@@ -832,7 +832,7 @@ function UnifiedLoginContent() {
                 fullWidth
                 loading={loading}
               >
-                Authenticate & Access
+                Log In
               </Button>
 
               <Button
@@ -872,7 +872,7 @@ function UnifiedLoginContent() {
       <div id="recaptcha-container" className="hidden" />
 
       <footer className="mt-8 text-center text-label-small text-content-tertiary font-mono select-none">
-        Secure SHA-256 Token Vault • Active Sandbox Session
+        Vahnly Driver v2.0.0 • Secure Connection
       </footer>
     </div>
   );

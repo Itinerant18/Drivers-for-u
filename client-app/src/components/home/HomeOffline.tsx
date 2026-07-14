@@ -16,6 +16,7 @@ interface HomeOfflineProps {
     earningsRupees: number;
     onlineHours: number;
     rating: number;
+    acceptanceRate: number;
   };
   upcomingJob?: {
     time: string;
@@ -83,7 +84,7 @@ export function HomeOffline({
         <StatCard value={`${stats.tripsCount}`} label="Jobs today" />
         <StatCard value={`₹${stats.earningsRupees.toLocaleString('en-IN')}`} label="Earned" />
         <StatCard value={`${stats.onlineHours.toFixed(1)}h`} label="Online" />
-        <StatCard value={`${(stats.rating * 20).toFixed(0)}%`} label="Acceptance" />
+        <StatCard value={`${Math.round(stats.acceptanceRate)}%`} label="Acceptance" />
       </div>
 
       {/* Upcoming Job Nudge */}

@@ -81,7 +81,7 @@ export default function DriverJobsPage() {
         <JobsListScreen
           jobs={jobs}
           isLoading={isLoading}
-          onJobPress={() => router.push('/driver-account/trip-history')}
+          onJobPress={(id) => router.push(`/driver-account/trip-history/?trip=${id}`)}
           onLoadMore={() => {}}
           hasMore={false}
         />

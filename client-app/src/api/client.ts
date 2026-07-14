@@ -272,8 +272,16 @@ async function request<T>(path: string, options: RequestOptions, _retried = fals
       }
       if (typeof window !== 'undefined') window.location.href = '/login';
     }
+    // Gateway auth errors are JSON ({success, code, error}); surface the human
+    // message so callers rendering err.message don't show a raw JSON blob.
+    let errMessage = bodyText;
+    try {
+      errMessage = JSON.parse(bodyText).error || bodyText;
+    } catch {
+      /* plain-text body — use as-is */
+    }
     throw new ApiClientError(
-      bodyText || `gateway_request_failed_${response.status}`,
+      errMessage || `gateway_request_failed_${response.status}`,
       response.status,
       bodyText,
     );

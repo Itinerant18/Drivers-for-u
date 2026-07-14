@@ -72,7 +72,8 @@ export default function DriverTripHistoryPage() {
     if (!token) return;
 
     let cancelled = false;
-    getTripHistory(token, 20, 0)
+    // 50 matches the Jobs tab fetch so ?trip= deep-links always find their trip.
+    getTripHistory(token, 50, 0)
       .then((data) => {
         if (!cancelled) {
           setLiveTrips(data.trips.map(mapDriverTripToTripItem));
@@ -92,6 +93,21 @@ export default function DriverTripHistoryPage() {
       cancelled = true;
     };
   }, [token]);
+
+  // Deep-link from the Jobs tab: /driver-account/trip-history/?trip=<id> opens
+  // that trip's detail view directly once live trips arrive.
+  // ponytail: window.location instead of useSearchParams — no Suspense boundary needed.
+  useEffect(() => {
+    if (!liveLoaded) return;
+    const id = new URLSearchParams(window.location.search).get('trip');
+    if (!id) return;
+    const match = liveTrips.find((t) => t.id === id);
+    if (match) {
+      setSelectedTrip(match);
+      setReplayProgress(0);
+      setIsPlaying(true);
+    }
+  }, [liveLoaded, liveTrips]);
 
   // No mock fallback — showing fabricated trips when the API fails erodes
   // trust in the earnings numbers. The error line above the list explains why

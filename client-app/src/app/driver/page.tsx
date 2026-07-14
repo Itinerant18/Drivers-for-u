@@ -1083,6 +1083,7 @@ export default function DriverTerminalPage() {
               earningsRupees: stats.earnings_rupees,
               onlineHours: stats.online_hours,
               rating: stats.rating,
+              acceptanceRate: stats.acceptance_rate,
             }}
             upcomingJob={null}
             onGoOnline={handleToggleDutySwitch}

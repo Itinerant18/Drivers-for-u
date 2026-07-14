@@ -179,6 +179,7 @@ export function HomeOrchestrator() {
         earningsRupees: stats.todayEarnings,
         onlineHours: stats.onlineHours,
         rating: stats.rating,
+        acceptanceRate: stats.acceptanceRate,
       }}
       upcomingJob={null}
       onGoOnline={goOnline}

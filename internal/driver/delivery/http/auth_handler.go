@@ -26,6 +26,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// writeJSONError writes a structured JSON error response.
+func writeJSONError(w http.ResponseWriter, message string, code string, status int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": false,
+		"code":    code,
+		"error":   message,
+	})
+}
+
 type DriverLoginRequest struct {
 	Phone             string `json:"phone"`
 	Password          string `json:"password"`
@@ -190,18 +201,18 @@ func (h *DriverAuthHandler) verifyDriverPhoneToken(ctx context.Context, idToken 
 // HandleDriverRegister creates a new driver record with default ONBOARDING status
 func (h *DriverAuthHandler) HandleDriverRegister(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed", "method_not_allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var req DriverRegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid payload", http.StatusBadRequest)
+		writeJSONError(w, "Invalid payload", "invalid_payload", http.StatusBadRequest)
 		return
 	}
 
 	if req.PhoneToken == "" {
-		http.Error(w, "Phone verification is required to complete registration", http.StatusBadRequest)
+		writeJSONError(w, "Phone verification is required to complete registration", "phone_verification_required", http.StatusBadRequest)
 		return
 	}
 
@@ -211,24 +222,24 @@ func (h *DriverAuthHandler) HandleDriverRegister(w http.ResponseWriter, r *http.
 	// Verify the phone-ownership proof (Firebase Phone Auth token, or dev fallback JWT).
 	verifiedPhone, err := h.verifyDriverPhoneToken(ctx, req.PhoneToken)
 	if err != nil || verifiedPhone == "" {
-		http.Error(w, "Invalid or expired phone verification token", http.StatusUnauthorized)
+		writeJSONError(w, "Invalid or expired phone verification token", "invalid_phone_token", http.StatusUnauthorized)
 		return
 	}
 
 	if normalizePhone(req.Phone) != normalizePhone(verifiedPhone) {
-		http.Error(w, "Phone number mismatch between verification and registration", http.StatusBadRequest)
+		writeJSONError(w, "Phone number mismatch between verification and registration", "phone_mismatch", http.StatusBadRequest)
 		return
 	}
 
 	if err := validatePasswordPolicy(req.Password); err != nil {
-		http.Error(w, "Password must be at least 8 characters and not all numbers.", http.StatusBadRequest)
+		writeJSONError(w, "Password must be at least 8 characters and not all numbers.", "weak_password", http.StatusBadRequest)
 		return
 	}
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		writeJSONError(w, "Server error", "internal_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -250,7 +261,7 @@ func (h *DriverAuthHandler) HandleDriverRegister(w http.ResponseWriter, r *http.
 	err = h.dbPool.QueryRow(ctx, query, req.Name, req.Phone, emailVal, string(hashedPassword), req.CityPrefix).Scan(&newDriverID)
 	if err != nil {
 		// Log or check for duplicate phone
-		http.Error(w, "Driver registration failed, phone or email might be already registered", http.StatusConflict)
+		writeJSONError(w, "Driver registration failed, phone or email might be already registered", "already_registered", http.StatusConflict)
 		return
 	}
 
@@ -300,13 +311,13 @@ func (h *DriverAuthHandler) HandleDriverRegister(w http.ResponseWriter, r *http.
 // HandleDriverLogin verifies phone & password, logs captured telemetry and issues JWT token
 func (h *DriverAuthHandler) HandleDriverLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed", "method_not_allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var req DriverLoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid payload", http.StatusBadRequest)
+		writeJSONError(w, "Invalid payload", "invalid_payload", http.StatusBadRequest)
 		return
 	}
 
@@ -333,7 +344,7 @@ func (h *DriverAuthHandler) HandleDriverLogin(w http.ResponseWriter, r *http.Req
 	if h.recentLoginFailures(ctx, ip) >= loginFailureThreshold {
 		h.recordAuditLog(ctx, "", "LOGIN_THROTTLED", deviceID, ip, appVersion, geoLocation)
 		w.Header().Set("Retry-After", "900")
-		http.Error(w, "Too many failed login attempts; try again later", http.StatusTooManyRequests)
+		writeJSONError(w, "Too many failed login attempts; try again later", "rate_limited", http.StatusTooManyRequests)
 		return
 	}
 
@@ -352,7 +363,7 @@ func (h *DriverAuthHandler) HandleDriverLogin(w http.ResponseWriter, r *http.Req
 	phoneKey := lastTenDigits(req.Phone)
 	if len(phoneKey) < 10 {
 		h.recordAuditLog(ctx, "", "LOGIN_FAILURE_NOT_FOUND", deviceID, ip, appVersion, geoLocation)
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		writeJSONError(w, "Invalid credentials", "invalid_credentials", http.StatusUnauthorized)
 		return
 	}
 
@@ -370,10 +381,10 @@ func (h *DriverAuthHandler) HandleDriverLogin(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			h.recordAuditLog(ctx, "", "LOGIN_FAILURE_NOT_FOUND", deviceID, ip, appVersion, geoLocation)
-			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			writeJSONError(w, "Invalid credentials", "invalid_credentials", http.StatusUnauthorized)
 			return
 		}
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		writeJSONError(w, "Server error", "internal_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -381,7 +392,7 @@ func (h *DriverAuthHandler) HandleDriverLogin(w http.ResponseWriter, r *http.Req
 	err = bcrypt.CompareHashAndPassword([]byte(dbPasswordHash), []byte(req.Password))
 	if err != nil {
 		h.recordAuditLog(ctx, dbDriverID, "LOGIN_FAILURE_PASSWORD", deviceID, ip, appVersion, geoLocation)
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		writeJSONError(w, "Invalid credentials", "invalid_credentials", http.StatusUnauthorized)
 		return
 	}
 
@@ -393,7 +404,7 @@ func (h *DriverAuthHandler) HandleDriverLogin(w http.ResponseWriter, r *http.Req
 
 	tokenString, refreshTok, expirationTime, err := h.issueDriverSession(ctx, dbDriverID, dbCityPrefix, dbPhoneVerified)
 	if err != nil {
-		http.Error(w, "JWT token generation failed", http.StatusInternalServerError)
+		writeJSONError(w, "Authentication service error", "token_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -425,18 +436,18 @@ type DriverGoogleLoginRequest struct {
 
 func (h *DriverAuthHandler) HandleDriverGoogleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed", "method_not_allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var req DriverGoogleLoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid payload", http.StatusBadRequest)
+		writeJSONError(w, "Invalid payload", "invalid_payload", http.StatusBadRequest)
 		return
 	}
 
 	if req.IDToken == "" {
-		http.Error(w, "Missing ID token", http.StatusBadRequest)
+		writeJSONError(w, "Missing ID token", "missing_id_token", http.StatusBadRequest)
 		return
 	}
 
@@ -444,13 +455,13 @@ func (h *DriverAuthHandler) HandleDriverGoogleLogin(w http.ResponseWriter, r *ht
 	tokenInfoUrl := "https://oauth2.googleapis.com/tokeninfo?id_token=" + url.QueryEscape(req.IDToken)
 	resp, err := http.Get(tokenInfoUrl)
 	if err != nil {
-		http.Error(w, "Failed to verify ID token with Google", http.StatusUnauthorized)
+		writeJSONError(w, "Failed to verify ID token with Google", "google_verify_failed", http.StatusUnauthorized)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		http.Error(w, "Invalid Google ID token", http.StatusUnauthorized)
+		writeJSONError(w, "Invalid Google ID token", "invalid_google_token", http.StatusUnauthorized)
 		return
 	}
 
@@ -461,12 +472,12 @@ func (h *DriverAuthHandler) HandleDriverGoogleLogin(w http.ResponseWriter, r *ht
 		Sub           string      `json:"sub"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&googleClaims); err != nil {
-		http.Error(w, "Failed to decode Google token response", http.StatusInternalServerError)
+		writeJSONError(w, "Failed to decode Google token response", "internal_error", http.StatusInternalServerError)
 		return
 	}
 
 	if googleClaims.Email == "" {
-		http.Error(w, "Google account does not provide email", http.StatusBadRequest)
+		writeJSONError(w, "Google account does not provide email", "google_no_email", http.StatusBadRequest)
 		return
 	}
 
@@ -482,7 +493,7 @@ func (h *DriverAuthHandler) HandleDriverGoogleLogin(w http.ResponseWriter, r *ht
 	}
 
 	if !emailVerified {
-		http.Error(w, "Google email not verified", http.StatusUnauthorized)
+		writeJSONError(w, "Google email not verified", "google_email_unverified", http.StatusUnauthorized)
 		return
 	}
 
@@ -528,19 +539,19 @@ func (h *DriverAuthHandler) HandleDriverGoogleLogin(w http.ResponseWriter, r *ht
 			}
 
 			if req.PhoneToken == "" {
-				http.Error(w, "Phone verification is required to complete Google registration", http.StatusBadRequest)
+				writeJSONError(w, "Phone verification is required to complete Google registration", "phone_verification_required", http.StatusBadRequest)
 				return
 			}
 
 			// Verify the phone-ownership proof (Firebase Phone Auth token, or dev fallback JWT).
 			verifiedPhone, vErr := h.verifyDriverPhoneToken(ctx, req.PhoneToken)
 			if vErr != nil || verifiedPhone == "" {
-				http.Error(w, "Invalid or expired phone verification token", http.StatusUnauthorized)
+				writeJSONError(w, "Invalid or expired phone verification token", "invalid_phone_token", http.StatusUnauthorized)
 				return
 			}
 
 			if normalizePhone(req.Phone) != normalizePhone(verifiedPhone) {
-				http.Error(w, "Phone number mismatch between verification and registration", http.StatusBadRequest)
+				writeJSONError(w, "Phone number mismatch between verification and registration", "phone_mismatch", http.StatusBadRequest)
 				return
 			}
 
@@ -549,7 +560,7 @@ func (h *DriverAuthHandler) HandleDriverGoogleLogin(w http.ResponseWriter, r *ht
 			dummyPwd := "oauth-google-" + googleClaims.Sub
 			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dummyPwd), bcrypt.DefaultCost)
 			if err != nil {
-				http.Error(w, "Server error", http.StatusInternalServerError)
+				writeJSONError(w, "Server error", "internal_error", http.StatusInternalServerError)
 				return
 			}
 
@@ -570,13 +581,13 @@ func (h *DriverAuthHandler) HandleDriverGoogleLogin(w http.ResponseWriter, r *ht
 				&dbDriverID, &dbName, &dbPhone, &dbCityPrefix, &dbVerificationStatus, &dbOnboardingStep, &dbPhoneVerified,
 			)
 			if err != nil {
-				http.Error(w, "Driver Google registration failed, phone might be already registered", http.StatusConflict)
+				writeJSONError(w, "Driver Google registration failed, phone might be already registered", "already_registered", http.StatusConflict)
 				return
 			}
 
 			h.recordAuditLog(ctx, dbDriverID, "REGISTER_SUCCESS_GOOGLE", deviceID, ip, appVersion, geoLocation)
 		} else {
-			http.Error(w, "Server error", http.StatusInternalServerError)
+			writeJSONError(w, "Server error", "internal_error", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -589,7 +600,7 @@ func (h *DriverAuthHandler) HandleDriverGoogleLogin(w http.ResponseWriter, r *ht
 
 	tokenString, refreshTok, expirationTime, err := h.issueDriverSession(ctx, dbDriverID, dbCityPrefix, dbPhoneVerified)
 	if err != nil {
-		http.Error(w, "JWT token generation failed", http.StatusInternalServerError)
+		writeJSONError(w, "JWT token generation failed", "token_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -662,7 +673,7 @@ func generateOTP() (string, error) {
 // HandleSendOTP generates and dispatches a login/verification OTP
 func (h *DriverAuthHandler) HandleSendOTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed", "method_not_allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -670,13 +681,13 @@ func (h *DriverAuthHandler) HandleSendOTP(w http.ResponseWriter, r *http.Request
 		Phone string `json:"phone"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		writeJSONError(w, "Invalid request body", "invalid_payload", http.StatusBadRequest)
 		return
 	}
 
 	phone := normalizePhone(req.Phone)
 	if !indiaPhoneRe.MatchString(phone) {
-		http.Error(w, "Invalid phone number: must be a 10-digit Indian mobile number", http.StatusBadRequest)
+		writeJSONError(w, "Invalid phone number: must be a 10-digit Indian mobile number", "invalid_phone", http.StatusBadRequest)
 		return
 	}
 
@@ -692,7 +703,7 @@ func (h *DriverAuthHandler) HandleSendOTP(w http.ResponseWriter, r *http.Request
 				_ = h.redis.Expire(ctx, key, time.Hour).Err()
 			}
 			if n > 5 {
-				http.Error(w, "OTP request rate limit exceeded. Try again in an hour.", http.StatusTooManyRequests)
+				writeJSONError(w, "OTP request rate limit exceeded. Try again in an hour.", "rate_limited", http.StatusTooManyRequests)
 				return
 			}
 		}
@@ -700,13 +711,13 @@ func (h *DriverAuthHandler) HandleSendOTP(w http.ResponseWriter, r *http.Request
 
 	otp, err := generateOTP()
 	if err != nil {
-		http.Error(w, "Failed to generate OTP", http.StatusInternalServerError)
+		writeJSONError(w, "Failed to generate OTP", "internal_error", http.StatusInternalServerError)
 		return
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(otp), 10)
 	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		writeJSONError(w, "Server error", "internal_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -715,7 +726,7 @@ func (h *DriverAuthHandler) HandleSendOTP(w http.ResponseWriter, r *http.Request
 		INSERT INTO driver_otp_sessions (phone, otp_hash, purpose, expires_at)
 		VALUES ($1, $2, 'LOGIN', $3)`, phone, string(hash), expiresAt)
 	if err != nil {
-		http.Error(w, "Failed to store OTP session", http.StatusInternalServerError)
+		writeJSONError(w, "Failed to store OTP session", "internal_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -731,7 +742,7 @@ func (h *DriverAuthHandler) HandleSendOTP(w http.ResponseWriter, r *http.Request
 // HandleVerifyOTP verifies driver OTP and returns session JWT (if registered) or phone_token (if unregistered)
 func (h *DriverAuthHandler) HandleVerifyOTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed", "method_not_allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -740,13 +751,13 @@ func (h *DriverAuthHandler) HandleVerifyOTP(w http.ResponseWriter, r *http.Reque
 		OTP   string `json:"otp"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		writeJSONError(w, "Invalid request body", "invalid_payload", http.StatusBadRequest)
 		return
 	}
 
 	phone := normalizePhone(req.Phone)
 	if !indiaPhoneRe.MatchString(phone) {
-		http.Error(w, "Invalid phone number", http.StatusBadRequest)
+		writeJSONError(w, "Invalid phone number", "invalid_phone", http.StatusBadRequest)
 		return
 	}
 
@@ -757,11 +768,11 @@ func (h *DriverAuthHandler) HandleVerifyOTP(w http.ResponseWriter, r *http.Reque
 	if isFirebaseToken {
 		verifiedPhone, vErr := h.verifyDriverPhoneToken(ctx, req.OTP)
 		if vErr != nil || verifiedPhone == "" {
-			http.Error(w, "Invalid Firebase verification token", http.StatusUnauthorized)
+			writeJSONError(w, "Invalid Firebase verification token", "invalid_phone_token", http.StatusUnauthorized)
 			return
 		}
 		if normalizePhone(verifiedPhone) != phone {
-			http.Error(w, "Verification phone number mismatch", http.StatusBadRequest)
+			writeJSONError(w, "Verification phone number mismatch", "phone_mismatch", http.StatusBadRequest)
 			return
 		}
 	} else {
@@ -780,21 +791,21 @@ func (h *DriverAuthHandler) HandleVerifyOTP(w http.ResponseWriter, r *http.Reque
 		err := h.dbPool.QueryRow(ctx, querySession, phone).Scan(&sessionID, &otpHash, &attempts, &maxAttempts)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				http.Error(w, "No active OTP session found or OTP expired", http.StatusUnauthorized)
+				writeJSONError(w, "No active OTP session found or OTP expired", "otp_expired", http.StatusUnauthorized)
 				return
 			}
-			http.Error(w, "Database error", http.StatusInternalServerError)
+			writeJSONError(w, "Database error", "internal_error", http.StatusInternalServerError)
 			return
 		}
 
 		if attempts >= maxAttempts {
-			http.Error(w, "Too many verification attempts; request a new OTP", http.StatusUnauthorized)
+			writeJSONError(w, "Too many verification attempts; request a new OTP", "too_many_attempts", http.StatusUnauthorized)
 			return
 		}
 
 		if err := bcrypt.CompareHashAndPassword([]byte(otpHash), []byte(req.OTP)); err != nil {
 			_, _ = h.dbPool.Exec(ctx, "UPDATE driver_otp_sessions SET attempts = attempts + 1 WHERE id = $1::uuid", sessionID)
-			http.Error(w, "Incorrect OTP", http.StatusUnauthorized)
+			writeJSONError(w, "Incorrect OTP", "incorrect_otp", http.StatusUnauthorized)
 			return
 		}
 
@@ -828,7 +839,7 @@ func (h *DriverAuthHandler) HandleVerifyOTP(w http.ResponseWriter, r *http.Reque
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, phoneTokenClaims)
 			phoneTokenString, tErr := token.SignedString(h.jwtSecret)
 			if tErr != nil {
-				http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+				writeJSONError(w, "Failed to generate token", "token_error", http.StatusInternalServerError)
 				return
 			}
 
@@ -840,7 +851,7 @@ func (h *DriverAuthHandler) HandleVerifyOTP(w http.ResponseWriter, r *http.Reque
 			})
 			return
 		}
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		writeJSONError(w, "Database error", "internal_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -849,7 +860,7 @@ func (h *DriverAuthHandler) HandleVerifyOTP(w http.ResponseWriter, r *http.Reque
 
 	tokenString, refreshTok, expirationTime, err := h.issueDriverSession(ctx, dbDriverID, dbCityPrefix, true)
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		writeJSONError(w, "Failed to generate token", "token_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -890,14 +901,14 @@ func validatePasswordPolicy(pwd string) error {
 // of whether the phone is registered, so it can't be used to probe which numbers have accounts.
 func (h *DriverAuthHandler) HandleForgotPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed", "method_not_allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	var req struct {
 		Phone string `json:"phone"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		writeJSONError(w, "Invalid request body", "invalid_payload", http.StatusBadRequest)
 		return
 	}
 
@@ -962,7 +973,7 @@ func (h *DriverAuthHandler) HandleForgotPassword(w http.ResponseWriter, r *http.
 // existing sessions, and auto-logs-in (returns a fresh session JWT) so the driver lands in the app.
 func (h *DriverAuthHandler) HandleResetPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		writeJSONError(w, "Method not allowed", "method_not_allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	var req struct {
@@ -971,17 +982,17 @@ func (h *DriverAuthHandler) HandleResetPassword(w http.ResponseWriter, r *http.R
 		NewPassword string `json:"new_password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		writeJSONError(w, "Invalid request body", "invalid_payload", http.StatusBadRequest)
 		return
 	}
 
 	phone := normalizePhone(req.Phone)
 	if !indiaPhoneRe.MatchString(phone) {
-		http.Error(w, "Invalid phone number", http.StatusBadRequest)
+		writeJSONError(w, "Invalid phone number", "invalid_phone", http.StatusBadRequest)
 		return
 	}
 	if err := validatePasswordPolicy(req.NewPassword); err != nil {
-		http.Error(w, "Password must be at least 8 characters and not all numbers.", http.StatusBadRequest)
+		writeJSONError(w, "Password must be at least 8 characters and not all numbers.", "weak_password", http.StatusBadRequest)
 		return
 	}
 
@@ -998,16 +1009,16 @@ func (h *DriverAuthHandler) HandleResetPassword(w http.ResponseWriter, r *http.R
 		ORDER BY created_at DESC
 		LIMIT 1`, phone).Scan(&sessionID, &otpHash, &attempts, &maxAttempts)
 	if err != nil {
-		http.Error(w, "No active reset request found or it has expired", http.StatusUnauthorized)
+		writeJSONError(w, "No active reset request found or it has expired", "reset_expired", http.StatusUnauthorized)
 		return
 	}
 	if attempts >= maxAttempts {
-		http.Error(w, "Too many attempts; request a new reset code", http.StatusUnauthorized)
+		writeJSONError(w, "Too many attempts; request a new reset code", "too_many_attempts", http.StatusUnauthorized)
 		return
 	}
 	if bcrypt.CompareHashAndPassword([]byte(otpHash), []byte(req.OTP)) != nil {
 		_, _ = h.dbPool.Exec(ctx, "UPDATE driver_otp_sessions SET attempts = attempts + 1 WHERE id = $1::uuid", sessionID)
-		http.Error(w, "Incorrect code", http.StatusUnauthorized)
+		writeJSONError(w, "Incorrect code", "incorrect_code", http.StatusUnauthorized)
 		return
 	}
 	_, _ = h.dbPool.Exec(ctx, "UPDATE driver_otp_sessions SET used_at = now() WHERE id = $1::uuid", sessionID)
@@ -1020,18 +1031,18 @@ func (h *DriverAuthHandler) HandleResetPassword(w http.ResponseWriter, r *http.R
 		FROM drivers WHERE right(regexp_replace(phone, '\D', '', 'g'), 10) = $1`, lastTenDigits(phone)).
 		Scan(&dbDriverID, &dbName, &dbCityPrefix, &dbVerificationStatus, &dbOnboardingStep)
 	if err != nil {
-		http.Error(w, "Account not found", http.StatusUnauthorized)
+		writeJSONError(w, "Account not found", "account_not_found", http.StatusUnauthorized)
 		return
 	}
 
 	// Set the new password.
 	newHash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
-		http.Error(w, "Server error", http.StatusInternalServerError)
+		writeJSONError(w, "Server error", "internal_error", http.StatusInternalServerError)
 		return
 	}
 	if _, err = h.dbPool.Exec(ctx, "UPDATE drivers SET password_hash = $1 WHERE id = $2::uuid", string(newHash), dbDriverID); err != nil {
-		http.Error(w, "Failed to update password", http.StatusInternalServerError)
+		writeJSONError(w, "Failed to update password", "internal_error", http.StatusInternalServerError)
 		return
 	}
 
@@ -1045,7 +1056,7 @@ func (h *DriverAuthHandler) HandleResetPassword(w http.ResponseWriter, r *http.R
 
 	tokenString, refreshTok, expirationTime, err := h.issueDriverSession(ctx, dbDriverID, dbCityPrefix, true)
 	if err != nil {
-		http.Error(w, "JWT token generation failed", http.StatusInternalServerError)
+		writeJSONError(w, "JWT token generation failed", "token_error", http.StatusInternalServerError)
 		return
 	}
 

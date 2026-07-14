@@ -4,6 +4,11 @@
     "public": "out",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "trailingSlash": true,
+    "redirects": [
+      { "source": "/driver/account/referrals{,/}", "destination": "/driver-account/refer/", "type": 301 },
+      { "source": "/driver/account/insurance{,/}", "destination": "/driver-account/vehicles/", "type": 301 },
+      { "source": "/driver/account/:rest*", "destination": "/driver-account/:rest*", "type": 301 }
+    ],
     "rewrites": [
       { "source": "**", "destination": "/index.html" }
     ],

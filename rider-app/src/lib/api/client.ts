@@ -113,7 +113,11 @@ async function request<T>(
     throw new NetworkError(`Request to ${path} failed (offline?)`);
   }
 
-  if (res.status === 401) {
+  // A 401 from the public auth endpoints (wrong password, bad OTP) is a form
+  // error, not session expiry — fall through to the envelope parse below so the
+  // caller gets the backend message instead of a logout + /login reload that
+  // wipes the form.
+  if (res.status === 401 && !path.startsWith("/api/v1/rider/auth/")) {
     // Refresh-on-401: silently refresh once, then retry with the fresh token.
     if (!_retried && readRefresh()) {
       const ok = await refreshRiderToken();

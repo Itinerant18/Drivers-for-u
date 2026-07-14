@@ -98,6 +98,7 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
           docker compose pull            # refresh third-party images (postgres/redis/kafka)
+          export APP_VERSION=$(git rev-parse --short HEAD)   # surfaced by GET /health
           docker compose up -d --build --remove-orphans
           docker image prune -f || true
           REMOTE

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -94,8 +95,15 @@ type LogSMSSender struct {
 }
 
 func (s LogSMSSender) SendSMS(phone, otp string) error {
-	if s.Logger != nil {
+	if s.Logger == nil {
+		return nil
+	}
+	// Plaintext code only with LOG_OTP=true (local dev). Production logs must
+	// never contain the code.
+	if os.Getenv("LOG_OTP") == "true" {
 		s.Logger.Printf("[RIDER_SMS] OTP for %s is %s", phone, otp)
+	} else {
+		s.Logger.Printf("[RIDER_SMS] OTP generated for %s", phone)
 	}
 	return nil
 }

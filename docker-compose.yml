@@ -506,6 +506,11 @@ services:
       # service's in-network address — the code default (localhost:8089)
       # resolves to the gateway container itself and 502s.
       - ANALYTICS_SSE_URL=${ANALYTICS_SSE_URL:-http://spatial-analytics:8089}
+      # Reported by GET /health. The VM deploy exports the git short SHA.
+      - APP_VERSION=${APP_VERSION:-dev}
+      # Dev only: print plaintext OTP codes in gateway logs (no SMS provider yet).
+      # NEVER set on the production VM.
+      - LOG_OTP=${LOG_OTP:-}
     depends_on:
       spatial-db:
         condition: service_healthy

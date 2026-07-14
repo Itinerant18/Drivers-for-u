@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/big"
 	"net"
+	"os"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -638,6 +639,17 @@ func lastTenDigits(phone string) string {
 	return d
 }
 
+// logOTP records that an OTP was dispatched. The plaintext code is printed only
+// when LOG_OTP=true — the local-dev fallback while the platform has no
+// transactional SMS provider. Production logs must never contain the code.
+func logOTP(kind, phone, otp string) {
+	if os.Getenv("LOG_OTP") == "true" {
+		log.Printf("[DRIVER_SMS] %s OTP for %s is %s", kind, phone, otp)
+		return
+	}
+	log.Printf("[DRIVER_SMS] %s OTP generated for %s", kind, phone)
+}
+
 // generateOTP returns a cryptographically-random 6-digit numeric OTP.
 func generateOTP() (string, error) {
 	n, err := rand.Int(rand.Reader, big.NewInt(1000000))
@@ -707,7 +719,7 @@ func (h *DriverAuthHandler) HandleSendOTP(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	log.Printf("[DRIVER_SMS] OTP for %s is %s", phone, otp)
+	logOTP("login", phone, otp)
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -942,7 +954,7 @@ func (h *DriverAuthHandler) HandleForgotPassword(w http.ResponseWriter, r *http.
 		INSERT INTO driver_otp_sessions (phone, otp_hash, purpose, expires_at)
 		VALUES ($1, $2, 'RESET', $3)`, phone, string(hash), expiresAt)
 
-	log.Printf("[DRIVER_SMS] password-reset OTP for %s is %s", phone, otp)
+	logOTP("password-reset", phone, otp)
 	respondOK()
 }
 

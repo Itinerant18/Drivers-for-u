@@ -514,7 +514,10 @@ func main() {
 	otpSendPhone := rateLimiter.PerKey(middleware.PhoneBodyKey, "otp:phone", 3, time.Hour)      // SMS cost: 3/phone/hr
 	otpSendIP := rateLimiter.PerKey(middleware.ClientIPKey, "otp:ip", 15, time.Hour)            // SMS bomb: 15/IP/hr
 	otpVerify := rateLimiter.PerKey(middleware.PhoneBodyKey, "otp:verify", 5, 10*time.Minute)   // brute-force: 5/phone/10m
-	loginGuard := rateLimiter.PerKey(middleware.ClientIPKey, "login", 10, 15*time.Minute)       // spray: 10/IP/15m
+	// Per-app buckets so QA on one app can't exhaust logins for the others.
+	adminLoginGuard := rateLimiter.PerKey(middleware.ClientIPKey, "login:admin", 10, 15*time.Minute)   // spray: 10/IP/15m
+	driverLoginGuard := rateLimiter.PerKey(middleware.ClientIPKey, "login:driver", 10, 15*time.Minute) // spray: 10/IP/15m
+	riderLoginGuard := rateLimiter.PerKey(middleware.ClientIPKey, "login:rider", 10, 15*time.Minute)   // spray: 10/IP/15m
 	fbVerifyGuard := rateLimiter.PerKey(middleware.ClientIPKey, "fbverify", 30, 15*time.Minute) // 30/IP/15m
 	sosFlood := rateLimiter.PerKey(middleware.ClientIPKey, "sos", 20, time.Minute)              // runaway-loop guard only (never blocks one real SOS)
 	// otpSend composes the phone AND IP limits (both must pass).
@@ -567,11 +570,11 @@ func main() {
 	// Authentication / Access routes. Rider login is handled exclusively by the
 	// real OTP flow (/api/v1/rider/auth/send-otp + verify-otp); the old mock
 	// /api/v1/auth/rider/login endpoint was removed (it accepted any OTP).
-	mux.HandleFunc("POST /api/v1/auth/driver/login", loginGuard(handler.HandleDriverLogin))
+	mux.HandleFunc("POST /api/v1/auth/driver/login", driverLoginGuard(handler.HandleDriverLogin))
 	// Public, unauthenticated, Redis-cached config the apps read on startup.
 	mux.HandleFunc("GET /api/v1/config/flags", handler.HandlePublicFlags)
 	mux.HandleFunc("GET /api/v1/config/app-version", handler.HandlePublicAppVersion)
-	mux.HandleFunc("POST /api/v1/admin/auth/login", loginGuard(adminAuthHandler.HandleAdminLogin))
+	mux.HandleFunc("POST /api/v1/admin/auth/login", adminLoginGuard(adminAuthHandler.HandleAdminLogin))
 	// Admin creation must be an authenticated SUPER_ADMIN action. Leaving this public
 	// let anyone self-register an account with an arbitrary role (incl. SUPER_ADMIN),
 	// a full authentication bypass. New admins are provisioned via /admin/team/invite.
@@ -592,7 +595,7 @@ func main() {
 	mux.HandleFunc("POST /api/v1/admin/auth/logout", adminAuthHandler.HandleAuthLogout)
 
 	// Driver App & Onboarding routes
-	mux.HandleFunc("POST /api/v1/driver/login", loginGuard(driverAuthHandler.HandleDriverLogin))
+	mux.HandleFunc("POST /api/v1/driver/login", driverLoginGuard(driverAuthHandler.HandleDriverLogin))
 	mux.HandleFunc("POST /api/v1/driver/login/google", driverAuthHandler.HandleDriverGoogleLogin)
 	mux.HandleFunc("POST /api/v1/driver/register", driverAuthHandler.HandleDriverRegister)
 	mux.HandleFunc("POST /api/v1/driver/auth/send-otp", otpSend(driverAuthHandler.HandleSendOTP))
@@ -741,7 +744,7 @@ func main() {
 	mux.HandleFunc("POST /api/v1/rider/auth/verify-otp", otpVerify(riderAppHandler.HandleVerifyOTP))
 	mux.HandleFunc("POST /api/v1/rider/auth/login/google", riderAppHandler.HandleRiderGoogleLogin)
 	// Rider phone+password (no OTP/SMS on routine login). See DOC/RIDER_LOGIN_PLAN.md.
-	mux.HandleFunc("POST /api/v1/rider/auth/login", loginGuard(riderAppHandler.HandleRiderLogin))
+	mux.HandleFunc("POST /api/v1/rider/auth/login", riderLoginGuard(riderAppHandler.HandleRiderLogin))
 	mux.HandleFunc("POST /api/v1/rider/auth/forgot-password", otpSend(riderAppHandler.HandleRiderForgotPassword))
 	mux.HandleFunc("POST /api/v1/rider/auth/reset-password", otpVerify(riderAppHandler.HandleRiderResetPassword))
 	mux.HandleFunc("POST /api/v1/rider/me/password", riderAuthMW.Require(riderAppHandler.HandleRiderSetPassword))

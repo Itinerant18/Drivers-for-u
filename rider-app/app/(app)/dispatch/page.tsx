@@ -226,8 +226,16 @@ function DispatchContent() {
           setActiveOrder(res.order);
           setState("TIMEOUT");
         }
-      } catch {
-        // ignore poll errors
+      } catch (e) {
+        // /rider/active 404s once the order leaves the active set (dispatch
+        // auto-cancel or completion) — the poll never sees status=CANCELLED,
+        // so treat "no active order" as the search ending.
+        if (e instanceof ApiError && e.status === 404) {
+          stopTimers();
+          clearInterval(countInterval);
+          setState("TIMEOUT");
+        }
+        // other poll errors (network blips): keep polling
       }
     }, POLL_INTERVAL_MS);
 

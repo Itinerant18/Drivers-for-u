@@ -151,6 +151,7 @@ export function ResilientWebSocketProvider({
       1000 * Math.pow(2, reconnectAttemptsRef.current),
       30000
     );
+    // eslint-disable-next-line react-hooks/purity -- runs in reconnect callbacks/timeouts, never during render
     const jitterMs = Math.random() * 1000; // Full-jitter
 
     console.log(`Reconnecting in ${delayMs + jitterMs}ms...`);

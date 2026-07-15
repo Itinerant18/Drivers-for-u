@@ -58,7 +58,8 @@ export function TripArrived({
   // Wait timer (updates every second)
   useEffect(() => {
     const tick = () => {
-      const elapsed = Math.max(0, Math.floor((Date.now() - waitStartedAt) / 1000));
+      // 0 = anchor not captured yet (parent sets it in an effect) — show 0:00, not epoch-elapsed.
+      const elapsed = waitStartedAt ? Math.max(0, Math.floor((Date.now() - waitStartedAt) / 1000)) : 0;
       setWaitElapsed(elapsed);
     };
     tick();

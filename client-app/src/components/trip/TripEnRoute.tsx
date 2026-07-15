@@ -145,7 +145,7 @@ export function TripEnRoute({
         <button
           type="button"
           onClick={onNavigate}
-          className="w-full h-[52px] rounded-sm bg-[#1E40AF] hover:bg-[#1E3A8A]
+          className="w-full h-[52px] rounded-sm bg-interactive-primary hover:bg-interactive-hover
             active:scale-[0.98] text-gray-0 font-sans font-bold text-sm
             flex items-center justify-center gap-300
             shadow-elevation-1 transition-base cursor-pointer"

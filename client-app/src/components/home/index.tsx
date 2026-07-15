@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { HomeOffline } from './HomeOffline';
 import { HomeOnline } from './HomeOnline';
@@ -48,6 +48,14 @@ export function HomeOrchestrator() {
 
   // OTP entered on the ARRIVED screen, consumed by Start Job.
   const [enteredOtp, setEnteredOtp] = useState('');
+
+  // Wait timer anchor — captured when ARRIVED is entered, not on every render
+  // (Date.now() during render is impure and made the timer restart per render).
+  const [waitStartedAt, setWaitStartedAt] = useState(0);
+  useEffect(() => {
+    if (dutyState === 'ARRIVED' && !waitStartedAt) setWaitStartedAt(Date.now());
+    if (dutyState !== 'ARRIVED' && waitStartedAt) setWaitStartedAt(0);
+  }, [dutyState, waitStartedAt]);
 
   const orderId = activeOrder?.id || '';
   const goToBill = () => router.push(`/driver/trip/bill?order_id=${orderId}`);
@@ -97,7 +105,7 @@ export function HomeOrchestrator() {
           pickupAddress={activeOrder.pickupAddress}
           vehicleInfo={activeOrder.carType || ''}
           vehiclePlate=""
-          waitStartedAt={Date.now()}
+          waitStartedAt={waitStartedAt}
           freeWaitMinutes={5}
           onVerifyOtp={setEnteredOtp}
           onStartJob={async () => {

@@ -207,7 +207,7 @@ function ActionTile({
       className={`flex flex-col items-center justify-center gap-200 h-[68px] rounded-sm
         border transition-base cursor-pointer active:scale-95
         ${accent
-          ? 'bg-[#1E40AF]/5 border-[#1E40AF]/30 text-[#1E40AF]'
+          ? 'bg-accent-50 border-accent-200 text-accent-600'
           : 'bg-background-primary border-border-opaque text-content-secondary hover:text-content-primary'
         }`}
     >

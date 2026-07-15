@@ -118,6 +118,11 @@ function UpcomingList({ reloadKey }: { reloadKey: number }) {
   const router = useRouter();
   const [trips, setTrips] = useState<UpcomingTrip[] | null>(null);
   const [startingId, setStartingId] = useState<string | null>(null);
+  // Clock anchor for the start-window check — set in an effect, not during render.
+  const [now, setNow] = useState(0);
+  useEffect(() => {
+    if (trips?.length) setNow(Date.now());
+  }, [trips]);
 
   useEffect(() => {
     if (!token) return;
@@ -167,8 +172,6 @@ function UpcomingList({ reloadKey }: { reloadKey: number }) {
       </div>
     );
   }
-
-  const now = Date.now();
 
   return (
     <div className="space-y-2.5">

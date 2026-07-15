@@ -100,10 +100,10 @@ export function TripArrived({
       {/* ── Content ── */}
       <div className="flex-1 overflow-y-auto px-500 py-400 space-y-400">
         {/* Wait Timer */}
-        <div className={`rounded-sm p-400 flex items-center justify-between border-l-2
+        <div className={`rounded-sm p-400 flex items-center justify-between border
           ${isBillable
-            ? 'bg-warning-50 border-warning-400'
-            : 'bg-gray-50 border-accent-400'}`}>
+            ? 'bg-warning-50 border-warning-200'
+            : 'bg-gray-50 border-border-opaque'}`}>
           <div>
             <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-content-tertiary block">
               Wait time

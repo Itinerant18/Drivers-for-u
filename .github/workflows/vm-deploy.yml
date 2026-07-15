@@ -97,12 +97,21 @@ jobs:
           # untracked, so they're untouched.
           git fetch origin main
           git reset --hard origin/main
+          # Upsert the Maps server key into the compose .env (untracked, survives the
+          # reset). Empty secret = leave .env alone, matcher stays in local CH mode.
+          if [ -n "__MAPS_KEY__" ]; then
+            grep -v '^GOOGLE_MAPS_API_KEY=' .env 2>/dev/null > .env.tmp || true
+            echo "GOOGLE_MAPS_API_KEY=__MAPS_KEY__" >> .env.tmp
+            mv .env.tmp .env
+          fi
           docker compose pull            # refresh third-party images (postgres/redis/kafka)
           export APP_VERSION=$(git rev-parse --short HEAD)   # surfaced by GET /health
           docker compose up -d --build --remove-orphans
           docker image prune -f || true
           REMOTE
           sed -i "s|__OVERRIDE__|${{ vars.VM_COMPOSE_DIR }}|" remote-deploy.sh
+          # Maps API keys are [A-Za-z0-9_-] — safe for sed injection.
+          sed -i "s|__MAPS_KEY__|${{ secrets.GOOGLE_MAPS_API_KEY }}|" remote-deploy.sh
 
       - name: Pull images + restart on the VM
         if: steps.guard.outputs.ready == 'true'

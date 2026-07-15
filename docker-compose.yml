@@ -318,6 +318,9 @@ services:
       - REDIS_CLUSTER_NODES=redis-node-1:6379
       - TRITON_SERVER_URL=triton-server:8001
       - ALGORITHM_STRATEGY=GREEDY
+      # ponytail: QA supply is one test driver; 30s GPS-freshness window makes every
+      # booking miss. Drop this override when real drivers stream continuous telemetry.
+      - DISPATCH_STALE_WINDOW_SEC=300
     depends_on:
       spatial-db:
         condition: service_healthy

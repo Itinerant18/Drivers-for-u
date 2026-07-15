@@ -321,6 +321,8 @@ services:
       # ponytail: QA supply is one test driver; 30s GPS-freshness window makes every
       # booking miss. Drop this override when real drivers stream continuous telemetry.
       - DISPATCH_STALE_WINDOW_SEC=300
+      # Key lives in the VM's untracked .env (server key, Distance Matrix only).
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-}
     depends_on:
       spatial-db:
         condition: service_healthy

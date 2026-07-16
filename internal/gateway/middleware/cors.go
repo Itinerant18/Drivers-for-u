@@ -58,6 +58,14 @@ func (c *CORSMiddleware) Handler(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Region-Prefix, X-Idempotency-Key, X-Admin-Role, X-Admin-Email, X-Admin-ID")
 
+		// Security headers on every API response. The API serves only JSON to XHR
+		// clients, so a strict frame/type/referrer posture costs nothing. HSTS is safe:
+		// api.aniket.site is HTTPS-only behind Caddy.
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return

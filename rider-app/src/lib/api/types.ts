@@ -101,6 +101,13 @@ export interface FareBreakdown {
 
 export type DriverAvailability = "HIGH" | "MEDIUM" | "LOW" | "NONE";
 
+// Rider-facing label. NONE returns "" so callers drop the clause entirely rather
+// than printing "NONE availability" (or lying with "Available now" when there are
+// zero nearby drivers).
+export function availabilityLabel(a: DriverAvailability): string {
+  return a === "NONE" ? "" : `${a.charAt(0)}${a.slice(1).toLowerCase()} availability`;
+}
+
 export interface FareEstimate {
   fare_breakdown: FareBreakdown;
   estimated_pickup_eta_minutes: number;

@@ -14,6 +14,7 @@ import { FareDisplay } from "@/components/ds/FareDisplay";
 import { CrossIcon, PinIcon, CarIcon, FlameIcon, CheckIcon, ChevronIcon } from "@/components/ds/Icon";
 import { BorderBeam } from "@/components/ui/border-beam";
 import type { CarType, GarageCar, LocationPoint, PaymentMethod, Transmission, TripType } from "@/lib/api/types";
+import { availabilityLabel } from "@/lib/api/types";
 
 const TRIP_TYPES: { value: TripType; label: string }[] = [
   { value: "IN_CITY_ONE_WAY",  label: "One-Way" },
@@ -877,7 +878,7 @@ export function BookingSheet() {
                       )}
                     </div>
                     <p className="text-paragraph-small text-content-secondary mt-0.5">
-                      {fareEstimate.driver_availability} availability · ~{fareEstimate.estimated_pickup_eta_minutes} min pickup
+                      {[availabilityLabel(fareEstimate.driver_availability), `~${fareEstimate.estimated_pickup_eta_minutes} min pickup`].filter(Boolean).join(' · ')}
                     </p>
                   </div>
                   <button

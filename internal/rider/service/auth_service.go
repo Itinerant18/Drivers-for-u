@@ -134,7 +134,23 @@ func validateRiderPassword(pwd string) error {
 	if allDigits {
 		return ErrWeakPassword
 	}
+	if commonWeakPasswords[strings.ToLower(pwd)] {
+		return ErrWeakPassword
+	}
 	return nil
+}
+
+// commonWeakPasswords are the handful of 8+ char passwords that pass the length
+// and not-all-digits gates but are the first thing a spray tries. NIST 800-63B
+// favors a blocklist over composition rules (which just push users to "Password1!").
+// ponytail: 20-entry inline set, not a downloaded 100k dictionary — add a real
+// dictionary + zxcvbn only if account-takeover attempts show up in the audit log.
+var commonWeakPasswords = map[string]bool{
+	"password": true, "password1": true, "password123": true, "passw0rd": true,
+	"qwerty123": true, "12345678": true, "123456789": true, "1234567890": true,
+	"abcdefgh": true, "iloveyou": true, "welcome1": true, "letmein1": true,
+	"admin123": true, "trustno1": true, "baseball": true, "football": true,
+	"sunshine": true, "princess": true, "dragon123": true, "monkey123": true,
 }
 
 // LoginByPassword authenticates a rider by phone + password. Anti-enumeration: a missing rider, an

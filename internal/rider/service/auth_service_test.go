@@ -279,8 +279,10 @@ func TestRiderFromJWT_RoundTrip(t *testing.T) {
 
 func TestValidateRiderPassword(t *testing.T) {
 	cases := map[string]bool{
-		"password1": true, "abcd1234": true, "Abc!2xyz": true,
+		"abcd1234": true, "Abc!2xyz": true, "correcthorse": true,
 		"short1": false, "12345678": false, "0000000000": false, "": false,
+		// common-password blocklist (case-insensitive)
+		"password1": false, "PASSWORD": false, "iloveyou": false,
 	}
 	for pwd, ok := range cases {
 		if (validateRiderPassword(pwd) == nil) != ok {

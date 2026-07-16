@@ -2,6 +2,7 @@
 
 import { useBookingStore } from "@/lib/store/bookingStore";
 import { FareDisplay } from "@/components/ds";
+import { availabilityLabel } from "@/lib/api/types";
 
 export function FareEstimateStrip() {
   const fare = useBookingStore((s) => s.fareEstimate);
@@ -21,8 +22,7 @@ export function FareEstimateStrip() {
           className="font-bold"
         />
         <p className="text-xs text-content-secondary">
-          {fare.surge_active ? "Surge active · " : ""}
-          {fare.driver_availability} availability
+          {[fare.surge_active ? "Surge active" : "", availabilityLabel(fare.driver_availability)].filter(Boolean).join(' · ')}
         </p>
       </div>
       <p className="text-xs text-content-secondary">

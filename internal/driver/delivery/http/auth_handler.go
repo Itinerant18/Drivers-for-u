@@ -894,7 +894,22 @@ func validatePasswordPolicy(pwd string) error {
 	if allDigits {
 		return errors.New("password all numeric")
 	}
+	if driverCommonWeakPasswords[strings.ToLower(pwd)] {
+		return errors.New("password too common")
+	}
 	return nil
+}
+
+// driverCommonWeakPasswords blocks the common 8+ char passwords that clear the
+// length/not-all-digits gates. Mirrors the rider blocklist; kept per-package to
+// avoid a shared-deps import for a 20-entry set.
+// ponytail: inline set, not a dictionary — grow it only if the audit log shows spray hits.
+var driverCommonWeakPasswords = map[string]bool{
+	"password": true, "password1": true, "password123": true, "passw0rd": true,
+	"qwerty123": true, "12345678": true, "123456789": true, "1234567890": true,
+	"abcdefgh": true, "iloveyou": true, "welcome1": true, "letmein1": true,
+	"admin123": true, "trustno1": true, "baseball": true, "football": true,
+	"sunshine": true, "princess": true, "dragon123": true, "monkey123": true,
 }
 
 // HandleForgotPassword sends a password-reset OTP. Anti-enumeration: always returns 200, regardless

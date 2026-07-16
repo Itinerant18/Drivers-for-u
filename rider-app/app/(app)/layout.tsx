@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useNotificationStore } from "@/lib/store/notificationStore";
 import { useAuthStore } from "@/lib/store/authStore";
+import { registerRiderPushNotifications } from "@/lib/notifications";
 
 import { TubelightNavbar } from "@/components/ui/tubelight-navbar";
 
@@ -42,6 +43,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       setAuthChecked(true);
     }
   }, [token, router]);
+
+  // Once authenticated, register this browser for FCM web push (idempotent; no-ops
+  // when push is unsupported or permission is denied).
+  useEffect(() => {
+    if (!token) return;
+    void registerRiderPushNotifications().catch(() => {});
+  }, [token]);
 
   if (!authChecked) return null;
 

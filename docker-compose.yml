@@ -483,6 +483,9 @@ services:
       - REDIS_CLUSTER_NODES=redis-node-1:6379
       - KAFKA_BROKERS=kafka-broker:9092
       - HTTP_PORT=8080
+      # Short-lived access JWT (default 7d). Safe now that the refresh round-trip is
+      # verified live and both apps single-flight refresh on 401. Override via .env.
+      - ACCESS_TOKEN_TTL=${ACCESS_TOKEN_TTL:-4h}
       - JWT_SECRET_SIGNING_KEY=${JWT_SECRET_SIGNING_KEY:?set JWT_SECRET_SIGNING_KEY in .env}
       - FIELD_ENCRYPTION_KEY=${FIELD_ENCRYPTION_KEY}
       - SUPPORTED_REGIONS_MATRIX=${SUPPORTED_REGIONS_MATRIX:-}

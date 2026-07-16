@@ -1,6 +1,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// Persist key — referenced by both the persist middleware (below) and the
+// cross-tab logout listener. Keep them in sync: renaming here without updating
+// the persist `name` silently disables cross-tab logout.
+const AUTH_STORAGE_KEY = 'platform-auth-storage';
+
+/**
+ * True when another tab's write to the persisted auth state means "logged out".
+ * The persist envelope is `{ state: { token, ... }, version }`, so logout
+ * rewrites the key with `token: null` (it is NOT removed) — hence we parse
+ * `state.token` rather than checking for an empty newValue.
+ */
+export function shouldCrossTabLogout(key: string | null, newValue: string | null): boolean {
+  if (key !== AUTH_STORAGE_KEY || !newValue) return false;
+  try {
+    return !JSON.parse(newValue)?.state?.token;
+  } catch {
+    return false;
+  }
+}
+
 interface User {
   id: string;
   role: 'RIDER' | 'DRIVER' | 'ADMIN';
@@ -65,10 +85,23 @@ export const useAuthStore = create<AuthState>()(
       setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
     }),
     {
-      name: 'platform-auth-storage', // Persists to localStorage automatically
+      name: AUTH_STORAGE_KEY, // Persists to localStorage automatically
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
     }
   )
 );
+
+// Cross-tab logout: when another tab clears the token, drop this tab's session
+// too. The `getState().token` guard is load-bearing — driver logout re-persists
+// state (firing a fresh storage event in every tab), so without it the tabs
+// would cascade logouts endlessly.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (shouldCrossTabLogout(e.key, e.newValue) && useAuthStore.getState().token) {
+      useAuthStore.getState().logout();
+      window.location.href = '/login';
+    }
+  });
+}

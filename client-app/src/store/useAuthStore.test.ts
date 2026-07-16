@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useAuthStore } from './useAuthStore';
+import { useAuthStore, shouldCrossTabLogout } from './useAuthStore';
 
 const user = { id: 'd1', role: 'DRIVER' as const, name: 'Dee', phone: '+919876543210' };
 
@@ -29,5 +29,20 @@ describe('useAuthStore (driver)', () => {
   it('persists the token to localStorage (survives a reload)', () => {
     useAuthStore.getState().login('persist-me', user);
     expect(localStorage.getItem('platform-auth-storage')).toContain('persist-me');
+  });
+});
+
+describe('shouldCrossTabLogout', () => {
+  const key = 'platform-auth-storage';
+  it('fires on a cross-tab logout (token nulled in the persist envelope)', () => {
+    expect(shouldCrossTabLogout(key, JSON.stringify({ state: { token: null }, version: 0 }))).toBe(true);
+  });
+  it('does NOT fire on a cross-tab login (token present)', () => {
+    expect(shouldCrossTabLogout(key, JSON.stringify({ state: { token: 'x' }, version: 0 }))).toBe(false);
+  });
+  it('ignores other keys and empty / malformed values', () => {
+    expect(shouldCrossTabLogout('other-key', JSON.stringify({ state: { token: null } }))).toBe(false);
+    expect(shouldCrossTabLogout(key, null)).toBe(false);
+    expect(shouldCrossTabLogout(key, 'not json')).toBe(false);
   });
 });

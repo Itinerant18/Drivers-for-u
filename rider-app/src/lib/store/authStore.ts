@@ -175,3 +175,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
 // Wire the API client's 401 handler to the store logout (no import cycle).
 setUnauthorizedHandler(() => useAuthStore.getState().logout());
+
+// Cross-tab logout: another tab removed the token → drop this tab's session too.
+// persistToken removes the key on logout, so newValue is null here. The
+// getState().token guard skips the (truthy-token) login/refresh writes.
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === TOKEN_STORAGE_KEY && !e.newValue && useAuthStore.getState().token) {
+      useAuthStore.getState().logout(); // already redirects to /login
+    }
+  });
+}
